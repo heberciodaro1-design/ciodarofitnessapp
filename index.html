@@ -158,14 +158,18 @@
                     historialHTML += `
                         <div class="border-b border-slate-700/40 last:border-none pb-2 pt-2 first:pt-0 text-[11px]">
                             <div class="flex justify-between items-center font-bold text-orange-400 mb-1">
-                                <span>Fecha: ${ev.fecha}</span>
+                                <span class="flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3 text-slate-500"></i>Fecha: ${ev.fecha}</span>
                                 <span>IMC: ${calcularIMC(ev.peso, ev.estatura)}</span>
                             </div>
-                            <div class="grid grid-cols-4 gap-x-2 gap-y-0.5 text-slate-300">
-                                <div><span class="text-slate-500">P:</span> ${ev.peso || '-'}kg</div>
-                                <div><span class="text-slate-500">Cint:</span> ${ev.cintura || '-'}cm</div>
-                                <div><span class="text-slate-500">Pech:</span> ${ev.pecho || '-'}cm</div>
-                                <div><span class="text-slate-500">Cad:</span> ${ev.cadera || '-'}cm</div>
+                            <div class="grid grid-cols-4 gap-x-2 gap-y-1 text-slate-300">
+                                <div><span class="text-slate-500 font-medium">Peso:</span> ${ev.peso || '-'}kg</div>
+                                <div><span class="text-slate-500 font-medium">Cint:</span> ${ev.cintura || '-'}cm</div>
+                                <div><span class="text-slate-500 font-medium">Pech:</span> ${ev.pecho || '-'}cm</div>
+                                <div><span class="text-slate-500 font-medium">Cad:</span> ${ev.cadera || '-'}cm</div>
+                                <div><span class="text-slate-500 font-medium">B.Izq:</span> ${ev.brazo_izq || '-'}cm</div>
+                                <div><span class="text-slate-500 font-medium">B.Der:</span> ${ev.brazo_der || '-'}cm</div>
+                                <div><span class="text-slate-500 font-medium">Musl:</span> ${ev.muslo || '-'}cm</div>
+                                <div><span class="text-slate-500 font-medium">Est:</span> ${ev.estatura || '-'}cm</div>
                             </div>
                         </div>
                     `;
@@ -175,21 +179,26 @@
                     <div class="flex justify-between items-start border-b border-slate-700/60 pb-2">
                         <div>
                             <h3 class="font-bold text-white text-base">${cliente.nombre}</h3>
-                            <span class="text-xs text-slate-400">Inicio: ${cliente.fechainicio}</span>
+                            <div class="flex items-center space-x-2 text-xs text-slate-400 mt-0.5">
+                                <span>Inicio: ${cliente.fechainicio}</span>
+                                <a href="https://wa.me/${cliente.telefono}" target="_blank" class="text-orange-400 flex items-center hover:underline gap-0.5">
+                                    <i data-lucide="phone" class="w-3 h-3"></i>WhatsApp
+                                </a>
+                            </div>
                         </div>
                         <span class="text-emerald-400 font-bold text-sm">$${parseFloat(cliente.pago || 0).toFixed(2)}</span>
                     </div>
                     <div class="bg-slate-900/60 p-3 rounded-lg space-y-2">
                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wider flex justify-between items-center border-b border-slate-700/60 pb-1.5">
-                            <span>Evolución</span>
-                            <span class="text-orange-400">${evals.length} Reg.</span>
+                            <span>Historial de Medidas Avanzado</span>
+                            <span class="text-orange-400 bg-orange-500/10 px-1.5 py-0.5 rounded text-[10px]">${evals.length} Controles</span>
                         </div>
-                        <div class="space-y-1 max-h-40 overflow-y-auto">${historialHTML || 'Sin controles.'}</div>
+                        <div class="space-y-2 max-h-52 overflow-y-auto pr-1">${historialHTML || 'Sin controles.'}</div>
                     </div>
                     <div class="grid grid-cols-12 gap-2 pt-1">
-                        <button onclick="agregarMedicionMensual(${index})" class="col-span-6 bg-orange-500/10 text-orange-400 text-xs font-semibold py-2 rounded-lg border border-orange-500/30">Nueva Eval</button>
-                        <button onclick="enviarMensaje(${index})" class="col-span-4 bg-slate-700 text-white text-xs font-semibold py-2 rounded-lg">Notificar</button>
-                        <button onclick="eliminarCliente(${index})" class="col-span-2 bg-red-500/10 text-red-400 py-2 rounded-lg">Borrar</button>
+                        <button onclick="agregarMedicionMensual(${index})" class="col-span-6 bg-orange-500/10 text-orange-400 text-xs font-semibold py-2 rounded-lg border border-orange-500/30 hover:bg-orange-500/20 transition">Nueva Eval</button>
+                        <button onclick="enviarMensaje(${index})" class="col-span-4 bg-slate-700 text-white text-xs font-semibold py-2 rounded-lg hover:bg-slate-600 transition">Notificar</button>
+                        <button onclick="eliminarCliente(${index})" class="col-span-2 bg-red-500/10 text-red-400 py-2 rounded-lg border border-red-500/20 hover:bg-red-500/20 transition flex items-center justify-center"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                     </div>
                 `;
                 listaContenedor.appendChild(card);
@@ -200,7 +209,7 @@
         }
 
         form.addEventListener('submit', (e) => {
-            e.preventDefault(); // <-- LA LÍNEA MÁGICA CORRECTA QUE EVITA EL ERROR
+            e.preventDefault();
 
             const fechaEval = document.getElementById('fechainicio').value;
             const primeraEvaluacion = {
@@ -232,24 +241,35 @@
 
         window.agregarMedicionMensual = function(index) {
             const cliente = clientes[index];
-            const fechaMedicion = prompt("Fecha control (AAAA-MM-DD):", new Date().toISOString().split('T')[0]);
+            const fechaMedicion = prompt("Fecha de este nuevo control (AAAA-MM-DD):", new Date().toISOString().split('T')[0]);
             if (!fechaMedicion) return;
 
-            const peso = prompt("Nuevo Peso Corporal (kg):");
-            const cintura = prompt("Nueva Cintura (cm):");
+            const peso = prompt(`[${cliente.nombre}] Nuevo Peso Corporal (kg):`);
+            const estatura = prompt(`[${cliente.nombre}] Estatura (cm):`, cliente.evaluaciones[0]?.estatura || "170");
+            const pecho = prompt(`[${cliente.nombre}] Nuevo Perímetro Pecho (cm):`);
+            const cintura = prompt(`[${cliente.nombre}] Nueva Cintura (cm):`);
+            const brazo_izq = prompt(`[${cliente.nombre}] Nuevo Brazo Izquierdo (cm):`);
+            const brazo_der = prompt(`[${cliente.nombre}] Nuevo Brazo Derecho (cm):`);
+            const cadera = prompt(`[${cliente.nombre}] Nueva Cadera (cm):`);
+            const muslo = prompt(`[${cliente.nombre}] Nuevo Muslo Promedio (cm):`);
             
             cliente.evaluaciones.push({
                 fecha: fechaMedicion,
                 peso: peso || null,
+                estatura: estatura || null,
+                pecho: pecho || null,
                 cintura: cintura || null,
-                estatura: cliente.evaluaciones[0]?.estatura || "170"
+                brazo_izq: brazo_izq || null,
+                brazo_der: brazo_der || null,
+                cadera: cadera || null,
+                muslo: muslo || null
             });
             localStorage.setItem('ciodaro_clientes', JSON.stringify(clientes));
             renderApp();
         };
 
         window.eliminarCliente = function(index) {
-            if(confirm('¿Eliminar atleta?')) {
+            if(confirm('¿Eliminar por completo a este atleta e historial?')) {
                 clientes.splice(index, 1);
                 localStorage.setItem('ciodaro_clientes', JSON.stringify(clientes));
                 renderApp();
@@ -258,7 +278,15 @@
 
         window.enviarMensaje = function(index) {
             const c = clientes[index];
-            let texto = `¡Hola *${c.nombre}*! Reporte de tu Evolución Inteligente en *Ciodarofitness* 🧬`;
+            const evals = c.evaluaciones || [];
+            evals.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            const act = evals[0] || {};
+            
+            let texto = `¡Hola *${c.nombre}*! Reporte de tu Evolución en *Ciodarofitness* 🧬\n\n`;
+            texto += `*Último control:* ${act.fecha}\n`;
+            if(act.peso) texto += `- Peso: ${act.peso} kg (IMC: ${calcularIMC(act.peso, act.estatura)})\n`;
+            if(act.cintura) texto += `- Cintura: ${act.cintura} cm\n`;
+            texto += `\n¡Seguimos con todo enfocados en los objetivos! 💪🔥`;
             window.open(`https://wa.me/${c.telefono}?text=${encodeURIComponent(texto)}`, '_blank');
         };
 
