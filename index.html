@@ -154,7 +154,6 @@
             let montoCompletoGlobal = 0;
 
             clientes.forEach((cliente, index) => {
-                // Sumamos el valor total acordado del plan de cada cliente para la Caja Total global
                 montoCompletoGlobal += parseFloat(cliente.total_paquete || 0);
 
                 const pagos = cliente.pagos || [];
@@ -237,7 +236,6 @@
             });
 
             document.getElementById('stat-clientes').innerText = clientes.length;
-            // La métrica ahora muestra la suma total completa de los paquetes acordados
             document.getElementById('stat-ingresos').innerText = ocultarFinanzas ? '***' : `$${montoCompletoGlobal.toFixed(2)}`;
             lucide.createIcons();
         }
@@ -287,10 +285,8 @@
             const brazo_der = prompt(`[${cliente.nombre}] Nuevo Brazo Derecho (cm):`);
             const cadera = prompt(`[${cliente.nombre}] Nueva Cadera (cm):`);
             const muslo = prompt(`[${cliente.nombre}] Nuevo Muslo Promedio (cm):`);
-            
-            if(!cliente.evaluaciones) cliente.evaluaciones = [];
-            
-            cliente.evaluaciones.push({
+
+            const nuevaEv = {
                 fecha: fechaMedicion,
                 peso: peso || null,
                 estatura: estatura || null,
@@ -300,22 +296,20 @@
                 brazo_der: brazo_der || null,
                 cadera: cadera || null,
                 muslo: muslo || null
-            });
+            };
+
+            clientes[index].evaluaciones.push(nuevaEv);
             localStorage.setItem('ciodaro_clientes', JSON.stringify(clientes));
             renderApp();
         };
 
         window.registrarAbono = function(index) {
-            const cliente = clientes[index];
-            const monto = prompt(`¿Cuánto va a abonar ${cliente.nombre} en USD? ($):`);
-            if (!monto || isNaN(monto)) return;
+            const monto = prompt(`¿Cuánto va a abonar el atleta ${clientes[index].nombre}? ($):`);
+            if (!monto || isNaN(monto) || parseFloat(monto) <= 0) return;
 
-            const fechaPago = prompt("Fecha del abono (AAAA-MM-DD):", new Date().toISOString().split('T')[0]);
-            if (!fechaPago) return;
-
-            if(!cliente.pagos) cliente.pagos = [];
-            cliente.pagos.push({
-                fecha: fechaPago,
+            if(!clientes[index].pagos) clientes[index].pagos = [];
+            clientes[index].pagos.push({
+                fecha: new Date().toISOString().split('T')[0],
                 monto: parseFloat(monto)
             });
 
@@ -326,20 +320,19 @@
         window.verResumenPagos = function(index) {
             const cliente = clientes[index];
             const pagos = cliente.pagos || [];
-            let historial = `Historial de Recibos - ${cliente.nombre}\n-----------------------------------\n`;
-            
             if(pagos.length === 0) {
-                historial += "No registra abonos cargados aún.";
-            } else {
-                pagos.forEach((p, i) => {
-                    historial += `${i+1}. Fecha: ${p.fecha} || Monto: $${p.monto}\n`;
-                });
+                alert(`El atleta ${cliente.nombre} no registra abonos aún.`);
+                return;
             }
-            alert(historial);
+            let lista = `Historial de pagos de: ${cliente.nombre}\n\n`;
+            pagos.forEach((p, i) => {
+                lista += `${i+1}. Fecha: ${p.fecha} -> Monto: $${p.monto}\n`;
+            });
+            alert(lista);
         };
 
         window.eliminarCliente = function(index) {
-            if(confirm('¿Eliminar por completo a este atleta, sus medidas y sus finanzas?')) {
+            if(confirm(`¿Seguro que deseas eliminar por completo a ${clientes[index].nombre}?`)) {
                 clientes.splice(index, 1);
                 localStorage.setItem('ciodaro_clientes', JSON.stringify(clientes));
                 renderApp();
@@ -347,17 +340,30 @@
         };
 
         window.enviarMensaje = function(index) {
-            const c = clientes[index];
-            const evals = c.evaluaciones || [];
-            evals.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-            const act = evals[0] || {};
+            const cliente = clientes[index];
             
-            let texto = `¡Hola *${c.nombre}*! Reporte de tu Evolución en *Ciodarofitness* 🧬\n\n`;
-            texto += `*Último control:* ${act.fecha || c.fechainicio}\n`;
-            if(act.peso) texto += `- Peso: ${act.peso} kg (IMC: ${calcularIMC(act.peso, act.estatura)})\n`;
-            if(act.cintura) texto += `- Cintura: ${act.cintura} cm\n`;
-            texto += `\n¡Seguimos con todo enfocados en los objetivos! 💪🔥`;
-            window.open(`https://wa.me/${c.telefono}?text=${encodeURIComponent(texto)}`, '_blank');
+            const opcion = prompt(
+                `Selecciona la notificación profesional para ${cliente.nombre}:\n\n` +
+                `1 - Recordatorio de Vencimiento (3 días antes)\n` +
+                `2 - Alerta de Vencimiento Crítica (Hoy mismo)\n` +
+                `3 - Recordatorio de Día de Medidas (Antropometría)`
+            );
+
+            let textoFinal = "";
+
+            if (opcion === "1") {
+                textoFinal = `Hola, ${cliente.nombre}. Te recordamos que tu paquete personalizado en Ciodarofitness vence pronto. Para garantizar la continuidad de tu planificación, asegurar tu cupo y permitirnos cargar tus próximas rutinas inteligentes a tiempo, te sugerimos ponerte al día en los próximos días. ¡Tu progreso no se detiene!`;
+            } else if (opcion === "2") {
+                textoFinal = `Tu paquete personalizado finaliza hoy, ${cliente.nombre}. Recuerda ponerte al día para mantener activo tu acceso a la aplicación, tus cargas de entrenamiento y tus datos de antropometría. Evita interrupciones en tu proceso y sigue entrenando con base en la ciencia y la disciplina. ¡Gestiónalo hoy mismo!`;
+            } else if (opcion === "3") {
+                textoFinal = `Hoy es tu día de medidas en Ciodarofitness app, ${cliente.nombre}. Recuerda registrar tus datos de antropometría en la aplicación para poder evaluar tu evolución biomecánica y ajustar tus calorías y entrenamiento de forma precisa. ¡El control de tus datos asegura tus resultados!`;
+            } else {
+                alert("Opción no válida.");
+                return;
+            }
+
+            const url = `https://wa.me/${cliente.telefono}?text=${encodeURIComponent(textoFinal)}`;
+            window.open(url, '_blank');
         };
 
         renderApp();
