@@ -9,7 +9,6 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans pb-12">
 
-    <!-- Encabezado con Ojo de Visibilidad -->
     <header class="bg-slate-800/50 backdrop-blur-md border-b border-slate-700/50 p-4 sticky top-0 z-50 shadow-lg">
         <div class="flex justify-between items-center max-w-xl mx-auto">
             <h1 class="text-xl font-black tracking-wider text-orange-500">CIODAROFITNESS<span class="text-slate-400 text-xs font-normal lowercase pl-1">pro</span></h1>
@@ -21,7 +20,6 @@
 
     <main class="max-w-xl mx-auto p-4 space-y-6">
 
-        <!-- METRICAS EN TIEMPO REAL -->
         <section class="grid grid-cols-2 gap-4">
             <div class="bg-slate-800 border border-slate-700/60 p-4 rounded-xl shadow-md">
                 <div class="flex justify-between items-center text-slate-400 mb-1">
@@ -39,7 +37,6 @@
             </div>
         </section>
 
-        <!-- FORMULARIO PRINCIPAL UNIFICADO -->
         <section class="bg-slate-800 p-5 rounded-2xl border border-slate-700/60 shadow-xl space-y-4">
             <div class="flex items-center space-x-2 text-orange-500 font-bold border-b border-slate-700/60 pb-2">
                 <i data-lucide="user-plus" class="w-5 h-5"></i>
@@ -68,7 +65,6 @@
                     </div>
                 </div>
 
-                <!-- Evaluación Antropométrica Inicial -->
                 <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-700/40 space-y-3">
                     <div class="flex items-center space-x-1.5 text-xs font-bold text-slate-300 uppercase tracking-wider border-b border-slate-700/40 pb-1.5">
                         <i data-lucide="activity" class="w-3.5 h-3.5 text-orange-400"></i>
@@ -117,7 +113,6 @@
             </form>
         </section>
 
-        <!-- LISTADO DE CLIENTES CON HISTORIAL Y PAGOS -->
         <section class="space-y-3">
             <div class="flex items-center space-x-2 text-slate-300 font-bold px-1">
                 <i data-lucide="clipboard-list" class="w-5 h-5 text-orange-500"></i>
@@ -156,13 +151,14 @@
                 return;
             }
 
-            let ingresosTotalesCaja = 0;
+            let montoCompletoGlobal = 0;
 
             clientes.forEach((cliente, index) => {
+                // Sumamos el valor total acordado del plan de cada cliente para la Caja Total global
+                montoCompletoGlobal += parseFloat(cliente.total_paquete || 0);
+
                 const pagos = cliente.pagos || [];
                 const totalAbonado = pagos.reduce((acc, p) => acc + parseFloat(p.monto || 0), 0);
-                ingresosTotalesCaja += totalAbonado;
-
                 const deuda = parseFloat(cliente.total_paquete || 0) - totalAbonado;
 
                 if (!cliente.fechainicio || cliente.fechainicio === "undefined") {
@@ -198,7 +194,6 @@
                 });
 
                 card.innerHTML = `
-                    <!-- Encabezado de la Tarjeta -->
                     <div class="flex justify-between items-start border-b border-slate-700/60 pb-2">
                         <div>
                             <div class="flex items-center gap-2">
@@ -219,7 +214,6 @@
                         </div>
                     </div>
 
-                    <!-- Bloque de Historial Clínico/Métrico -->
                     <div class="bg-slate-900/60 p-3 rounded-lg space-y-2">
                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wider flex justify-between items-center border-b border-slate-700/60 pb-1.5">
                             <span>Historial de Medidas Evolutivo</span>
@@ -228,7 +222,6 @@
                         <div class="space-y-2 max-h-40 overflow-y-auto pr-1">${historialHTML || '<p class="text-slate-500 text-xs">Sin mediciones aún.</p>'}</div>
                     </div>
 
-                    <!-- Botoneras de Control Técnico y Monetario -->
                     <div class="grid grid-cols-2 gap-2">
                         <button onclick="agregarMedicionMensual(${index})" class="bg-orange-500/10 text-orange-400 text-xs font-bold py-2 rounded-lg border border-orange-500/20 hover:bg-orange-500/20 transition flex items-center justify-center gap-1"><i data-lucide="trending-up" class="w-3.5 h-3.5"></i>Nueva Eval</button>
                         <button onclick="registrarAbono(${index})" class="bg-emerald-500/10 text-emerald-400 text-xs font-bold py-2 rounded-lg border border-emerald-500/20 hover:bg-emerald-500/20 transition flex items-center justify-center gap-1"><i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>+ Registrar Abono</button>
@@ -244,7 +237,8 @@
             });
 
             document.getElementById('stat-clientes').innerText = clientes.length;
-            document.getElementById('stat-ingresos').innerText = ocultarFinanzas ? '***' : `$${ingresosTotalesCaja.toFixed(2)}`;
+            // La métrica ahora muestra la suma total completa de los paquetes acordados
+            document.getElementById('stat-ingresos').innerText = ocultarFinanzas ? '***' : `$${montoCompletoGlobal.toFixed(2)}`;
             lucide.createIcons();
         }
 
@@ -270,7 +264,7 @@
                 total_paquete: document.getElementById('total_paquete').value,
                 fechainicio: fechaEval,
                 evaluaciones: [primeraEvaluacion],
-                pagos: [] // Inicia sin abonos cargados
+                pagos: []
             };
 
             clientes.push(nuevoCliente);
