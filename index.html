@@ -114,169 +114,101 @@
         <section class="space-y-3">
             <div class="flex items-center space-x-2 text-gray-300 font-bold px-1">
                 <i data-lucide="clipboard-list" class="w-5 h-5 text-orange-500"></i>
-                <h2>Control de Clientes y Antropometría</h2>
+                <h2>Control de Clientes y Evolución Métricamétrica</h2>
             </div>
 
-            <div id="lista-clientes" class="space-y-3">
-                <div id="sin-clientesMsg" class="text-center py-8 text-gray-500 text-sm bg-gray-800/50 rounded-xl border border-dashed border-gray-700">
-                    No hay atletas registrados en este dispositivo.
+            <div id="lista-clientes" class="space-y-4">
                 </div>
-            </div>
         </section>
     </main>
 
     <script>
-        // Arreglo de base de datos simulada que se guarda en el navegador (LocalStorage)
+        // Arreglo de atletas guardado localmente. Cada atleta cuenta con un sub-arreglo 'evaluaciones'
         let clientes = JSON.parse(localStorage.getItem('ciodaro_clientes')) || [];
 
         const form = document.getElementById('form-cliente');
         const listaContenedor = document.getElementById('lista-clientes');
-        const sinClientesMsg = document.getElementById('sin-clientesMsg');
 
-        // Establecer la fecha de hoy automáticamente en el formulario
+        // Fecha de hoy por defecto
         document.getElementById('fechainicio').value = new Date().toISOString().split('T')[0];
 
-        // Función para calcular IMC
         function calcularIMC(peso, estatura) {
-            if (!peso || !estatura) return null;
+            if (!peso || !estatura || peso <= 0 || estatura <= 0) return '-';
             const estaturaMetros = estatura / 100;
             return (peso / (estaturaMetros * estaturaMetros)).toFixed(1);
         }
 
-        // Función para renderizar los componentes e iconos de la lista
+        // Renderizado Dinámico de la aplicación
         function renderApp() {
             listaContenedor.innerHTML = '';
             
             if (clientes.length === 0) {
-                listaContenedor.appendChild(sinClientesMsg);
+                listaContenedor.innerHTML = `
+                    <div class="text-center py-8 text-gray-500 text-sm bg-gray-800/50 rounded-xl border border-dashed border-gray-700">
+                        No hay atletas registrados en este dispositivo.
+                    </div>
+                `;
                 document.getElementById('stat-clientes').innerText = '0';
                 document.getElementById('stat-ingressos').innerText = '$0.00';
                 return;
             }
 
-            if (sinClientesMsg.parentNode) {
-                sinClientesMsg.remove();
-            }
-
             let totalIngresos = 0;
 
             clientes.forEach((cliente, index) => {
-                totalIngresos += parseFloat(cliente.pago);
+                totalIngresos += parseFloat(cliente.pago || 0);
 
-                const imc = calcularIMC(cliente.peso, cliente.estatura);
-                
+                // Organizar las evaluaciones por fecha (más reciente primero para la vista principal)
+                const evals = cliente.evaluaciones || [];
+                evals.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+                const ultimaEval = evals[0] || {};
+
                 const card = document.createElement('div');
-                card.className = "bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-md space-y-3";
+                card.className = "bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-md space-y-4";
                 
+                // Generar HTML del historial de mediciones mensuales para comparar
+                let historialHTML = '';
+                evals.forEach((ev) => {
+                    const imcEv = calcularIMC(ev.peso, ev.estatura);
+                    historialHTML += `
+                        <div class="border-b border-gray-800/80 last:border-none pb-2 last:pb-0 pt-2 first:pt-0">
+                            <div class="flex justify-between items-center text-[11px] font-bold text-orange-400 mb-1">
+                                <span class="flex items-center"><i data-lucide="calendar" class="w-3 h-3 mr-1 text-gray-500"></i>Eval: ${ev.fecha}</span>
+                                <span>IMC: ${imcEv}</span>
+                            </div>
+                            <div class="grid grid-cols-4 gap-1 text-[11px] text-gray-300">
+                                <div><span class="text-gray-500">Peso:</span> ${ev.peso || '-'}k</div>
+                                <div><span class="text-gray-500">Cint:</span> ${ev.cintura || '-'}cm</div>
+                                <div><span class="text-gray-500">Pecho:</span> ${ev.pecho || '-'}cm</div>
+                                <div><span class="text-gray-500">Cad:</span> ${ev.cadera || '-'}cm</div>
+                                <div><span class="text-gray-500">B.Izq:</span> ${ev.brazo_izq || '-'}cm</div>
+                                <div><span class="text-gray-500">B.Der:</span> ${ev.brazo_der || '-'}cm</div>
+                                <div><span class="text-gray-500">Muslo:</span> ${ev.muslo || '-'}cm</div>
+                                <div><span class="text-gray-500">Est:</span> ${ev.estatura || '-'}cm</div>
+                            </div>
+                        </div>
+                    `;
+                });
+
                 card.innerHTML = `
                     <div class="flex justify-between items-start border-b border-gray-700/60 pb-2">
                         <div>
                             <h3 class="font-bold text-white text-base">${cliente.nombre}</h3>
                             <div class="flex items-center space-x-2 text-xs text-gray-400 mt-0.5">
-                                <span class="flex items-center"><i data-lucide="calendar" class="w-3 h-3 mr-1 text-gray-500"></i>Ciclo: ${cliente.fechainicio}</span>
+                                <span><span class="text-gray-500">Inicio:</span> ${cliente.fechainicio}</span>
                                 <a href="https://wa.me/${cliente.telefono}" target="_blank" class="text-orange-400 flex items-center hover:underline"><i data-lucide="phone" class="w-3 h-3 mr-0.5"></i>WhatsApp</a>
                             </div>
                         </div>
                         <div class="text-right">
-                            <span class="text-green-400 font-bold text-sm block">$${parseFloat(cliente.pago).toFixed(2)}</span>
-                            <span class="bg-green-500/10 text-green-400 text-[10px] px-2 py-0.5 rounded-full border border-green-500/20 inline-block mt-1">Activo (30d)</span>
+                            <span class="text-green-400 font-bold text-sm block">$${parseFloat(cliente.pago || 0).toFixed(2)}</span>
+                            <span class="bg-green-500/10 text-green-400 text-[10px] px-2 py-0.5 rounded-full border border-green-500/20 inline-block mt-1">Activo</span>
                         </div>
                     </div>
 
-                    <div class="bg-gray-900/60 p-2.5 rounded-lg text-xs space-y-2">
-                        <div class="flex justify-between text-gray-400 font-medium border-b border-gray-800 pb-1">
-                            <span>MEDIDAS: ${cliente.peso || '-'} kg | ${cliente.estatura || '-'} cm</span>
-                            <span class="text-orange-400 font-bold">${imc ? 'IMC: ' + imc : 'IMC: -'}</span>
+                    <div class="bg-gray-900/60 p-3 rounded-lg space-y-2">
+                        <div class="text-xs font-bold text-gray-400 uppercase tracking-wider flex justify-between items-center border-b border-gray-800 pb-1.5">
+                            <span>Historial de Evolución Métricas</span>
+                            <span class="text-[10px] bg-orange-500/10 text-orange-400 px-1.5 py-0.5 rounded">${evals.length} registros</span>
                         </div>
-                        <div class="grid grid-cols-3 gap-y-1 gap-x-2 text-gray-300">
-                            <div><span class="text-gray-500">Pecho:</span> ${cliente.pecho || '-'}cm</div>
-                            <div><span class="text-gray-500">Cintura:</span> ${cliente.cintura || '-'}cm</div>
-                            <div><span class="text-gray-500">Cadera:</span> ${cliente.cadera || '-'}cm</div>
-                            <div><span class="text-gray-500">B. Izq:</span> ${cliente.brazo_izq || '-'}cm</div>
-                            <div><span class="text-gray-500">B. Der:</span> ${cliente.brazo_der || '-'}cm</div>
-                            <div><span class="text-gray-500">Muslo:</span> ${cliente.muslo || '-'}cm</div>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-between items-center pt-1">
-                        <button onclick="enviarMensaje(${index})" class="bg-gray-700 hover:bg-gray-600 text-white text-xs font-semibold py-2 px-3 rounded-lg flex items-center space-x-1 transition w-full justify-center mr-2">
-                            <i data-lucide="message-square" class="w-3.5 h-3.5 text-orange-400"></i>
-                            <span>Notificar Registro</span>
-                        </button>
-                        <button onclick="eliminarCliente(${index})" class="bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 p-2 rounded-lg transition" title="Eliminar Atleta">
-                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                        </button>
-                    </div>
-                `;
-                listaContenedor.appendChild(card);
-            }
-            
-            // Actualizar Métricas Superiores
-            document.getElementById('stat-clientes').innerText = clientes.length;
-            document.getElementById('stat-ingressos').innerText = `$${totalIngresos.toFixed(2)}`;
-            
-            // Recargar iconos de Lucide en tiempo real
-            lucide.createIcons();
-        }
-
-        // Lógica para capturar formulario y guardar datos
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-
-            const nuevoCliente = {
-                nombre: document.getElementById('nombre').value,
-                telefono: document.getElementById('telefono').value,
-                pago: document.getElementById('pago').value,
-                fechainicio: document.getElementById('fechainicio').value,
-                // Datos Antropométricos
-                peso: document.getElementById('peso').value,
-                estatura: document.getElementById('estatura').value,
-                pecho: document.getElementById('pecho').value,
-                cintura: document.getElementById('cintura').value,
-                brazo_izq: document.getElementById('brazo_izq').value,
-                brazo_der: document.getElementById('brazo_der').value,
-                cadera: document.getElementById('cadera').value,
-                muslo: document.getElementById('muslo').value
-            };
-
-            clientes.push(nuevoCliente);
-            localStorage.setItem('ciodaro_clientes', JSON.stringify(clientes));
-            
-            form.reset();
-            document.getElementById('fechainicio').value = new Date().toISOString().split('T')[0];
-            renderApp();
-        });
-
-        // Función para eliminar atletas
-        window.eliminarCliente = function(index) {
-            if(confirm('¿Seguro que deseas eliminar este atleta del sistema?')) {
-                clientes.splice(index, 1);
-                localStorage.setItem('ciodaro_clientes', JSON.stringify(clientes));
-                renderApp();
-            }
-        }
-
-        // Función para enviar notificación inteligente por WhatsApp
-        window.enviarMensaje = function(index) {
-            const c = clientes[index];
-            const imc = calcularIMC(c.peso, c.estatura);
-            let texto = `¡Hola *${c.nombre}*! Tu registro en *Ciodarofitness* está activo.\n\n`;
-            texto += `*Plan Actual:* Inteligente Especializado\n`;
-            texto += `*Fecha de Inicio:* ${c.fechainicio}\n\n`;
-            if (c.peso || c.cintura) {
-                texto += `*Evaluación Antropométrica Inicial:*\n`;
-                if(c.peso) texto += `- Peso: ${c.peso} kg (IMC: ${imc || '-'})\n`;
-                if(c.cintura) texto += `- Cintura: ${c.cintura} cm\n`;
-                if(c.brazo_der) texto += `- Brazo Der: ${c.brazo_der} cm\n`;
-                texto += `\n¡Vamos a entrenar de forma inteligente para lograr los mejores resultados biomecánicos! 🧬💪`;
-            }
-            
-            const url = `https://wa.me/${c.telefono}?text=${encodeURIComponent(texto)}`;
-            window.open(url, '_blank');
-        }
-
-        // Ejecutar carga inicial al abrir el panel
-        renderApp();
-    </script>
-</body>
-</html>
+                        <div class="space-y-1 max-h-40 overflow-y-auto pr-1">
+                            ${historialHTML || '<p class="text-gray-500 text-xs py-1">Sin evaluaciones registr
