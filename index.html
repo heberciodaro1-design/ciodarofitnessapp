@@ -3,304 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ciodarofitness - Panel Inteligente</title>
+    <title>Ciodarofitness - Panel Profesional</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans pb-12">
 
+    <!-- Encabezado con Control de Visibilidad -->
     <header class="bg-slate-800/50 backdrop-blur-md border-b border-slate-700/50 p-4 sticky top-0 z-50 shadow-lg">
         <div class="flex justify-between items-center max-w-xl mx-auto">
-            <h1 class="text-xl font-black tracking-wider text-orange-500">CIODAROFITNESS<span class="text-slate-400 text-xs font-normal lowercase pl-1">app</span></h1>
-            <span class="bg-emerald-500/10 text-emerald-400 text-xs px-2.5 py-1 rounded-full border border-emerald-500/20 font-medium flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>Panel Activo
-            </span>
+            <h1 class="text-xl font-black tracking-wider text-orange-500">CIODAROFITNESS</h1>
+            <button onclick="toggleVisibilidad()" class="p-2 bg-slate-700 rounded-full hover:bg-slate-600 transition">
+                <i id="icono-ojo" data-lucide="eye" class="w-5 h-5 text-orange-400"></i>
+            </button>
         </div>
     </header>
 
     <main class="max-w-xl mx-auto p-4 space-y-6">
 
+        <!-- Métricas -->
         <section class="grid grid-cols-2 gap-4">
             <div class="bg-slate-800 border border-slate-700/60 p-4 rounded-xl shadow-md">
-                <div class="flex justify-between items-center text-slate-400 mb-1">
-                    <span class="text-xs font-semibold uppercase tracking-wider">Clientes Activos</span>
-                    <i data-lucide="users" class="w-4 h-4 text-orange-500"></i>
-                </div>
-                <div class="text-2xl font-bold text-white" id="stat-clientes">0</div>
+                <span class="text-xs text-slate-400 font-semibold uppercase">Clientes Activos</span>
+                <div class="text-2xl font-bold" id="stat-clientes">0</div>
             </div>
             <div class="bg-slate-800 border border-slate-700/60 p-4 rounded-xl shadow-md">
-                <div class="flex justify-between items-center text-slate-400 mb-1">
-                    <span class="text-xs font-semibold uppercase tracking-wider">Ingresos Mensuales</span>
-                    <i data-lucide="dollar-sign" class="w-4 h-4 text-orange-500"></i>
-                </div>
-                <div class="text-2xl font-bold text-white" id="stat-ingresos">$0.00</div>
+                <span class="text-xs text-slate-400 font-semibold uppercase">Ingresos Totales</span>
+                <div class="text-2xl font-bold text-emerald-400" id="stat-ingresos">$0.00</div>
             </div>
         </section>
 
+        <!-- Formulario (Se mantiene igual para no perder la agilidad) -->
         <section class="bg-slate-800 p-5 rounded-2xl border border-slate-700/60 shadow-xl space-y-4">
-            <div class="flex items-center space-x-2 text-orange-500 font-bold border-b border-slate-700/60 pb-2">
-                <i data-lucide="user-plus" class="w-5 h-5"></i>
-                <h2 class="text-lg">Registrar Atleta Inteligente</h2>
-            </div>
-
-            <form id="form-cliente" class="space-y-4">
-                <div class="space-y-3">
-                    <div>
-                        <label class="block text-xs text-slate-400 font-medium mb-1">Nombre Completo</label>
-                        <input type="text" id="nombre" required placeholder="Ej. Juan Pérez" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-500 text-white">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 font-medium mb-1">Número de WhatsApp (con código de país)</label>
-                        <input type="tel" id="telefono" required placeholder="Ej. 584123456789" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-500 text-white">
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs text-slate-400 font-medium mb-1">Costo Paquete ($)</label>
-                            <input type="number" id="pago" required placeholder="Ej. 50" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-500 text-white">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-slate-400 font-medium mb-1">Fecha de Inicio</label>
-                            <input type="date" id="fechainicio" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-500 text-white">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-700/40 space-y-3">
-                    <div class="flex items-center space-x-1.5 text-xs font-bold text-slate-300 uppercase tracking-wider border-b border-slate-700/40 pb-1.5">
-                        <i data-lucide="activity" class="w-3.5 h-3.5 text-orange-400"></i>
-                        <span>Evaluación Antropométrica Inicial</span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[11px] text-slate-400 mb-1">Peso Corporal (kg)</label>
-                            <input type="number" step="0.1" id="peso" placeholder="0.0" class="w-full bg-slate-900 border border-slate-700 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:border-orange-500 text-white">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] text-slate-400 mb-1">Estatura (cm)</label>
-                            <input type="number" id="estatura" placeholder="170" class="w-full bg-slate-900 border border-slate-700 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:border-orange-500 text-white">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] text-slate-400 mb-1">Perímetro Pecho (cm)</label>
-                            <input type="number" step="0.1" id="pecho" placeholder="0.0" class="w-full bg-slate-900 border border-slate-700 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:border-orange-500 text-white">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] text-slate-400 mb-1">Cintura (cm)</label>
-                            <input type="number" step="0.1" id="cintura" placeholder="0.0" class="w-full bg-slate-900 border border-slate-700 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:border-orange-500 text-white">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] text-slate-400 mb-1">Brazo Izquierdo (cm)</label>
-                            <input type="number" step="0.1" id="brazo_izq" placeholder="0.0" class="w-full bg-slate-900 border border-slate-700 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:border-orange-500 text-white">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] text-slate-400 mb-1">Brazo Derecho (cm)</label>
-                            <input type="number" step="0.1" id="brazo_der" placeholder="0.0" class="w-full bg-slate-900 border border-slate-700 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:border-orange-500 text-white">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] text-slate-400 mb-1">Cadera (cm)</label>
-                            <input type="number" step="0.1" id="cadera" placeholder="0.0" class="w-full bg-slate-900 border border-slate-700 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:border-orange-500 text-white">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] text-slate-400 mb-1">Muslo Promedio (cm)</label>
-                            <input type="number" step="0.1" id="muslo" placeholder="0.0" class="w-full bg-slate-900 border border-slate-700 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:border-orange-500 text-white">
-                        </div>
-                    </div>
-                </div>
-
-                <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2.5 px-4 rounded-lg transition duration-200 flex items-center justify-center space-x-2 text-sm shadow-md shadow-orange-500/20">
-                    <i data-lucide="save" class="w-4 h-4"></i>
-                    <span>Agregar a la Base de Datos</span>
-                </button>
+            <h2 class="text-lg font-bold text-orange-500 border-b border-slate-700/60 pb-2">Registrar Atleta</h2>
+            <form id="form-cliente" class="space-y-3">
+                <input type="text" id="nombre" placeholder="Nombre completo" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-white">
+                <input type="tel" id="telefono" placeholder="WhatsApp (584...)" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-white">
+                <input type="number" id="total_paquete" placeholder="Total Paquete ($)" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-white">
+                <button type="submit" class="w-full bg-orange-500 py-2 rounded-lg font-bold text-sm">Registrar</button>
             </form>
         </section>
 
-        <section class="space-y-3">
-            <div class="flex items-center space-x-2 text-slate-300 font-bold px-1">
-                <i data-lucide="clipboard-list" class="w-5 h-5 text-orange-500"></i>
-                <h2>Control de Clientes e Historial Métrico</h2>
-            </div>
-
-            <div id="lista-clientes" class="space-y-4"></div>
-        </section>
+        <!-- Listado -->
+        <div id="lista-clientes" class="space-y-4"></div>
     </main>
 
     <script>
         let clientes = JSON.parse(localStorage.getItem('ciodaro_clientes')) || [];
-        const form = document.getElementById('form-cliente');
-        const listaContenedor = document.getElementById('lista-clientes');
+        let ocultar = false;
 
-        document.getElementById('fechainicio').value = new Date().toISOString().split('T')[0];
-
-        function calcularIMC(peso, estatura) {
-            if (!peso || !estatura || peso <= 0 || estatura <= 0) return '-';
-            return (peso / ((estatura / 100) * (estatura / 100))).toFixed(1);
+        function toggleVisibilidad() {
+            ocultar = !ocultar;
+            document.getElementById('icono-ojo').setAttribute('data-lucide', ocultar ? 'eye-off' : 'eye');
+            lucide.createIcons();
+            renderApp();
         }
 
         function renderApp() {
-            listaContenedor.innerHTML = '';
-            if (clientes.length === 0) {
-                listaContenedor.innerHTML = `<div class="text-center py-8 text-slate-500 text-sm bg-slate-800/40 rounded-xl border border-dashed border-slate-700">No hay atletas registrados.</div>`;
-                document.getElementById('stat-clientes').innerText = '0';
-                document.getElementById('stat-ingresos').innerText = '$0.00';
-                return;
-            }
+            const lista = document.getElementById('lista-clientes');
+            lista.innerHTML = '';
+            let totalGeneral = 0;
 
-            let totalIngresos = 0;
-            clientes.forEach((cliente, index) => {
-                totalIngresos += parseFloat(cliente.pago || 0);
+            clientes.forEach((c, idx) => {
+                const totalPagado = (c.pagos || []).reduce((acc, p) => acc + parseFloat(p.monto), 0);
+                totalGeneral += totalPagado;
                 
-                // Corrección automática en caso de datos con formato corrupto del historial anterior
-                if (!cliente.fechainicio || cliente.fechainicio === "undefined") {
-                    cliente.fechainicio = new Date().toISOString().split('T')[0];
-                }
-
-                const evals = cliente.evaluaciones || [];
-                evals.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-
                 const card = document.createElement('div');
-                card.className = "bg-slate-800 p-4 rounded-xl border border-slate-700/60 shadow-md space-y-4";
-                
-                let historialHTML = '';
-                evals.forEach((ev) => {
-                    historialHTML += `
-                        <div class="border-b border-slate-700/40 last:border-none pb-2 pt-2 first:pt-0 text-[11px]">
-                            <div class="flex justify-between items-center font-bold text-orange-400 mb-1">
-                                <span class="flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3 text-slate-500"></i>Fecha: ${ev.fecha || cliente.fechainicio}</span>
-                                <span>IMC: ${calcularIMC(ev.peso, ev.estatura)}</span>
-                            </div>
-                            <div class="grid grid-cols-4 gap-x-2 gap-y-1 text-slate-300">
-                                <div><span class="text-slate-500 font-medium">Peso:</span> ${ev.peso || '-'}kg</div>
-                                <div><span class="text-slate-500 font-medium">Cint:</span> ${ev.cintura || '-'}cm</div>
-                                <div><span class="text-slate-500 font-medium">Pech:</span> ${ev.pecho || '-'}cm</div>
-                                <div><span class="text-slate-500 font-medium">Cad:</span> ${ev.cadera || '-'}cm</div>
-                                <div><span class="text-slate-500 font-medium">B.Izq:</span> ${ev.brazo_izq || '-'}cm</div>
-                                <div><span class="text-slate-500 font-medium">B.Der:</span> ${ev.brazo_der || '-'}cm</div>
-                                <div><span class="text-slate-500 font-medium">Musl:</span> ${ev.muslo || '-'}cm</div>
-                                <div><span class="text-slate-500 font-medium">Est:</span> ${ev.estatura || '-'}cm</div>
-                            </div>
-                        </div>
-                    `;
-                });
-
-                // Inyección del número de orden y fecha de inicio limpia
+                card.className = "bg-slate-800 p-4 rounded-xl border border-slate-700/60";
                 card.innerHTML = `
-                    <div class="flex justify-between items-start border-b border-slate-700/60 pb-2">
+                    <div class="flex justify-between items-start mb-3">
                         <div>
-                            <div class="flex items-center gap-2">
-                                <span class="bg-orange-500/20 text-orange-400 text-[10px] font-bold px-1.5 py-0.5 rounded border border-orange-500/30">Atleta #${index + 1}</span>
-                                <h3 class="font-bold text-white text-base">${cliente.nombre}</h3>
-                            </div>
-                            <div class="flex items-center space-x-2 text-xs text-slate-400 mt-1">
-                                <span class="flex items-center gap-1"><i data-lucide="calendar-days" class="w-3 h-3 text-slate-500"></i>Inicio: ${cliente.fechainicio}</span>
-                                <a href="https://wa.me/${cliente.telefono}" target="_blank" class="text-orange-400 flex items-center hover:underline gap-0.5">
-                                    <i data-lucide="phone" class="w-3 h-3"></i>WhatsApp
-                                </a>
-                            </div>
+                            <h3 class="font-bold">${c.nombre}</h3>
+                            <p class="text-xs text-slate-400">Total Acordado: ${ocultar ? '***' : '$' + c.total_paquete}</p>
                         </div>
-                        <span class="text-emerald-400 font-bold text-sm">$${parseFloat(cliente.pago || 0).toFixed(2)}</span>
-                    </div>
-                    <div class="bg-slate-900/60 p-3 rounded-lg space-y-2">
-                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider flex justify-between items-center border-b border-slate-700/60 pb-1.5">
-                            <span>Historial de Medidas Avanzado</span>
-                            <span class="text-orange-400 bg-orange-500/10 px-1.5 py-0.5 rounded text-[10px]">${evals.length} Controles</span>
+                        <div class="text-right">
+                            <p class="text-xs text-slate-400">Pagado</p>
+                            <p class="font-bold text-emerald-400">${ocultar ? '***' : '$' + totalPagado}</p>
                         </div>
-                        <div class="space-y-2 max-h-52 overflow-y-auto pr-1">${historialHTML || 'Sin controles.'}</div>
                     </div>
-                    <div class="grid grid-cols-12 gap-2 pt-1">
-                        <button onclick="agregarMedicionMensual(${index})" class="col-span-6 bg-orange-500/10 text-orange-400 text-xs font-semibold py-2 rounded-lg border border-orange-500/30 hover:bg-orange-500/20 transition">Nueva Eval</button>
-                        <button onclick="enviarMensaje(${index})" class="col-span-4 bg-slate-700 text-white text-xs font-semibold py-2 rounded-lg hover:bg-slate-600 transition">Notificar</button>
-                        <button onclick="eliminarCliente(${index})" class="col-span-2 bg-red-500/10 text-red-400 py-2 rounded-lg border border-red-500/20 hover:bg-red-500/20 transition flex items-center justify-center"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                    <div class="flex gap-2">
+                        <button onclick="registrarAbono(${idx})" class="flex-1 bg-emerald-600 text-xs py-1.5 rounded font-bold">+ Abono</button>
+                        <button onclick="verResumen(${idx})" class="flex-1 bg-slate-700 text-xs py-1.5 rounded font-bold">Resumen</button>
+                        <button onclick="eliminarCliente(${idx})" class="px-3 bg-red-900/50 text-red-400 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     </div>
                 `;
-                listaContenedor.appendChild(card);
+                lista.appendChild(card);
             });
+
             document.getElementById('stat-clientes').innerText = clientes.length;
-            document.getElementById('stat-ingresos').innerText = `$${totalIngresos.toFixed(2)}`;
+            document.getElementById('stat-ingresos').innerText = ocultar ? '***' : '$' + totalGeneral.toFixed(2);
             lucide.createIcons();
         }
 
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-
-            const fechaEval = document.getElementById('fechainicio').value;
-            const primeraEvaluacion = {
-                fecha: fechaEval,
-                peso: document.getElementById('peso').value || null,
-                estatura: document.getElementById('estatura').value || null,
-                pecho: document.getElementById('pecho').value || null,
-                cintura: document.getElementById('cintura').value || null,
-                brazo_izq: document.getElementById('brazo_izq').value || null,
-                brazo_der: document.getElementById('brazo_der').value || null,
-                cadera: document.getElementById('cadera').value || null,
-                muslo: document.getElementById('muslo').value || null
-            };
-
-            const nuevoCliente = {
-                nombre: document.getElementById('nombre').value,
-                telefono: document.getElementById('telefono').value,
-                pago: document.getElementById('pago').value,
-                fechainicio: fechaEval,
-                evaluaciones: [primeraEvaluacion]
-            };
-
-            clientes.push(nuevoCliente);
-            localStorage.setItem('ciodaro_clientes', JSON.stringify(clientes));
-            form.reset();
-            document.getElementById('fechainicio').value = new Date().toISOString().split('T')[0];
-            renderApp();
-        });
-
-        window.agregarMedicionMensual = function(index) {
-            const cliente = clientes[index];
-            const fechaMedicion = prompt("Fecha de este nuevo control (AAAA-MM-DD):", new Date().toISOString().split('T')[0]);
-            if (!fechaMedicion) return;
-
-            const peso = prompt(`[${cliente.nombre}] Nuevo Peso Corporal (kg):`);
-            const estatura = prompt(`[${cliente.nombre}] Estatura (cm):`, cliente.evaluaciones[0]?.estatura || "170");
-            const pecho = prompt(`[${cliente.nombre}] Nuevo Perímetro Pecho (cm):`);
-            const cintura = prompt(`[${cliente.nombre}] Nueva Cintura (cm):`);
-            const brazo_izq = prompt(`[${cliente.nombre}] Nuevo Brazo Izquierdo (cm):`);
-            const brazo_der = prompt(`[${cliente.nombre}] Nuevo Brazo Derecho (cm):`);
-            const cadera = prompt(`[${cliente.nombre}] Nueva Cadera (cm):`);
-            const muslo = prompt(`[${cliente.nombre}] Nuevo Muslo Promedio (cm):`);
-            
-            if(!cliente.evaluaciones) cliente.evaluaciones = [];
-            
-            cliente.evaluaciones.push({
-                fecha: fechaMedicion,
-                peso: peso || null,
-                estatura: estatura || null,
-                pecho: pecho || null,
-                cintura: cintura || null,
-                brazo_izq: brazo_izq || null,
-                brazo_der: brazo_der || null,
-                cadera: cadera || null,
-                muslo: muslo || null
-            });
-            localStorage.setItem('ciodaro_clientes', JSON.stringify(clientes));
-            renderApp();
-        };
-
-        window.eliminarCliente = function(index) {
-            if(confirm('¿Eliminar por completo a este atleta e historial?')) {
-                clientes.splice(index, 1);
+        window.registrarAbono = (idx) => {
+            const monto = prompt("Monto del abono ($):");
+            if(monto) {
+                if(!clientes[idx].pagos) clientes[idx].pagos = [];
+                clientes[idx].pagos.push({ fecha: new Date().toLocaleDateString(), monto: monto });
                 localStorage.setItem('ciodaro_clientes', JSON.stringify(clientes));
                 renderApp();
             }
         };
 
-        window.enviarMensaje = function(index) {
-            const c = clientes[index];
-            const evals = c.evaluaciones || [];
-            evals.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-            const act = evals[0] || {};
-            
-            let texto = `¡Hola *${c.nombre}*! Reporte de tu Evolución en *Ciodarofitness* 🧬\n\n`;
-            texto += `*Último control:* ${act.fecha || c.fechainicio}\n`;
-            if(act.peso) texto += `- Peso: ${act.peso} kg (IMC: ${calcularIMC(act.peso, act.estatura)})\n`;
-            if(act.cintura) texto += `- Cintura: ${act.cintura} cm\n`;
-            texto += `\n¡Seguimos con todo enfocados en los objetivos! 💪🔥`;
-            window.open(`https://wa.me/${c.telefono}?text=${encodeURIComponent(texto)}`, '_blank');
+        window.verResumen = (idx) => {
+            const c = clientes[idx];
+            let msg = `Historial de ${c.nombre}:\n`;
+            (c.pagos || []).forEach(p => msg += `• ${p.fecha}: $${p.monto}\n`);
+            alert(msg || "Sin pagos registrados.");
         };
+
+        window.eliminarCliente = (idx) => {
+            if(confirm("¿Eliminar atleta?")) {
+                clientes.splice(idx, 1);
+                localStorage.setItem('ciodaro_clientes', JSON.stringify(clientes));
+                renderApp();
+            }
+        };
+
+        document.getElementById('form-cliente').addEventListener('submit', (e) => {
+            e.preventDefault();
+            clientes.push({
+                nombre: document.getElementById('nombre').value,
+                total_paquete: document.getElementById('total_paquete').value,
+                pagos: []
+            });
+            localStorage.setItem('ciodaro_clientes', JSON.stringify(clientes));
+            e.target.reset();
+            renderApp();
+        });
 
         renderApp();
     </script>
