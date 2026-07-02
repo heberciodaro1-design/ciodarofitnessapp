@@ -211,4 +211,133 @@
                             <span class="text-[10px] bg-orange-500/10 text-orange-400 px-1.5 py-0.5 rounded">${evals.length} registros</span>
                         </div>
                         <div class="space-y-1 max-h-40 overflow-y-auto pr-1">
-                            ${historialHTML || '<p class="text-gray-500 text-xs py-1">Sin evaluaciones registr
+                            ${historialHTML || '<p class="text-gray-500 text-xs py-1">Sin evaluaciones registradas.</p>'}
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-12 gap-2 pt-1">
+                        <button onclick="agregarMedicionMensual(${index})" class="col-span-6 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-400 text-xs font-semibold py-2 rounded-lg flex items-center justify-center space-x-1 transition">
+                            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+                            <span>Nueva Eval Mensual</span>
+                        </button>
+                        <button onclick="enviarMensaje(${index})" class="col-span-4 bg-gray-700 hover:bg-gray-600 text-white text-xs font-semibold py-2 rounded-lg flex items-center justify-center space-x-1 transition">
+                            <i data-lucide="message-square" class="w-3.5 h-3.5 text-orange-400"></i>
+                            <span>Notificar</span>
+                        </button>
+                        <button onclick="eliminarCliente(${index})" class="col-span-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 py-2 rounded-lg transition flex items-center justify-center" title="Eliminar Atleta">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                `;
+                listaContenedor.appendChild(card);
+            }
+            
+            document.getElementById('stat-clientes').innerText = clientes.length;
+            document.getElementById('stat-ingressos').innerText = `$${totalIngresos.toFixed(2)}`;
+            lucide.createIcons();
+        }
+
+        // Lógica: Crear nuevo atleta con su primera evaluación inicial
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const fechaEval = document.getElementById('fechainicio').value;
+            const primeraEvaluacion = {
+                fecha: fechaEval,
+                peso: document.getElementById('peso').value,
+                estatura: document.getElementById('estatura').value,
+                pecho: document.getElementById('pecho').value,
+                cintura: document.getElementById('cintura').value,
+                brazo_izq: document.getElementById('brazo_izq').value,
+                brazo_der: document.getElementById('brazo_der').value,
+                cadera: document.getElementById('cadera').value,
+                muslo: document.getElementById('muslo').value
+            };
+
+            const nuevoCliente = {
+                nombre: document.getElementById('nombre').value,
+                telefono: document.getElementById('telefono').value,
+                pago: document.getElementById('pago').value,
+                fechainicio: fechaEval,
+                evaluaciones: [primeraEvaluacion] // Se inicializa el arreglo de evolución métrica
+            };
+
+            clientes.push(nuevoCliente);
+            localStorage.setItem('ciodaro_clientes', JSON.stringify(clientes));
+            
+            form.reset();
+            document.getElementById('fechainicio').value = new Date().toISOString().split('T')[0];
+            renderApp();
+        });
+
+        // Función interactiva para agregar una nueva evaluación comparativa mensual
+        window.agregarMedicionMensual = function(index) {
+            const cliente = clientes[index];
+            const fechaMedicion = prompt("Introduce la fecha de la evaluación (AAAA-MM-DD):", new Date().toISOString().split('T')[0]);
+            
+            if (!fechaMedicion) return; // Cancelado
+
+            // Pedir los datos métricos de control de forma interactiva y veloz
+            const peso = prompt(`[${cliente.nombre}] Nuevo Peso Corporal (kg):`);
+            const cintura = prompt(`[${cliente.nombre}] Nueva Cintura (cm):`);
+            const pecho = prompt(`[${cliente.nombre}] Nuevo Perímetro Pecho (cm):`);
+            const cadera = prompt(`[${cliente.nombre}] Nueva Cadera (cm):`);
+            const brazo_izq = prompt(`[${cliente.nombre}] Nuevo Brazo Izquierdo (cm):`);
+            const brazo_der = prompt(`[${cliente.nombre}] Nuevo Brazo Derecho (cm):`);
+            const muslo = prompt(`[${cliente.nombre}] Nuevo Muslo Promedio (cm):`);
+            const estatura = prompt(`[${cliente.nombre}] Estatura (cm):`, cliente.evaluaciones[0]?.estatura || "170");
+
+            const nuevaEval = {
+                fecha: fechaMedicion,
+                peso: peso || null,
+                estatura: estatura || null,
+                pecho: pecho || null,
+                cintura: cintura || null,
+                brazo_izq: brazo_izq || null,
+                brazo_der: brazo_der || null,
+                cadera: cadera || null,
+                muslo: muslo || null
+            };
+
+            cliente.evaluaciones.push(nuevaEval);
+            localStorage.setItem('ciodaro_clientes', JSON.stringify(clientes));
+            renderApp();
+        }
+
+        window.eliminarCliente = function(index) {
+            if(confirm('¿Seguro que deseas eliminar este atleta y todo su historial de evolución?')) {
+                clientes.splice(index, 1);
+                localStorage.setItem('ciodaro_clientes', JSON.stringify(clientes));
+                renderApp();
+            }
+        }
+
+        window.enviarMensaje = function(index) {
+            const c = clientes[index];
+            const evals = c.evaluaciones || [];
+            evals.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+            const actual = evals[0] || {};
+            const anterior = evals[1]; // Para contrastar progreso directo si existe
+
+            let texto = `¡Hola *${c.nombre}*! Reporte de tu Evolución Inteligente en *Ciodarofitness* 🧬\n\n`;
+            texto += `*Último control:* ${actual.fecha}\n`;
+            if(actual.peso) texto += `- Peso: ${actual.peso} kg (IMC: ${calcularIMC(actual.peso, actual.estatura)})\n`;
+            if(actual.cintura) texto += `- Cintura: ${actual.cintura} cm\n`;
+            if(actual.brazo_der) texto += `- Brazo Der: ${actual.brazo_der} cm\n`;
+
+            if (anterior) {
+                texto += `\n*Comparativa Control Anterior (${anterior.fecha}):*\n`;
+                if(anterior.peso) texto += `- Peso previo: ${anterior.peso} kg\n`;
+                if(anterior.cintura) texto += `- Cintura previa: ${anterior.cintura} cm\n`;
+            }
+
+            texto += `\n¡Seguimos aplicando principios biomecánicos para optimizar cada resultado! 💪🔥`;
+            
+            const url = `https://wa.me/${c.telefono}?text=${encodeURIComponent(texto)}`;
+            window.open(url, '_blank');
+        }
+
+        renderApp();
+    </script>
+</body>
+</html>
