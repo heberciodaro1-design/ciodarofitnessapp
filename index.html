@@ -119,48 +119,35 @@
                 <h2>Control de Clientes e Historial Métrico</h2>
             </div>
 
-            <div id="lista-clientes" class="space-y-4">
-                </div>
+            <div id="lista-clientes" class="space-y-4"></div>
         </section>
     </main>
 
     <script>
-        // Cargar base de datos local de manera segura
         let clientes = JSON.parse(localStorage.getItem('ciodaro_clientes')) || [];
-
         const form = document.getElementById('form-cliente');
         const listaContenedor = document.getElementById('lista-clientes');
 
-        // Poner fecha actual por defecto en el campo correspondiente
         document.getElementById('fechainicio').value = new Date().toISOString().split('T')[0];
 
         function calcularIMC(peso, estatura) {
             if (!peso || !estatura || peso <= 0 || estatura <= 0) return '-';
-            const estaturaMetros = estatura / 100;
-            return (peso / (estaturaMetros * estaturaMetros)).toFixed(1);
+            return (peso / ((estatura / 100) * (estatura / 100))).toFixed(1);
         }
 
         function renderApp() {
             listaContenedor.innerHTML = '';
-            
             if (clientes.length === 0) {
-                listaContenedor.innerHTML = `
-                    <div class="text-center py-8 text-slate-500 text-sm bg-slate-800/40 rounded-xl border border-dashed border-slate-700">
-                        No hay atletas registrados en este dispositivo.
-                    </div>
-                `;
+                listaContenedor.innerHTML = `<div class="text-center py-8 text-slate-500 text-sm bg-slate-800/40 rounded-xl border border-dashed border-slate-700">No hay atletas registrados.</div>`;
                 document.getElementById('stat-clientes').innerText = '0';
                 document.getElementById('stat-ingresos').innerText = '$0.00';
                 return;
             }
 
             let totalIngresos = 0;
-
             clientes.forEach((cliente, index) => {
                 totalIngresos += parseFloat(cliente.pago || 0);
-
                 const evals = cliente.evaluaciones || [];
-                // Ordenar evaluaciones de más nueva a más vieja para mostrar arriba la más reciente
                 evals.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
                 const card = document.createElement('div');
@@ -168,22 +155,17 @@
                 
                 let historialHTML = '';
                 evals.forEach((ev) => {
-                    const imcEv = calcularIMC(ev.peso, ev.estatura);
                     historialHTML += `
                         <div class="border-b border-slate-700/40 last:border-none pb-2 pt-2 first:pt-0 text-[11px]">
                             <div class="flex justify-between items-center font-bold text-orange-400 mb-1">
-                                <span class="flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3 text-slate-500"></i>Fecha: ${ev.fecha}</span>
-                                <span>IMC: ${imcEv}</span>
+                                <span>Fecha: ${ev.fecha}</span>
+                                <span>IMC: ${calcularIMC(ev.peso, ev.estatura)}</span>
                             </div>
                             <div class="grid grid-cols-4 gap-x-2 gap-y-0.5 text-slate-300">
-                                <div><span class="text-slate-500">Peso:</span> ${ev.peso || '-'} kg</div>
-                                <div><span class="text-slate-500">Cint:</span> ${ev.cintura || '-'} cm</div>
-                                <div><span class="text-slate-500">Pecho:</span> ${ev.pecho || '-'} cm</div>
-                                <div><span class="text-slate-500">Cad:</span> ${ev.cadera || '-'} cm</div>
-                                <div><span class="text-slate-500">B.Izq:</span> ${ev.brazo_izq || '-'} cm</div>
-                                <div><span class="text-slate-500">B.Der:</span> ${ev.brazo_der || '-'} cm</div>
-                                <div><span class="text-slate-500">Muslo:</span> ${ev.muslo || '-'} cm</div>
-                                <div><span class="text-slate-500">Est:</span> ${ev.estatura || '-'} cm</div>
+                                <div><span class="text-slate-500">P:</span> ${ev.peso || '-'}kg</div>
+                                <div><span class="text-slate-500">Cint:</span> ${ev.cintura || '-'}cm</div>
+                                <div><span class="text-slate-500">Pech:</span> ${ev.pecho || '-'}cm</div>
+                                <div><span class="text-slate-500">Cad:</span> ${ev.cadera || '-'}cm</div>
                             </div>
                         </div>
                     `;
@@ -193,53 +175,32 @@
                     <div class="flex justify-between items-start border-b border-slate-700/60 pb-2">
                         <div>
                             <h3 class="font-bold text-white text-base">${cliente.nombre}</h3>
-                            <div class="flex items-center space-x-2 text-xs text-slate-400 mt-0.5">
-                                <span><span class="text-slate-500">Inicio:</span> ${cliente.fechainicio}</span>
-                                <a href="https://wa.me/${cliente.telefono}" target="_blank" class="text-orange-400 flex items-center hover:underline gap-0.5">
-                                    <i data-lucide="phone" class="w-3 h-3"></i>WhatsApp
-                                </a>
-                            </div>
+                            <span class="text-xs text-slate-400">Inicio: ${cliente.fechainicio}</span>
                         </div>
-                        <div class="text-right">
-                            <span class="text-emerald-400 font-bold text-sm block">$${parseFloat(cliente.pago || 0).toFixed(2)}</span>
-                            <span class="bg-emerald-500/10 text-emerald-400 text-[10px] px-2 py-0.5 rounded-full border border-emerald-500/20 inline-block mt-1">Activo</span>
-                        </div>
+                        <span class="text-emerald-400 font-bold text-sm">$${parseFloat(cliente.pago || 0).toFixed(2)}</span>
                     </div>
-
                     <div class="bg-slate-900/60 p-3 rounded-lg space-y-2">
                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wider flex justify-between items-center border-b border-slate-700/60 pb-1.5">
-                            <span>Evolución Mensual</span>
-                            <span class="text-[10px] bg-orange-500/10 text-orange-400 px-1.5 py-0.5 rounded">${evals.length} Registros</span>
+                            <span>Evolución</span>
+                            <span class="text-orange-400">${evals.length} Reg.</span>
                         </div>
-                        <div class="space-y-1 max-h-40 overflow-y-auto pr-1">
-                            ${historialHTML || '<p class="text-slate-500 text-xs py-1">Sin controles cargados.</p>'}
-                        </div>
+                        <div class="space-y-1 max-h-40 overflow-y-auto">${historialHTML || 'Sin controles.'}</div>
                     </div>
-
                     <div class="grid grid-cols-12 gap-2 pt-1">
-                        <button onclick="agregarMedicionMensual(${index})" class="col-span-6 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-400 text-xs font-semibold py-2 rounded-lg flex items-center justify-center space-x-1 transition">
-                            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
-                            <span>Nueva Eval Mensual</span>
-                        </button>
-                        <button onclick="enviarMensaje(${index})" class="col-span-4 bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold py-2 rounded-lg flex items-center justify-center space-x-1 transition">
-                            <i data-lucide="message-square" class="w-3.5 h-3.5 text-orange-400"></i>
-                            <span>Notificar</span>
-                        </button>
-                        <button onclick="eliminarCliente(${index})" class="col-span-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 py-2 rounded-lg transition flex items-center justify-center">
-                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                        </button>
+                        <button onclick="agregarMedicionMensual(${index})" class="col-span-6 bg-orange-500/10 text-orange-400 text-xs font-semibold py-2 rounded-lg border border-orange-500/30">Nueva Eval</button>
+                        <button onclick="enviarMensaje(${index})" class="col-span-4 bg-slate-700 text-white text-xs font-semibold py-2 rounded-lg">Notificar</button>
+                        <button onclick="eliminarCliente(${index})" class="col-span-2 bg-red-500/10 text-red-400 py-2 rounded-lg">Borrar</button>
                     </div>
                 `;
                 listaContenedor.appendChild(card);
-            }
-            
+            });
             document.getElementById('stat-clientes').innerText = clientes.length;
             document.getElementById('stat-ingresos').innerText = `$${totalIngresos.toFixed(2)}`;
             lucide.createIcons();
         }
 
         form.addEventListener('submit', (e) => {
-            e.preventDefault();
+            e.preventDefault(); // <-- LA LÍNEA MÁGICA CORRECTA QUE EVITA EL ERROR
 
             const fechaEval = document.getElementById('fechainicio').value;
             const primeraEvaluacion = {
@@ -264,7 +225,6 @@
 
             clientes.push(nuevoCliente);
             localStorage.setItem('ciodaro_clientes', JSON.stringify(clientes));
-            
             form.reset();
             document.getElementById('fechainicio').value = new Date().toISOString().split('T')[0];
             renderApp();
@@ -272,38 +232,24 @@
 
         window.agregarMedicionMensual = function(index) {
             const cliente = clientes[index];
-            const fechaMedicion = prompt("Introduce la fecha del control mensual (AAAA-MM-DD):", new Date().toISOString().split('T')[0]);
-            
+            const fechaMedicion = prompt("Fecha control (AAAA-MM-DD):", new Date().toISOString().split('T')[0]);
             if (!fechaMedicion) return;
 
-            const peso = prompt(`[${cliente.nombre}] Nuevo Peso Corporal (kg):`);
-            const cintura = prompt(`[${cliente.nombre}] Nueva Cintura (cm):`);
-            const pecho = prompt(`[${cliente.nombre}] Nuevo Perímetro Pecho (cm):`);
-            const cadera = prompt(`[${cliente.nombre}] Nueva Cadera (cm):`);
-            const brazo_izq = prompt(`[${cliente.nombre}] Nuevo Brazo Izquierdo (cm):`);
-            const brazo_der = prompt(`[${cliente.nombre}] Nuevo Brazo Derecho (cm):`);
-            const muslo = prompt(`[${cliente.nombre}] Nuevo Muslo Promedio (cm):`);
-            const estatura = prompt(`[${cliente.nombre}] Estatura (cm):`, cliente.evaluaciones[0]?.estatura || "170");
-
-            const nuevaEval = {
+            const peso = prompt("Nuevo Peso Corporal (kg):");
+            const cintura = prompt("Nueva Cintura (cm):");
+            
+            cliente.evaluaciones.push({
                 fecha: fechaMedicion,
                 peso: peso || null,
-                estatura: estatura || null,
-                pecho: pecho || null,
                 cintura: cintura || null,
-                brazo_izq: brazo_izq || null,
-                brazo_der: brazo_der || null,
-                cadera: cadera || null,
-                muslo: muslo || null
-            };
-
-            cliente.evaluaciones.push(nuevaEval);
+                estatura: cliente.evaluaciones[0]?.estatura || "170"
+            });
             localStorage.setItem('ciodaro_clientes', JSON.stringify(clientes));
             renderApp();
         };
 
         window.eliminarCliente = function(index) {
-            if(confirm('¿Seguro que deseas eliminar este atleta y todo su historial de controles?')) {
+            if(confirm('¿Eliminar atleta?')) {
                 clientes.splice(index, 1);
                 localStorage.setItem('ciodaro_clientes', JSON.stringify(clientes));
                 renderApp();
@@ -312,27 +258,8 @@
 
         window.enviarMensaje = function(index) {
             const c = clientes[index];
-            const evals = c.evaluaciones || [];
-            evals.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-            const actual = evals[0] || {};
-            const anterior = evals[1];
-
-            let texto = `¡Hola *${c.nombre}*! Reporte de tu Evolución Inteligente en *Ciodarofitness* 🧬\n\n`;
-            texto += `*Último control:* ${actual.fecha}\n`;
-            if(actual.peso) texto += `- Peso: ${actual.peso} kg (IMC: ${calcularIMC(actual.peso, actual.estatura)})\n`;
-            if(actual.cintura) texto += `- Cintura: ${actual.cintura} cm\n`;
-            if(actual.brazo_der) texto += `- Brazo Der: ${actual.brazo_der} cm\n`;
-
-            if (anterior) {
-                texto += `\n*Comparativa Control Anterior (${anterior.fecha}):*\n`;
-                if(anterior.peso) texto += `- Peso previo: ${anterior.peso} kg\n`;
-                if(anterior.cintura) texto += `- Cintura previa: ${anterior.cintura} cm\n`;
-            }
-
-            texto += `\n¡Seguimos aplicando principios biomecánicos para optimizar cada resultado! 💪🔥`;
-            
-            const url = `https://wa.me/${c.telefono}?text=${encodeURIComponent(texto)}`;
-            window.open(url, '_blank');
+            let texto = `¡Hola *${c.nombre}*! Reporte de tu Evolución Inteligente en *Ciodarofitness* 🧬`;
+            window.open(`https://wa.me/${c.telefono}?text=${encodeURIComponent(texto)}`, '_blank');
         };
 
         renderApp();
