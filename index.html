@@ -147,6 +147,12 @@
             let totalIngresos = 0;
             clientes.forEach((cliente, index) => {
                 totalIngresos += parseFloat(cliente.pago || 0);
+                
+                // Corrección automática en caso de datos con formato corrupto del historial anterior
+                if (!cliente.fechainicio || cliente.fechainicio === "undefined") {
+                    cliente.fechainicio = new Date().toISOString().split('T')[0];
+                }
+
                 const evals = cliente.evaluaciones || [];
                 evals.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
@@ -158,7 +164,7 @@
                     historialHTML += `
                         <div class="border-b border-slate-700/40 last:border-none pb-2 pt-2 first:pt-0 text-[11px]">
                             <div class="flex justify-between items-center font-bold text-orange-400 mb-1">
-                                <span class="flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3 text-slate-500"></i>Fecha: ${ev.fecha}</span>
+                                <span class="flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3 text-slate-500"></i>Fecha: ${ev.fecha || cliente.fechainicio}</span>
                                 <span>IMC: ${calcularIMC(ev.peso, ev.estatura)}</span>
                             </div>
                             <div class="grid grid-cols-4 gap-x-2 gap-y-1 text-slate-300">
@@ -175,12 +181,16 @@
                     `;
                 });
 
+                // Inyección del número de orden y fecha de inicio limpia
                 card.innerHTML = `
                     <div class="flex justify-between items-start border-b border-slate-700/60 pb-2">
                         <div>
-                            <h3 class="font-bold text-white text-base">${cliente.nombre}</h3>
-                            <div class="flex items-center space-x-2 text-xs text-slate-400 mt-0.5">
-                                <span>Inicio: ${cliente.fechainicio}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="bg-orange-500/20 text-orange-400 text-[10px] font-bold px-1.5 py-0.5 rounded border border-orange-500/30">Atleta #${index + 1}</span>
+                                <h3 class="font-bold text-white text-base">${cliente.nombre}</h3>
+                            </div>
+                            <div class="flex items-center space-x-2 text-xs text-slate-400 mt-1">
+                                <span class="flex items-center gap-1"><i data-lucide="calendar-days" class="w-3 h-3 text-slate-500"></i>Inicio: ${cliente.fechainicio}</span>
                                 <a href="https://wa.me/${cliente.telefono}" target="_blank" class="text-orange-400 flex items-center hover:underline gap-0.5">
                                     <i data-lucide="phone" class="w-3 h-3"></i>WhatsApp
                                 </a>
@@ -253,6 +263,8 @@
             const cadera = prompt(`[${cliente.nombre}] Nueva Cadera (cm):`);
             const muslo = prompt(`[${cliente.nombre}] Nuevo Muslo Promedio (cm):`);
             
+            if(!cliente.evaluaciones) cliente.evaluaciones = [];
+            
             cliente.evaluaciones.push({
                 fecha: fechaMedicion,
                 peso: peso || null,
@@ -283,7 +295,7 @@
             const act = evals[0] || {};
             
             let texto = `¡Hola *${c.nombre}*! Reporte de tu Evolución en *Ciodarofitness* 🧬\n\n`;
-            texto += `*Último control:* ${act.fecha}\n`;
+            texto += `*Último control:* ${act.fecha || c.fechainicio}\n`;
             if(act.peso) texto += `- Peso: ${act.peso} kg (IMC: ${calcularIMC(act.peso, act.estatura)})\n`;
             if(act.cintura) texto += `- Cintura: ${act.cintura} cm\n`;
             texto += `\n¡Seguimos con todo enfocados en los objetivos! 💪🔥`;
