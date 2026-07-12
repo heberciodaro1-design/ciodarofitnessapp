@@ -2,108 +2,316 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CIODAROFITNESS PRO</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ciodarofitness Pro - Sistema de Gestión</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = { theme: { extend: { colors: { 'custom-yellow': '#F59E0B', 'custom-black': '#09090b', 'custom-grey': '#27272a' } } } }
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'ciodaro-black': '#09090b',
+                        'ciodaro-grey': '#1c1c1e',
+                        'ciodaro-input': '#2c2c2e',
+                        'ciodaro-yellow': '#facc15'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Ocultar flechas en inputs de número */
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
     </style>
 </head>
-<body class="bg-custom-black text-white min-h-screen p-4 md:p-8">
+<body class="bg-ciodaro-black text-zinc-100 font-sans min-h-screen pb-12">
 
-    <div class="max-w-5xl mx-auto">
-        <!-- HEADER Y DASHBOARD -->
-        <header class="mb-8 border-b border-zinc-800 pb-6">
-            <h1 class="text-3xl font-black text-custom-yellow mb-6">CIODAROFITNESS PRO</h1>
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div class="max-w-5xl mx-auto p-4 md:p-6 space-y-6">
+        
+        <!-- ENCABEZADO -->
+        <header class="flex flex-col md:flex-row justify-between items-center bg-ciodaro-grey p-6 rounded-2xl border border-zinc-800 gap-4">
+            <div>
+                <h1 class="text-3xl font-black text-ciodaro-yellow tracking-tight text-center md:text-left">CIODAROFITNESS</h1>
+                <p class="text-xs text-zinc-400 mt-1 text-center md:text-left">Panel de Control & Antropometría Inteligente</p>
+            </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-custom-grey p-6 rounded-2xl border border-zinc-700">
-                    <p class="text-zinc-400 uppercase text-xs font-bold mb-2">Total Caja Mensual</p>
-                    <div class="flex items-center gap-4">
-                        <h2 id="total-caja" class="text-4xl font-black text-custom-yellow">***</h2>
-                        <button onclick="toggleDinero()" class="text-zinc-500 hover:text-white">👁️</button>
-                    </div>
+            <!-- CONTROLLER CAJA MENSUAL -->
+            <div class="bg-ciodaro-black px-6 py-3 rounded-xl border border-zinc-800 flex items-center gap-4 min-w-[240px] justify-between">
+                <div>
+                    <p class="text-[10px] text-zinc-400 uppercase font-bold tracking-wider">Recaudación Mensual</p>
+                    <h2 id="txt-caja" class="text-2xl font-black text-ciodaro-yellow">***</h2>
                 </div>
-                <div class="bg-custom-grey p-6 rounded-2xl border border-zinc-700 flex flex-col justify-center">
-                    <input type="text" id="buscador" onkeyup="render()" placeholder="🔍 Buscar cliente..." class="bg-black border border-zinc-600 p-3 rounded-lg outline-none focus:border-custom-yellow">
-                </div>
-                <div class="bg-custom-grey p-6 rounded-2xl border border-zinc-700">
-                    <button onclick="abrirModal()" class="w-full h-full bg-custom-yellow text-black font-bold rounded-xl hover:bg-yellow-500">➕ Agregar Nuevo Cliente</button>
-                </div>
+                <button onclick="toggleVisibilidadCaja()" id="btn-ojo" class="text-xl bg-ciodaro-grey p-2 rounded-lg hover:bg-zinc-800 transition">👁️</button>
             </div>
         </header>
 
-        <!-- LISTA -->
-        <div id="lista-clientes" class="grid gap-4">
-            <!-- Los clientes aparecerán aquí -->
+        <!-- BARRA DE ACCIONES Y BÚSQUEDA -->
+        <div class="flex flex-col md:flex-row gap-4">
+            <div class="relative flex-1">
+                <input type="text" id="buscador" onkeyup="renderizar()" placeholder="🔍 Buscar cliente por nombre..." class="w-full pl-5 pr-4 py-4 bg-ciodaro-grey border border-zinc-800 rounded-xl outline-none focus:border-ciodaro-yellow text-white placeholder-zinc-500 transition">
+            </div>
+            <button onclick="abrirModal()" class="bg-ciodaro-yellow text-black font-bold px-6 py-4 rounded-xl hover:bg-yellow-500 transition flex items-center justify-center gap-2 shadow-lg shadow-yellow-500/10">
+                <span>➕</span> Nuevo Cliente
+            </button>
         </div>
+
+        <!-- LISTADO DE CLIENTES -->
+        <div id="contenedor-clientes" class="space-y-4">
+            <!-- Render dinámico desde JavaScript -->
+        </div>
+
     </div>
 
-    <!-- MODAL AGREGAR -->
-    <div id="modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4">
-        <div class="bg-custom-grey p-8 rounded-2xl w-full max-w-lg border border-zinc-700">
-            <h2 class="text-xl font-bold mb-4 text-custom-yellow">Nuevo Alumno</h2>
-            <input type="text" id="in-nombre" placeholder="Nombre" class="w-full bg-black p-3 mb-2 rounded border border-zinc-600">
-            <input type="number" id="in-cuota" placeholder="Plan Mensual ($)" class="w-full bg-black p-3 mb-2 rounded border border-zinc-600">
-            <input type="number" id="in-peso" placeholder="Peso (kg)" class="w-full bg-black p-3 mb-2 rounded border border-zinc-600">
-            <button onclick="guardarCliente()" class="w-full bg-custom-yellow text-black font-bold p-3 rounded mt-4">Guardar</button>
-            <button onclick="document.getElementById('modal').classList.add('hidden')" class="w-full mt-2 text-zinc-400">Cancelar</button>
-        </div>
-    </div>
+    <!-- MODAL REGISTRO / EDICIÓN -->
+    <div id="modal-cliente" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50 overflow-y-auto backdrop-blur-sm">
+        <div class="bg-ciodaro-grey w-full max-w-2xl rounded-2xl border border-zinc-800 p-6 space-y-4 my-8">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+                <h2 id="modal-titulo" class="text-xl font-black text-ciodaro-yellow">REGISTRAR NUEVO ALUMNO</h2>
+                <button onclick="cerrarModal()" class="text-zinc-400 hover:text-white text-xl">✕</button>
+            </div>
+            
+            <form id="form-cliente" onsubmit="guardarCliente(event)" class="space-y-4">
+                <input type="hidden" id="edit-index">
+                
+                <!-- Datos básicos -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold uppercase text-zinc-400 mb-1">Nombre Completo</label>
+                        <input type="text" id="m-nombre" required class="w-full bg-ciodaro-input border border-zinc-700 rounded-lg p-2.5 outline-none focus:border-ciodaro-yellow">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-zinc-400 mb-1">Valor Plan ($)</label>
+                        <input type="number" id="m-cuota" required min="0" class="w-full bg-ciodaro-input border border-zinc-700 rounded-lg p-2.5 outline-none focus:border-ciodaro-yellow">
+                    </div>
+                </div>
 
-    <script>
-        let clientes = JSON.parse(localStorage.getItem('ciodaro_db')) || [];
-        let dineroVisible = false;
+                <!-- Historial -->
+                <div>
+                    <label class="block text-xs font-bold uppercase text-zinc-400 mb-1">Historial de Pagos / Notas</label>
+                    <input type="text" id="m-historial" placeholder="Ej: Ene: Pagado | Feb: Pendiente" class="w-full bg-ciodaro-input border border-zinc-700 rounded-lg p-2.5 outline-none focus:border-ciodaro-yellow">
+                </div>
 
-        function guardarCliente() {
-            let nuevo = {
-                nombre: document.getElementById('in-nombre').value,
-                cuota: document.getElementById('in-cuota').value,
-                peso: document.getElementById('in-peso').value,
-                pagado: false,
-                imc: (document.getElementById('in-peso').value / 1.75**2).toFixed(1)
-            };
-            clientes.push(nuevo);
-            localStorage.setItem('ciodaro_db', JSON.stringify(clientes));
-            document.getElementById('modal').classList.add('hidden');
-            render();
-        }
-
-        function toggleDinero() {
-            dineroVisible = !dineroVisible;
-            render();
-        }
-
-        function render() {
-            let busqueda = document.getElementById('buscador').value.toLowerCase();
-            let lista = document.getElementById('lista-clientes');
-            let total = 0;
-            lista.innerHTML = "";
-
-            clientes.filter(c => c.nombre.toLowerCase().includes(busqueda)).forEach((c, index) => {
-                if(c.pagado) total += parseFloat(c.cuota);
-                lista.innerHTML += `
-                    <div class="bg-custom-grey p-4 rounded-xl border border-zinc-700 flex justify-between items-center">
+                <!-- Métricas Físicas -->
+                <div class="border-t border-zinc-800 pt-3">
+                    <h3 class="text-sm font-bold text-ciodaro-yellow uppercase tracking-wider mb-3">Métricas Antropométricas</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                         <div>
-                            <h3 class="font-bold text-lg">${c.nombre}</h3>
-                            <p class="text-sm text-zinc-400">IMC: ${c.imc} | Plan: $${c.cuota}</p>
+                            <label class="block text-[11px] text-zinc-400 mb-0.5">Peso (kg)</label>
+                            <input type="number" step="0.1" id="m-peso" required class="w-full bg-ciodaro-input border border-zinc-700 rounded-lg p-2 outline-none focus:border-ciodaro-yellow">
                         </div>
-                        <div class="flex gap-2">
-                            <input type="checkbox" ${c.pagado ? 'checked' : ''} onchange="togglePago(${index})" class="w-6 h-6 accent-custom-yellow">
+                        <div>
+                            <label class="block text-[11px] text-zinc-400 mb-0.5">Estatura (m)</label>
+                            <input type="number" step="0.01" id="m-estatura" required placeholder="Ej: 1.75" class="w-full bg-ciodaro-input border border-zinc-700 rounded-lg p-2 outline-none focus:border-ciodaro-yellow">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-zinc-400 mb-0.5">Cuello (cm)</label>
+                            <input type="number" step="0.1" id="m-cuello" class="w-full bg-ciodaro-input border border-zinc-700 rounded-lg p-2 outline-none focus:border-ciodaro-yellow">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-zinc-400 mb-0.5">Tórax (cm)</label>
+                            <input type="number" step="0.1" id="m-torax" class="w-full bg-ciodaro-input border border-zinc-700 rounded-lg p-2 outline-none focus:border-ciodaro-yellow">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-zinc-400 mb-0.5">Bíceps (cm)</label>
+                            <input type="number" step="0.1" id="m-biceps" class="w-full bg-ciodaro-input border border-zinc-700 rounded-lg p-2 outline-none focus:border-ciodaro-yellow">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-zinc-400 mb-0.5">Cadera (cm)</label>
+                            <input type="number" step="0.1" id="m-cadera" class="w-full bg-ciodaro-input border border-zinc-700 rounded-lg p-2 outline-none focus:border-ciodaro-yellow">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-zinc-400 mb-0.5">Glúteos (cm)</label>
+                            <input type="number" step="0.1" id="m-gluteos" class="w-full bg-ciodaro-input border border-zinc-700 rounded-lg p-2 outline-none focus:border-ciodaro-yellow">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-zinc-400 mb-0.5">Cuádriceps (cm)</label>
+                            <input type="number" step="0.1" id="m-cuadriceps" class="w-full bg-ciodaro-input border border-zinc-700 rounded-lg p-2 outline-none focus:border-ciodaro-yellow">
+                        </div>
+                        <div class="col-span-2 sm:col-span-1">
+                            <label class="block text-[11px] text-zinc-400 mb-0.5">Pantorrillas (cm)</label>
+                            <input type="number" step="0.1" id="m-pantorrillas" class="w-full bg-ciodaro-input border border-zinc-700 rounded-lg p-2 outline-none focus:border-ciodaro-yellow">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Historial Mensual Métrico -->
+                <div class="border-t border-zinc-800 pt-3">
+                    <label class="block text-xs font-bold uppercase text-zinc-400 mb-1">Evolución Métrica Temporal (Notas de progreso)</label>
+                    <textarea id="m-comparaciones" rows="2" placeholder="Ej: Mayo: Peso 80kg, Bíceps 38cm | Junio: Peso 78kg, Bíceps 39cm" class="w-full bg-ciodaro-input border border-zinc-700 rounded-lg p-2.5 outline-none focus:border-ciodaro-yellow resize-none text-sm"></textarea>
+                </div>
+
+                <!-- Botoneras -->
+                <div class="flex justify-end gap-3 border-t border-zinc-800 pt-4">
+                    <button type="button" onclick="cerrarModal()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition font-medium text-sm">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 bg-ciodaro-yellow text-black font-bold rounded-lg hover:bg-yellow-500 transition text-sm">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Cargar Base de datos o iniciar vacía
+        let baseClientes = JSON.parse(localStorage.getItem('ciodaro_fitness_db')) || [];
+        let cajaVisible = JSON.parse(localStorage.getItem('ciodaro_caja_visible')) ?? false;
+
+        function guardarCliente(e) {
+            e.preventDefault();
+            
+            let index = document.getElementById('edit-index').value;
+            let peso = parseFloat(document.getElementById('m-peso').value) || 0;
+            let estatura = parseFloat(document.getElementById('m-estatura').value) || 1;
+            
+            // Fórmula Automática del IMC: Peso / (Estatura * Estatura)
+            let imcCalculado = (peso / (estatura * estatura)).toFixed(1);
+
+            let datosCliente = {
+                nombre: document.getElementById('m-nombre').value.trim(),
+                cuota: parseFloat(document.getElementById('m-cuota').value) || 0,
+                historial: document.getElementById('m-historial').value.trim(),
+                peso: peso,
+                estatura: estatura,
+                imc: imcCalculado,
+                cuello: document.getElementById('m-cuello').value || '-',
+                torax: document.getElementById('m-torax').value || '-',
+                biceps: document.getElementById('m-biceps').value || '-',
+                cadera: document.getElementById('m-cadera').value || '-',
+                gluteos: document.getElementById('m-gluteos').value || '-',
+                cuadriceps: document.getElementById('m-cuadriceps').value || '-',
+                pantorrillas: document.getElementById('m-pantorrillas').value || '-',
+                comparaciones: document.getElementById('m-comparaciones').value.trim(),
+                pagoDelMes: index !== "" ? baseClientes[index].pagoDelMes : false
+            };
+
+            if (index === "") {
+                // Agregar nuevo
+                baseClientes.push(datosCliente);
+            } else {
+                // Editar existente
+                baseClientes[index] = datosCliente;
+            }
+
+            sincronizarStorage();
+            cerrarModal();
+            renderizar();
+        }
+
+        function renderizar() {
+            let contenedor = document.getElementById('contenedor-clientes');
+            let busqueda = document.getElementById('buscador').value.toLowerCase();
+            let totalCaja = 0;
+            contenedor.innerHTML = "";
+
+            baseClientes.forEach((cliente, index) => {
+                // Sumar a la caja únicamente si tiene el check de pago activado
+                if (cliente.pagoDelMes) {
+                    totalCaja += cliente.cuota;
+                }
+
+                // Filtrado por buscador
+                if (!cliente.nombre.toLowerCase().includes(busqueda)) return;
+
+                // Determinar el color del estado de IMC
+                let colorImc = "text-zinc-400";
+                if(cliente.imc < 18.5) colorImc = "text-blue-400";
+                else if(cliente.imc >= 18.5 && cliente.imc < 25) colorImc = "text-emerald-400";
+                else if(cliente.imc >= 25 && cliente.imc < 30) colorImc = "text-yellow-400";
+                else if(cliente.imc >= 30) colorImc = "text-red-400";
+
+                let card = document.createElement('div');
+                card.className = `bg-ciodaro-grey rounded-2xl border ${cliente.pagoDelMes ? 'border-emerald-500/30 bg-emerald-950/5' : 'border-zinc-800'} p-5 transition relative overflow-hidden`;
+                card.innerHTML = `
+                    <div class="flex flex-col lg:flex-row justify-between gap-4">
+                        <!-- Bloque de datos e historial -->
+                        <div class="space-y-3 flex-1">
+                            <div class="flex flex-wrap items-center gap-3">
+                                <h3 class="text-xl font-black tracking-tight text-white uppercase">${cliente.nombre}</h3>
+                                <span class="bg-ciodaro-black px-2.5 py-0.5 rounded text-xs font-bold text-ciodaro-yellow border border-zinc-800">Plan: $${cliente.cuota}</span>
+                                <span class="text-xs font-bold ${colorImc}">IMC: ${cliente.imc}</span>
+                            </div>
+                            
+                            <p class="text-xs text-zinc-400 bg-ciodaro-black/40 p-2 rounded border border-zinc-800/60"><strong class="text-ciodaro-yellow">Historial de Pagos:</strong> ${cliente.historial || 'Sin registros'}</p>
+                            
+                            <!-- Grilla de Métricas -->
+                            <div class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-9 gap-2 bg-ciodaro-black/60 p-3 rounded-xl border border-zinc-800 text-center text-[11px]">
+                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Peso</p class="font-mono">${cliente.peso}kg</div>
+                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Cuello</p class="font-mono">${cliente.cuello}cm</div>
+                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Tórax</p class="font-mono">${cliente.torax}cm</div>
+                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Bíceps</p class="font-mono">${cliente.biceps}cm</div>
+                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Cadera</p class="font-mono">${cliente.cadera}cm</div>
+                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Glúteos</p class="font-mono">${cliente.gluteos}cm</div>
+                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Cuádricep</p class="font-mono">${cliente.cuadriceps}cm</div>
+                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Pantorr.</p class="font-mono">${cliente.pantorrillas}cm</div>
+                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Talla</p class="font-mono">${cliente.estatura}m</div>
+                            </div>
+
+                            <p class="text-xs text-zinc-400 italic bg-zinc-900/30 p-2 rounded"><strong class="text-zinc-300 not-italic block text-[10px] uppercase font-bold tracking-wider mb-0.5">Comparativa mensual de progresos:</strong> ${cliente.comparaciones || 'Sin comparaciones registradas aún.'}</p>
+                        </div>
+
+                        <!-- Bloque de acciones / Switch Pago -->
+                        <div class="flex lg:flex-col justify-between items-end lg:justify-center gap-4 border-t lg:border-t-0 lg:border-l border-zinc-800 pt-4 lg:pt-0 lg:pl-6 min-w-[140px]">
+                            <div class="text-center w-full lg:w-auto">
+                                <label class="block text-[10px] text-zinc-400 uppercase font-black mb-1 tracking-widest">¿Pagó este mes?</label>
+                                <input type="checkbox" ${cliente.pagoDelMes ? 'checked' : ''} onchange="togglePago(${index})" class="w-7 h-7 accent-ciodaro-yellow cursor-pointer rounded">
+                            </div>
+                            
+                            <div class="flex gap-2 w-full lg:w-auto justify-end">
+                                <button onclick="editarCliente(${index})" class="bg-zinc-800 text-xs font-bold hover:bg-zinc-700 text-white px-3 py-2 rounded-lg transition">✏️ Editar</button>
+                                <button onclick="eliminarCliente(${index})" class="bg-red-950/40 text-xs font-bold hover:bg-red-900/50 text-red-400 px-3 py-2 rounded-lg transition">🗑️ Borrar</button>
+                            </div>
                         </div>
                     </div>
                 `;
+                contenedor.appendChild(card);
             });
-            document.getElementById('total-caja').innerText = dineroVisible ? `$${total}` : '***';
+
+            // Renderizado Dinámico del total de caja
+            let txtCaja = document.getElementById('txt-caja');
+            let btnOjo = document.getElementById('btn-ojo');
+            if (cajaVisible) {
+                txtCaja.innerText = `$${totalCaja.toLocaleString()}`;
+                btnOjo.innerText = "🔒";
+            } else {
+                txtCaja.innerText = "***";
+                btnOjo.innerText = "👁️";
+            }
         }
 
         function togglePago(index) {
-            clientes[index].pagado = !clientes[index].pagado;
-            localStorage.setItem('ciodaro_db', JSON.stringify(clientes));
-            render();
+            baseClientes[index].pagoDelMes = !baseClientes[index].pagoDelMes;
+            sincronizarStorage();
+            renderizar();
         }
 
-        function abrirModal() { document.getElementById('modal').classList.remove('hidden'); }
-        window.onload = render;
-    </script>
-</body>
-</html>
+        function toggleVisibilidadCaja() {
+            cajaVisible = !cajaVisible;
+            localStorage.setItem('ciodaro_caja_visible', JSON.stringify(cajaVisible));
+            renderizar();
+        }
+
+        function eliminarCliente(index) {
+            if (confirm(`¿Estás seguro de eliminar a ${baseClientes[index].nombre}?`)) {
+                baseClientes.splice(index, 1);
+                sincronizarStorage();
+                renderizar();
+            }
+        }
+
+        function editarCliente(index) {
+            let cliente = baseClientes[index];
+            document.getElementById('modal-titulo').innerText = "EDITAR DATOS DEL ALUMNO";
+            document.getElementById('edit-index').value = index;
+            
+            document.getElementById('m-nombre').value = cliente.nombre;
+            document.getElementById('m-cuota').value = cliente.cuota;
+            document.getElementById('m-historial').value = cliente.historial;
+            document.getElementById('m-peso').value = cliente.peso;
+            document.getElementById('m-estatura').value = cliente.estatura;
+            document.getElementById('m-cuello').value = cliente.cuello === '-' ? '' : cliente.cuello;
+            document.getElementById('m-torax').value = cliente.torax === '-' ? '' : cliente.torax;
+            document.getElementById('m-biceps').value = cliente.biceps === '-' ? '' : cliente.biceps;
+            document.getElementById('m-cadera').value = cliente.cadera === '-' ? '' : cliente.cadera;
+            document.getElementById('m-gluteos').value = cliente.gluteos === '-' ? '' : cliente.gluteos;
+       
