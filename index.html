@@ -46,7 +46,10 @@
                 <input type="number" id="ex-est" placeholder="H" class="input-dark">
             </div>
             <div class="flex gap-2">
-                <input type="number" id="ex-plan" placeholder="Valor del Plan ($)" class="input-dark">
+                <div class="relative w-full">
+                    <input type="number" id="ex-plan" placeholder="Valor del Plan ($)" class="input-dark">
+                    <button onclick="document.getElementById('ex-plan').value=''" class="absolute right-2 top-2 text-zinc-500 font-bold">✕</button>
+                </div>
                 <button onclick="pagoTotal()" class="btn bg-zinc-800 w-auto text-[10px]">PAGO TOTAL</button>
             </div>
             
@@ -89,18 +92,24 @@
 
         function render() {
             let totalPlanes = db.reduce((a, b) => a + parseFloat(b.plan||0), 0);
-            // Cálculo exclusivo de Julio 2026
             let totalRecaudado = db.reduce((a, b) => a + (b.pagos||[]).filter(p => p.fecha.startsWith('2026-07')).reduce((x, y) => x + parseFloat(y.monto||0), 0), 0);
             
             document.getElementById('val-planes').innerText = `$${totalPlanes}`;
             document.getElementById('val-recaudado').innerText = `$${totalRecaudado}`;
             
-            document.getElementById('lista').innerHTML = db.map((c, i) => `
+            document.getElementById('lista').innerHTML = db.map((c, i) => {
+                let yaPagado = (c.pagos||[]).reduce((x, y) => x + parseFloat(y.monto||0), 0);
+                let saldo = parseFloat(c.plan||0) - yaPagado;
+                let textoSaldo = saldo <= 0 ? "Pagado (0)" : `Resta: $${saldo}`;
+                return `
                 <div class="box flex justify-between items-center">
-                    <div><h3 class="font-bold text-sm">${c.nom}</h3><span class="text-[10px] text-zinc-500 ${mostrar ? '' : 'hidden-monto'}">Plan: $${c.plan}</span></div>
+                    <div>
+                        <h3 class="font-bold text-sm">${c.nom}</h3>
+                        <span class="text-[10px] ${saldo <= 0 ? 'text-emerald-500' : 'text-red-500'} font-bold ${mostrar ? '' : 'hidden-monto'}">${textoSaldo}</span>
+                    </div>
                     <button onclick="abrirModal(${i})" class="bg-zinc-900 px-3 py-2 rounded-lg font-bold text-[10px] border border-zinc-700">EXPEDIENTE</button>
                 </div>
-            `).join('');
+            `}).join('');
         }
         
         function abrirModal(i) {
@@ -119,7 +128,7 @@
         }
 
         function pagoTotal() {
-            if(cur === null) { alert("Guarda al alumno primero."); return; }
+            if(cur === null) { guardarCliente(); }
             let plan = parseFloat(document.getElementById('ex-plan').value || 0);
             let yaPagado = (db[cur].pagos||[]).reduce((x, y) => x + parseFloat(y.monto||0), 0);
             let restante = plan - yaPagado;
