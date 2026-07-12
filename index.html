@@ -187,9 +187,30 @@
 
         function borrarMetrica(idx) { db[cur].met.splice(idx, 1); localStorage.setItem('ciodaro_db', JSON.stringify(db)); renderMetricas(); }
 
+        function editarMetrica(idx) {
+            let m = db[cur].met[idx];
+            document.getElementById('m-fecha').value = m.fecha;
+            document.getElementById('m-p').value = m.p;
+            document.getElementById('m-c').value = m.c;
+            document.getElementById('m-t').value = m.t;
+            document.getElementById('m-b').value = m.b;
+            document.getElementById('m-cin').value = m.cin;
+            document.getElementById('m-g').value = m.g;
+            document.getElementById('m-cuad').value = m.cuad;
+            document.getElementById('m-pan').value = m.pan;
+            db[cur].met.splice(idx, 1);
+            localStorage.setItem('ciodaro_db', JSON.stringify(db));
+            renderMetricas();
+        }
+
         function renderMetricas() {
             document.getElementById('hist-met').innerHTML = (db[cur].met||[]).map((m, i) => `<div class="comp-card">
-                <div class="flex justify-between font-bold text-yellow-500 mb-1"><span>FECHA: ${m.fecha}</span><button onclick="borrarMetrica(${i})" class="text-red-500 text-[10px]">ELIMINAR</button></div>
+                <div class="flex justify-between font-bold text-yellow-500 mb-1"><span>FECHA: ${m.fecha}</span>
+                    <div>
+                        <button onclick="borrarMetrica(${i})" class="text-red-500 text-[10px] mr-2">ELIMINAR</button>
+                        <button onclick="editarMetrica(${i})" class="text-blue-400 text-[10px]">EDITAR</button>
+                    </div>
+                </div>
                 <div class="grid grid-cols-2 gap-1 text-[11px]">
                     <span>PESO: <b>${m.p || '-'}</b></span> <span>IMC: <b>${m.imc}</b></span>
                     <span>C: <b>${m.c}</b></span> <span>T: <b>${m.t}</b></span>
