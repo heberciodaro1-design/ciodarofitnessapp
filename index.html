@@ -9,6 +9,7 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans pb-12">
 
+    <!-- ENCABEZADO -->
     <header class="bg-slate-800/50 backdrop-blur-md border-b border-slate-700/50 p-4 sticky top-0 z-50 shadow-lg">
         <div class="flex justify-between items-center max-w-xl mx-auto">
             <h1 class="text-xl font-black tracking-wider text-orange-500">CIODAROFITNESS<span class="text-slate-400 text-xs font-normal lowercase pl-1">pro</span></h1>
@@ -20,7 +21,9 @@
 
     <main class="max-w-xl mx-auto p-4 space-y-6">
 
+        <!-- DASHBOARD FINANCIERO Y ESTADÍSTICAS -->
         <section class="grid grid-cols-2 gap-4">
+            <!-- Clientes Activos -->
             <div class="bg-slate-800 border border-slate-700/60 p-4 rounded-xl shadow-md">
                 <div class="flex justify-between items-center text-slate-400 mb-1">
                     <span class="text-xs font-semibold uppercase tracking-wider">Clientes Activos</span>
@@ -28,345 +31,206 @@
                 </div>
                 <div class="text-2xl font-bold text-white" id="stat-clientes">0</div>
             </div>
+            
+            <!-- Monto Proyectado (Editable) -->
             <div class="bg-slate-800 border border-slate-700/60 p-4 rounded-xl shadow-md">
                 <div class="flex justify-between items-center text-slate-400 mb-1">
-                    <span class="text-xs font-semibold uppercase tracking-wider">Caja Total</span>
+                    <span class="text-xs font-semibold uppercase tracking-wider">Monto Proyectado</span>
+                    <i data-lucide="target" class="w-4 h-4 text-blue-400"></i>
+                </div>
+                <div class="flex items-center gap-1">
+                    <span class="text-xl font-bold text-blue-400">$</span>
+                    <input type="number" id="metaMensual" value="600" oninput="calcularFinanzas()" class="w-20 bg-slate-700 text-white font-bold text-xl rounded px-1 focus:outline-none focus:ring-1 focus:ring-blue-400">
+                </div>
+            </div>
+
+            <!-- Total Recaudado -->
+            <div class="bg-slate-800 border border-slate-700/60 p-4 rounded-xl shadow-md">
+                <div class="flex justify-between items-center text-slate-400 mb-1">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Total Recaudado</span>
                     <i data-lucide="dollar-sign" class="w-4 h-4 text-emerald-500"></i>
                 </div>
                 <div class="text-2xl font-bold text-emerald-400" id="stat-ingresos">$0.00</div>
             </div>
+
+            <!-- Resta por Recaudar (Lo que falta para el ahorro) -->
+            <div class="bg-slate-800 border border-slate-700/60 p-4 rounded-xl shadow-md">
+                <div class="flex justify-between items-center text-slate-400 mb-1">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Resta por Recaudar</span>
+                    <i data-lucide="trending-down" class="w-4 h-4 text-orange-400"></i>
+                </div>
+                <div class="text-2xl font-bold text-orange-400" id="stat-restante">$0.00</div>
+            </div>
         </section>
 
-        <section class="bg-slate-800 p-5 rounded-2xl border border-slate-700/60 shadow-xl space-y-4">
-            <div class="flex items-center space-x-2 text-orange-500 font-bold border-b border-slate-700/60 pb-2">
-                <i data-lucide="user-plus" class="w-5 h-5"></i>
-                <h2 class="text-lg">Registrar Atleta e Inicio de Plan</h2>
+        <!-- BARRA DE BÚSQUEDA RÁPIDA (CON LUPITA) -->
+        <section class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <i data-lucide="search" class="w-5 h-5"></i>
             </div>
+            <input type="text" id="buscadorCliente" onkeyup="filtrarClientes()" placeholder="Buscar cliente por nombre..." class="w-full pl-10 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition shadow-md">
+        </section>
 
-            <form id="form-cliente" class="space-y-4">
-                <div class="space-y-3">
+        <!-- SECCIÓN DE GESTIÓN DE ALUMNOS -->
+        <section class="bg-slate-800 border border-slate-700/60 rounded-xl shadow-md overflow-hidden">
+            <div class="p-4 border-b border-slate-700/60 bg-slate-800/50">
+                <h2 class="text-sm font-bold uppercase tracking-wider text-slate-300">Gestión de Alumnos</h2>
+            </div>
+            <div class="divide-y divide-slate-700/50" id="contenedor-clientes">
+                
+                <!-- Alumno 1 -->
+                <div class="p-4 flex justify-between items-center cliente-fila transition duration-150">
                     <div>
-                        <label class="block text-xs text-slate-400 font-medium mb-1">Nombre Completo</label>
-                        <input type="text" id="nombre" required placeholder="Ej. Juan Pérez" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-500 text-white">
+                        <p class="font-semibold text-white nombre-cliente">Angie Chavarría</p>
+                        <div class="flex items-center gap-1 text-xs text-slate-400 mt-1">
+                            <span>Cuota: $</span>
+                            <input type="number" class="cuota-cliente bg-slate-700 text-white rounded px-1 w-12 text-center focus:outline-none focus:ring-1 focus:ring-orange-500" value="40" oninput="calcularFinanzas()">
+                        </div>
                     </div>
                     <div>
-                        <label class="block text-xs text-slate-400 font-medium mb-1">WhatsApp (Con código de país)</label>
-                        <input type="tel" id="telefono" required placeholder="Ej. 584123456789" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-500 text-white">
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs text-slate-400 font-medium mb-1">Costo Total Plan ($)</label>
-                            <input type="number" id="total_paquete" required placeholder="Ej. 60" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-500 text-white">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-slate-400 font-medium mb-1">Fecha de Inicio</label>
-                            <input type="date" id="fechainicio" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-500 text-white">
-                        </div>
+                        <label class="flex items-center gap-2 cursor-pointer bg-slate-700/50 px-3 py-2 rounded-lg border border-slate-600/50 hover:bg-slate-700 transition">
+                            <input type="checkbox" class="pago-status accent-emerald-500 w-4 h-4" onchange="calcularFinanzas()">
+                            <span class="text-xs font-medium text-slate-300 select-none">Pagó</span>
+                        </label>
                     </div>
                 </div>
 
-                <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-700/40 space-y-3">
-                    <div class="flex items-center space-x-1.5 text-xs font-bold text-slate-300 uppercase tracking-wider border-b border-slate-700/40 pb-1.5">
-                        <i data-lucide="activity" class="w-3.5 h-3.5 text-orange-400"></i>
-                        <span>Evaluación Inicial (Medidas)</span>
+                <!-- Alumno 2 -->
+                <div class="p-4 flex justify-between items-center cliente-fila transition duration-150">
+                    <div>
+                        <p class="font-semibold text-white nombre-cliente">César Lares</p>
+                        <div class="flex items-center gap-1 text-xs text-slate-400 mt-1">
+                            <span>Cuota: $</span>
+                            <input type="number" class="cuota-cliente bg-slate-700 text-white rounded px-1 w-12 text-center focus:outline-none focus:ring-1 focus:ring-orange-500" value="35" oninput="calcularFinanzas()">
+                        </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[11px] text-slate-400 mb-1">Peso Corporal (kg)</label>
-                            <input type="number" step="0.1" id="peso" placeholder="0.0" class="w-full bg-slate-900 border border-slate-700 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:border-orange-500 text-white">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] text-slate-400 mb-1">Estatura (cm)</label>
-                            <input type="number" id="estatura" placeholder="170" class="w-full bg-slate-900 border border-slate-700 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:border-orange-500 text-white">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] text-slate-400 mb-1">Perímetro Pecho (cm)</label>
-                            <input type="number" step="0.1" id="pecho" placeholder="0.0" class="w-full bg-slate-900 border border-slate-700 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:border-orange-500 text-white">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] text-slate-400 mb-1">Cintura (cm)</label>
-                            <input type="number" step="0.1" id="cintura" placeholder="0.0" class="w-full bg-slate-900 border border-slate-700 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:border-orange-500 text-white">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] text-slate-400 mb-1">Brazo Izquierdo (cm)</label>
-                            <input type="number" step="0.1" id="brazo_izq" placeholder="0.0" class="w-full bg-slate-900 border border-slate-700 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:border-orange-500 text-white">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] text-slate-400 mb-1">Brazo Derecho (cm)</label>
-                            <input type="number" step="0.1" id="brazo_der" placeholder="0.0" class="w-full bg-slate-900 border border-slate-700 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:border-orange-500 text-white">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] text-slate-400 mb-1">Cadera (cm)</label>
-                            <input type="number" step="0.1" id="cadera" placeholder="0.0" class="w-full bg-slate-900 border border-slate-700 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:border-orange-500 text-white">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] text-slate-400 mb-1">Muslo Promedio (cm)</label>
-                            <input type="number" step="0.1" id="muslo" placeholder="0.0" class="w-full bg-slate-900 border border-slate-700 rounded-md px-2.5 py-1.5 text-xs focus:outline-none focus:border-orange-500 text-white">
-                        </div>
+                    <div>
+                        <label class="flex items-center gap-2 cursor-pointer bg-slate-700/50 px-3 py-2 rounded-lg border border-slate-600/50 hover:bg-slate-700 transition">
+                            <input type="checkbox" class="pago-status accent-emerald-500 w-4 h-4" onchange="calcularFinanzas()">
+                            <span class="text-xs font-medium text-slate-300 select-none">Pagó</span>
+                        </label>
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2.5 px-4 rounded-lg transition duration-200 flex items-center justify-center space-x-2 text-sm shadow-md shadow-orange-500/20">
-                    <i data-lucide="save" class="w-4 h-4"></i>
-                    <span>Guardar Atleta Completo</span>
-                </button>
-            </form>
+                <!-- Alumno 3 -->
+                <div class="p-4 flex justify-between items-center cliente-fila transition duration-150">
+                    <div>
+                        <p class="font-semibold text-white nombre-cliente">Wendy Lunar</p>
+                        <div class="flex items-center gap-1 text-xs text-slate-400 mt-1">
+                            <span>Cuota: $</span>
+                            <input type="number" class="cuota-cliente bg-slate-700 text-white rounded px-1 w-12 text-center focus:outline-none focus:ring-1 focus:ring-orange-500" value="50" oninput="calcularFinanzas()">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="flex items-center gap-2 cursor-pointer bg-slate-700/50 px-3 py-2 rounded-lg border border-slate-600/50 hover:bg-slate-700 transition">
+                            <input type="checkbox" class="pago-status accent-emerald-500 w-4 h-4" onchange="calcularFinanzas()">
+                            <span class="text-xs font-medium text-slate-300 select-none">Pagó</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Alumno 4 -->
+                <div class="p-4 flex justify-between items-center cliente-fila transition duration-150">
+                    <div>
+                        <p class="font-semibold text-white nombre-cliente">Ivonne Pirela</p>
+                        <div class="flex items-center gap-1 text-xs text-slate-400 mt-1">
+                            <span>Cuota: $</span>
+                            <input type="number" class="cuota-cliente bg-slate-700 text-white rounded px-1 w-12 text-center focus:outline-none focus:ring-1 focus:ring-orange-500" value="40" oninput="calcularFinanzas()">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="flex items-center gap-2 cursor-pointer bg-slate-700/50 px-3 py-2 rounded-lg border border-slate-600/50 hover:bg-slate-700 transition">
+                            <input type="checkbox" class="pago-status accent-emerald-500 w-4 h-4" onchange="calcularFinanzas()">
+                            <span class="text-xs font-medium text-slate-300 select-none">Pagó</span>
+                        </label>
+                    </div>
+                </div>
+
+            </div>
         </section>
 
-        <section class="space-y-3">
-            <div class="flex items-center space-x-2 text-slate-300 font-bold px-1">
-                <i data-lucide="clipboard-list" class="w-5 h-5 text-orange-500"></i>
-                <h2>Control de Clientes, Avances y Finanzas</h2>
-            </div>
-            <div id="lista-clientes" class="space-y-4"></div>
-        </section>
     </main>
 
+    <!-- LÓGICA DE CONTROL -->
     <script>
-        let clientes = JSON.parse(localStorage.getItem('ciodaro_clientes')) || [];
-        let ocultarFinanzas = false;
-        const form = document.getElementById('form-cliente');
-        const listaContenedor = document.getElementById('lista-clientes');
+        // Inicializar los iconos Lucide
+        lucide.createIcons();
 
-        document.getElementById('fechainicio').value = new Date().toISOString().split('T')[0];
-
+        // Control de visibilidad para ocultar números (Botón Ojo)
+        let visible = true;
         function toggleVisibilidad() {
-            ocultarFinanzas = !ocultarFinanzas;
-            document.getElementById('icono-ojo').setAttribute('data-lucide', ocultarFinanzas ? 'eye-off' : 'eye');
-            lucide.createIcons();
-            renderApp();
-        }
-
-        function calcularIMC(peso, estatura) {
-            if (!peso || !estatura || peso <= 0 || estatura <= 0) return '-';
-            return (peso / ((estatura / 100) * (estatura / 100))).toFixed(1);
-        }
-
-        function renderApp() {
-            listaContenedor.innerHTML = '';
-            if (clientes.length === 0) {
-                listaContenedor.innerHTML = `<div class="text-center py-8 text-slate-500 text-sm bg-slate-800/40 rounded-xl border border-dashed border-slate-700">No hay atletas registrados.</div>`;
-                document.getElementById('stat-clientes').innerText = '0';
-                document.getElementById('stat-ingresos').innerText = '$0.00';
-                return;
-            }
-
-            let montoCompletoGlobal = 0;
-
-            clientes.forEach((cliente, index) => {
-                montoCompletoGlobal += parseFloat(cliente.total_paquete || 0);
-
-                const pagos = cliente.pagos || [];
-                const totalAbonado = pagos.reduce((acc, p) => acc + parseFloat(p.monto || 0), 0);
-                const deuda = parseFloat(cliente.total_paquete || 0) - totalAbonado;
-
-                if (!cliente.fechainicio || cliente.fechainicio === "undefined") {
-                    cliente.fechainicio = new Date().toISOString().split('T')[0];
-                }
-
-                const evals = cliente.evaluaciones || [];
-                evals.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-
-                const card = document.createElement('div');
-                card.className = "bg-slate-800 p-4 rounded-xl border border-slate-700/60 shadow-md space-y-4";
-                
-                let historialHTML = '';
-                evals.forEach((ev) => {
-                    historialHTML += `
-                        <div class="border-b border-slate-700/40 last:border-none pb-2 pt-2 first:pt-0 text-[11px]">
-                            <div class="flex justify-between items-center font-bold text-orange-400 mb-1">
-                                <span class="flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3 text-slate-500"></i>Fecha: ${ev.fecha || cliente.fechainicio}</span>
-                                <span>IMC: ${calcularIMC(ev.peso, ev.estatura)}</span>
-                            </div>
-                            <div class="grid grid-cols-4 gap-x-2 gap-y-1 text-slate-300">
-                                <div><span class="text-slate-500 font-medium">Peso:</span> ${ev.peso || '-'}kg</div>
-                                <div><span class="text-slate-500 font-medium">Cint:</span> ${ev.cintura || '-'}cm</div>
-                                <div><span class="text-slate-500 font-medium">Pech:</span> ${ev.pecho || '-'}cm</div>
-                                <div><span class="text-slate-500 font-medium">Cad:</span> ${ev.cadera || '-'}cm</div>
-                                <div><span class="text-slate-500 font-medium">B.Izq:</span> ${ev.brazo_izq || '-'}cm</div>
-                                <div><span class="text-slate-500 font-medium">B.Der:</span> ${ev.brazo_der || '-'}cm</div>
-                                <div><span class="text-slate-500 font-medium">Musl:</span> ${ev.muslo || '-'}cm</div>
-                                <div><span class="text-slate-500 font-medium">Est:</span> ${ev.estatura || '-'}cm</div>
-                            </div>
-                        </div>
-                    `;
-                });
-
-                card.innerHTML = `
-                    <div class="flex justify-between items-start border-b border-slate-700/60 pb-2">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <span class="bg-orange-500/20 text-orange-400 text-[10px] font-bold px-1.5 py-0.5 rounded border border-orange-500/30">Atleta #${index + 1}</span>
-                                <h3 class="font-bold text-white text-base">${cliente.nombre}</h3>
-                            </div>
-                            <div class="flex items-center space-x-2 text-xs text-slate-400 mt-1">
-                                <span class="flex items-center gap-1"><i data-lucide="calendar-days" class="w-3 h-3 text-slate-500"></i>Inicio: ${cliente.fechainicio}</span>
-                                <a href="https://wa.me/${cliente.telefono}" target="_blank" class="text-orange-400 flex items-center hover:underline gap-0.5">
-                                    <i data-lucide="phone" class="w-3 h-3"></i>WhatsApp
-                                </a>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-slate-400 text-[11px] block">Acordado: ${ocultarFinanzas ? '***' : '$' + parseFloat(cliente.total_paquete || 0)}</span>
-                            <span class="text-emerald-400 font-bold text-sm block">Abonado: ${ocultarFinanzas ? '***' : '$' + totalAbonado}</span>
-                            ${deuda > 0 ? `<span class="text-red-400 text-[10px] font-semibold block">Resta: ${ocultarFinanzas ? '***' : '$' + deuda}</span>` : `<span class="text-emerald-500 text-[10px] font-bold block">PAGADO</span>`}
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-900/60 p-3 rounded-lg space-y-2">
-                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider flex justify-between items-center border-b border-slate-700/60 pb-1.5">
-                            <span>Historial de Medidas Evolutivo</span>
-                            <span class="text-orange-400 bg-orange-500/10 px-1.5 py-0.5 rounded text-[10px]">${evals.length} Controles</span>
-                        </div>
-                        <div class="space-y-2 max-h-40 overflow-y-auto pr-1">${historialHTML || '<p class="text-slate-500 text-xs">Sin mediciones aún.</p>'}</div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="agregarMedicionMensual(${index})" class="bg-orange-500/10 text-orange-400 text-xs font-bold py-2 rounded-lg border border-orange-500/20 hover:bg-orange-500/20 transition flex items-center justify-center gap-1"><i data-lucide="trending-up" class="w-3.5 h-3.5"></i>Nueva Eval</button>
-                        <button onclick="registrarAbono(${index})" class="bg-emerald-500/10 text-emerald-400 text-xs font-bold py-2 rounded-lg border border-emerald-500/20 hover:bg-emerald-500/20 transition flex items-center justify-center gap-1"><i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>+ Registrar Abono</button>
-                    </div>
-
-                    <div class="grid grid-cols-12 gap-2">
-                        <button onclick="verResumenPagos(${index})" class="col-span-5 bg-slate-700 text-slate-200 text-xs font-medium py-1.5 rounded-lg hover:bg-slate-600 transition flex items-center justify-center gap-1"><i data-lucide="receipt" class="w-3.5 h-3.5"></i>Historial Pagos</button>
-                        <button onclick="enviarMensaje(${index})" class="col-span-5 bg-slate-700 text-slate-200 text-xs font-medium py-1.5 rounded-lg hover:bg-slate-600 transition flex items-center justify-center gap-1"><i data-lucide="send" class="w-3.5 h-3.5"></i>Notificar</button>
-                        <button onclick="eliminarCliente(${index})" class="col-span-2 bg-red-500/10 text-red-400 py-1.5 rounded-lg border border-red-500/20 hover:bg-red-500/20 transition flex items-center justify-center"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-                    </div>
-                `;
-                listaContenedor.appendChild(card);
-            });
-
-            document.getElementById('stat-clientes').innerText = clientes.length;
-            document.getElementById('stat-ingresos').innerText = ocultarFinanzas ? '***' : `$${montoCompletoGlobal.toFixed(2)}`;
-            lucide.createIcons();
-        }
-
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-
-            const fechaEval = document.getElementById('fechainicio').value;
-            const primeraEvaluacion = {
-                fecha: fechaEval,
-                peso: document.getElementById('peso').value || null,
-                estatura: document.getElementById('estatura').value || null,
-                pecho: document.getElementById('pecho').value || null,
-                cintura: document.getElementById('cintura').value || null,
-                brazo_izq: document.getElementById('brazo_izq').value || null,
-                brazo_der: document.getElementById('brazo_der').value || null,
-                cadera: document.getElementById('cadera').value || null,
-                muslo: document.getElementById('muslo').value || null
-            };
-
-            const nuevoCliente = {
-                nombre: document.getElementById('nombre').value,
-                telefono: document.getElementById('telefono').value,
-                total_paquete: document.getElementById('total_paquete').value,
-                fechainicio: fechaEval,
-                evaluaciones: [primeraEvaluacion],
-                pagos: []
-            };
-
-            clientes.push(nuevoCliente);
-            localStorage.setItem('ciodaro_clientes', JSON.stringify(clientes));
-            form.reset();
-            document.getElementById('fechainicio').value = new Date().toISOString().split('T')[0];
-            renderApp();
-        });
-
-        window.agregarMedicionMensual = function(index) {
-            const cliente = clientes[index];
-            const fechaMedicion = prompt("Fecha de este nuevo control (AAAA-MM-DD):", new Date().toISOString().split('T')[0]);
-            if (!fechaMedicion) return;
-
-            const peso = prompt(`[${cliente.nombre}] Nuevo Peso Corporal (kg):`);
-            const estatura = prompt(`[${cliente.nombre}] Estatura (cm):`, cliente.evaluaciones[0]?.estatura || "170");
-            const pecho = prompt(`[${cliente.nombre}] Nuevo Perímetro Pecho (cm):`);
-            const cintura = prompt(`[${cliente.nombre}] Nueva Cintura (cm):`);
-            const brazo_izq = prompt(`[${cliente.nombre}] Nuevo Brazo Izquierdo (cm):`);
-            const brazo_der = prompt(`[${cliente.nombre}] Nuevo Brazo Derecho (cm):`);
-            const cadera = prompt(`[${cliente.nombre}] Nueva Cadera (cm):`);
-            const muslo = prompt(`[${cliente.nombre}] Nuevo Muslo Promedio (cm):`);
-
-            const nuevaEv = {
-                fecha: fechaMedicion,
-                peso: peso || null,
-                estatura: estatura || null,
-                pecho: pecho || null,
-                cintura: cintura || null,
-                brazo_izq: brazo_izq || null,
-                brazo_der: brazo_der || null,
-                cadera: cadera || null,
-                muslo: muslo || null
-            };
-
-            clientes[index].evaluaciones.push(nuevaEv);
-            localStorage.setItem('ciodaro_clientes', JSON.stringify(clientes));
-            renderApp();
-        };
-
-        window.registrarAbono = function(index) {
-            const monto = prompt(`¿Cuánto va a abonar el atleta ${clientes[index].nombre}? ($):`);
-            if (!monto || isNaN(monto) || parseFloat(monto) <= 0) return;
-
-            if(!clientes[index].pagos) clientes[index].pagos = [];
-            clientes[index].pagos.push({
-                fecha: new Date().toISOString().split('T')[0],
-                monto: parseFloat(monto)
-            });
-
-            localStorage.setItem('ciodaro_clientes', JSON.stringify(clientes));
-            renderApp();
-        };
-
-        window.verResumenPagos = function(index) {
-            const cliente = clientes[index];
-            const pagos = cliente.pagos || [];
-            if(pagos.length === 0) {
-                alert(`El atleta ${cliente.nombre} no registra abonos aún.`);
-                return;
-            }
-            let lista = `Historial de pagos de: ${cliente.nombre}\n\n`;
-            pagos.forEach((p, i) => {
-                lista += `${i+1}. Fecha: ${p.fecha} -> Monto: $${p.monto}\n`;
-            });
-            alert(lista);
-        };
-
-        window.eliminarCliente = function(index) {
-            if(confirm(`¿Seguro que deseas eliminar por completo a ${clientes[index].nombre}?`)) {
-                clientes.splice(index, 1);
-                localStorage.setItem('ciodaro_clientes', JSON.stringify(clientes));
-                renderApp();
-            }
-        };
-
-        window.enviarMensaje = function(index) {
-            const cliente = clientes[index];
+            visible = !visible;
+            const icono = document.getElementById('icono-ojo');
             
-            const opcion = prompt(
-                `Selecciona la notificación profesional para ${cliente.nombre}:\n\n` +
-                `1 - Recordatorio de Vencimiento (3 días antes)\n` +
-                `2 - Alerta de Vencimiento Crítica (Hoy mismo)\n` +
-                `3 - Recordatorio de Día de Medidas (Antropometría)`
-            );
-
-            let textoFinal = "";
-
-            if (opcion === "1") {
-                textoFinal = `Hola, ${cliente.nombre}. Te recordamos que tu paquete personalizado en Ciodarofitness vence pronto. Para garantizar la continuidad de tu planificación, asegurar tu cupo y permitirnos cargar tus próximas rutinas inteligentes a tiempo, te sugerimos ponerte al día en los próximos días. ¡Tu progreso no se detiene!`;
-            } else if (opcion === "2") {
-                textoFinal = `Tu paquete personalizado finaliza hoy, ${cliente.nombre}. Recuerda ponerte al día para mantener activo tu acceso a la aplicación, tus cargas de entrenamiento y tus datos de antropometría. Evita interrupciones en tu proceso y sigue entrenando con base en la ciencia y la disciplina. ¡Gestiónalo hoy mismo!`;
-            } else if (opcion === "3") {
-                textoFinal = `Hoy es tu día de medidas en Ciodarofitness app, ${cliente.nombre}. Recuerda registrar tus datos de antropometría en la aplicación para poder evaluar tu evolución biomecánica y ajustar tus calorías y entrenamiento de forma precisa. ¡El control de tus datos asegura tus resultados!`;
+            if (visible) {
+                icono.setAttribute('data-lucide', 'eye');
+                calcularFinanzas();
             } else {
-                alert("Opción no válida.");
-                return;
+                icono.setAttribute('data-lucide', 'eye-off');
+                document.getElementById('stat-ingresos').innerText = '***';
+                document.getElementById('stat-restante').innerText = '***';
+            }
+            lucide.createIcons();
+        }
+
+        // FUNCIÓN FILTRADORA (LA LUPITA)
+        function filtrarClientes() {
+            let input = document.getElementById('buscadorCliente');
+            let filter = input.value.toLowerCase();
+            let filas = document.getElementsByClassName('cliente-fila');
+
+            for (let i = 0; i < filas.length; i++) {
+                let nombreElemento = filas[i].getElementsByClassName('nombre-cliente')[0];
+                if (nombreElemento) {
+                    let nombreTexto = nombreElemento.textContent || nombreElemento.innerText;
+                    // Muestra u oculta usando clases nativas de Tailwind
+                    if (nombreTexto.toLowerCase().indexOf(filter) > -1) {
+                        filas[i].classList.remove('hidden');
+                        filas[i].classList.add('flex');
+                    } else {
+                        filas[i].classList.remove('flex');
+                        filas[i].classList.add('hidden');
+                    }
+                }
+            }
+        }
+
+        // CONTROL MATEMÁTICO DE ENTRADAS Y RESTAS
+        function calcularFinanzas() {
+            let metaTotal = parseFloat(document.getElementById('metaMensual').value) || 0;
+            let filas = document.getElementsByClassName('cliente-fila');
+            
+            let totalClientes = filas.length;
+            let totalRecaudado = 0;
+
+            for (let i = 0; i < filas.length; i++) {
+                let cuota = parseFloat(filas[i].getElementsByClassName('cuota-cliente')[0].value) || 0;
+                let estaPagado = filas[i].getElementsByClassName('pago-status')[0].checked;
+
+                if (estaPagado) {
+                    totalRecaudado += cuota;
+                    filas[i].classList.add('opacity-40'); // Atenuado visual elegante
+                } else {
+                    filas[i].classList.remove('opacity-40');
+                }
             }
 
-            const url = `https://wa.me/${cliente.telefono}?text=${encodeURIComponent(textoFinal)}`;
-            window.open(url, '_blank');
-        };
+            let restaPorRecaudar = metaTotal - totalRecaudado;
+            if (restaPorRecaudar < 0) restaPorRecaudar = 0;
 
-        renderApp();
+            // Mostrar resultados en los paneles correspondientes
+            document.getElementById('stat-clientes').innerText = totalClientes;
+            
+            if (visible) {
+                document.getElementById('stat-ingresos').innerText = `$${totalRecaudado.toFixed(2)}`;
+                document.getElementById('stat-restante').innerText = `$${restaPorRecaudar.toFixed(2)}`;
+            }
+        }
+
+        // Ejecución inicial automática
+        window.onload = function() {
+            calcularFinanzas();
+        };
     </script>
 </body>
 </html>
