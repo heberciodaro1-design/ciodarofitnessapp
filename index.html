@@ -2,113 +2,117 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ciodarofitness</title>
+    <title>Ciodarofitness Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #000; color: #fff; }
-        .bg-invisible { background-color: #09090b; border: 1px solid #18181b; }
-        .input-inv { background: #000; border: 1px solid #18181b; padding: 10px; width: 100%; border-radius: 8px; }
+        body { background: #000; color: #fff; font-family: sans-serif; }
+        .inv-card { background: #09090b; border: 1px solid #18181b; border-radius: 12px; padding: 16px; }
+        .inv-input { background: #000; border: 1px solid #27272a; padding: 8px; border-radius: 6px; width: 100%; color: #fff; }
     </style>
 </head>
-<body class="p-4 max-w-md mx-auto">
+<body class="p-4 max-w-lg mx-auto">
 
-    <!-- PANTALLA PRINCIPAL -->
-    <header class="bg-invisible p-5 rounded-2xl mb-4 flex justify-between items-center">
+    <!-- HEADER GLOBAL -->
+    <header class="inv-card flex justify-between items-center mb-4">
         <h1 class="font-black text-yellow-500">CIODAROFITNESS</h1>
         <div class="text-right">
-            <p class="text-[9px] text-zinc-600 uppercase">Total Caja</p>
-            <span id="txt-caja-global" class="font-black text-emerald-500">$0</span>
+            <p class="text-[9px] text-zinc-500 uppercase">Caja Total</p>
+            <span id="txt-caja-global" class="font-black text-emerald-500 text-lg">$0</span>
         </div>
     </header>
 
-    <input type="text" id="input-buscador" onkeyup="renderizar()" placeholder="🔍 Buscar alumno..." class="input-inv mb-4 text-sm">
-    <button onclick="abrirExpediente(null)" class="w-full bg-yellow-500 text-black font-black p-3 rounded-xl mb-4 uppercase text-sm">➕ Nuevo Alumno</button>
-    <div id="contenedor-clientes" class="space-y-3"></div>
+    <input type="text" id="buscador" onkeyup="renderizar()" placeholder="🔍 Buscar alumno..." class="inv-input mb-4 text-sm">
+    <button onclick="abrirModal(null)" class="w-full bg-yellow-500 text-black font-black p-3 rounded-xl mb-6 uppercase text-sm">➕ Nuevo Alumno</button>
 
-    <!-- MODAL EXPEDIENTE -->
+    <div id="lista-alumnos" class="space-y-3"></div>
+
+    <!-- MODAL -->
     <div id="modal" class="fixed inset-0 bg-black hidden p-4 overflow-y-auto">
-        <button onclick="document.getElementById('modal').classList.add('hidden')" class="text-zinc-500 mb-4">← Volver</button>
-        <div id="contenido-modal" class="space-y-4">
-            <input type="text" id="ex-nombre" placeholder="Nombre" class="input-inv">
+        <button onclick="document.getElementById('modal').classList.add('hidden')" class="text-zinc-500 mb-4">✕ Cerrar</button>
+        <div class="space-y-4">
+            <input type="text" id="ex-nombre" placeholder="Nombre" class="inv-input">
             
-            <section class="bg-invisible p-4 rounded-xl">
-                <h3 class="text-[10px] text-zinc-500 uppercase mb-2">Registro de Pagos</h3>
+            <div class="inv-card">
+                <h3 class="text-[10px] text-zinc-500 uppercase mb-2">Abonos</h3>
                 <div class="flex gap-2 mb-2">
-                    <input type="date" id="pago-fecha" class="input-inv text-[10px]">
-                    <input type="number" id="pago-monto" placeholder="$" class="input-inv w-20">
-                    <button onclick="agregarPago()" class="bg-emerald-600 px-4 rounded-lg font-black">+</button>
+                    <input type="date" id="pago-f" class="inv-input text-[10px] w-1/2">
+                    <input type="number" id="pago-m" placeholder="$" class="inv-input w-1/4">
+                    <button onclick="addPago()" class="bg-emerald-600 px-4 rounded font-black">+</button>
                 </div>
-                <div id="lista-pagos" class="text-xs"></div>
-            </section>
+                <div id="historial-pagos" class="text-xs space-y-1"></div>
+            </div>
 
-            <section class="bg-invisible p-4 rounded-xl">
-                <h3 class="text-[10px] text-zinc-500 uppercase mb-2">Métricas Mensuales</h3>
-                <div class="grid grid-cols-2 gap-2 mb-2">
-                    <input type="number" id="m-peso" placeholder="Kg" class="input-inv">
-                    <input type="number" id="m-altura" placeholder="Cm" class="input-inv">
+            <div class="inv-card">
+                <h3 class="text-[10px] text-zinc-500 uppercase mb-2">Métricas (IMC y Grasa)</h3>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <input type="number" id="m-peso" placeholder="Peso kg" class="inv-input">
+                    <input type="number" id="m-talla" placeholder="Altura cm" class="inv-input">
+                    <input type="number" id="m-cuello" placeholder="Cuello cm" class="inv-input">
+                    <input type="number" id="m-cintura" placeholder="Cintura cm" class="inv-input">
                 </div>
-                <button onclick="agregarMetrica()" class="w-full bg-yellow-500 text-black font-black p-2 rounded-lg text-xs uppercase">Guardar Métrica</button>
-                <div id="lista-metrics" class="mt-4 text-xs space-y-1"></div>
-            </section>
-            <button onclick="guardarPerfil()" class="w-full bg-zinc-800 p-3 rounded-xl font-bold">Guardar Cambios</button>
+                <button onclick="addMetrica()" class="w-full bg-yellow-500 text-black font-black p-2 rounded mt-2 uppercase text-[10px]">Calcular y Guardar</button>
+                <div id="historial-metrics" class="mt-4 text-xs space-y-1"></div>
+            </div>
+            <button onclick="guardar()" class="w-full bg-zinc-800 p-3 rounded-xl font-bold uppercase text-xs">Guardar Cliente</button>
         </div>
     </div>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('db')) || [];
-        let idx = null;
+        let db = JSON.parse(localStorage.getItem('ciodaro_fitness_db')) || [];
+        let cur = null;
 
         function renderizar() {
             let total = 0;
-            db.forEach(c => c.pagos.forEach(p => total += p.monto));
+            db.forEach(c => (c.pagos||[]).forEach(p => total += parseFloat(p.m || 0)));
             document.getElementById('txt-caja-global').innerText = `$${total}`;
             
-            let filtro = document.getElementById('input-buscador').value.toLowerCase();
-            document.getElementById('contenedor-clientes').innerHTML = db.filter(c => c.nombre.toLowerCase().includes(filtro)).map((c, i) => `
-                <div class="bg-invisible p-4 rounded-2xl flex justify-between items-center">
+            let term = document.getElementById('buscador').value.toLowerCase();
+            document.getElementById('lista-alumnos').innerHTML = db.filter(c => c.nombre.toLowerCase().includes(term)).map((c, i) => `
+                <div class="inv-card flex justify-between items-center">
                     <span class="font-bold text-sm">${c.nombre}</span>
-                    <button onclick="abrirExpediente(${i})" class="text-[10px] bg-zinc-900 px-3 py-1 rounded-lg border border-zinc-700">📂 EXPEDIENTE</button>
+                    <button onclick="abrirModal(${i})" class="bg-zinc-900 px-3 py-1 rounded text-[10px]">📂 EXPEDIENTE</button>
                 </div>
             `).join('');
         }
 
-        function abrirExpediente(i) {
-            idx = i;
+        function abrirModal(i) {
+            cur = i;
             if(i !== null) {
                 document.getElementById('ex-nombre').value = db[i].nombre;
-                renderizarModal();
+                mostrarDatos();
             }
             document.getElementById('modal').classList.remove('hidden');
         }
 
-        function agregarPago() {
-            let m = parseFloat(document.getElementById('pago-monto').value);
-            let f = document.getElementById('pago-fecha').value;
-            db[idx].pagos.push({fecha: f, monto: m});
-            localStorage.setItem('db', JSON.stringify(db));
-            renderizarModal();
+        function addPago() {
+            let m = document.getElementById('pago-m').value;
+            let f = document.getElementById('pago-f').value;
+            if(!db[cur].pagos) db[cur].pagos = [];
+            db[cur].pagos.push({f, m});
+            localStorage.setItem('ciodaro_fitness_db', JSON.stringify(db));
+            mostrarDatos();
         }
 
-        function agregarMetrica() {
+        function addMetrica() {
             let p = parseFloat(document.getElementById('m-peso').value);
-            let h = parseFloat(document.getElementById('m-altura').value) / 100;
-            let imc = (p / (h * h)).toFixed(1);
-            db[idx].metrics.push({fecha: new Date().toLocaleDateString(), imc: imc});
-            localStorage.setItem('db', JSON.stringify(db));
-            renderizarModal();
+            let h = parseFloat(document.getElementById('m-talla').value)/100;
+            let imc = (p/(h*h)).toFixed(1);
+            if(!db[cur].met) db[cur].met = [];
+            db[cur].met.push({f: new Date().toLocaleDateString(), imc});
+            localStorage.setItem('ciodaro_fitness_db', JSON.stringify(db));
+            mostrarDatos();
         }
 
-        function renderizarModal() {
-            document.getElementById('lista-pagos').innerHTML = db[idx].pagos.map(p => `<div class="flex justify-between"><span>${p.fecha}</span><span class="text-emerald-500">+$${p.monto}</span></div>`).join('');
-            document.getElementById('lista-metrics').innerHTML = db[idx].metrics.map(m => `<div class="flex justify-between"><span>${m.fecha}</span><span class="font-bold">IMC: ${m.imc}</span></div>`).join('');
+        function mostrarDatos() {
+            document.getElementById('historial-pagos').innerHTML = (db[cur].pagos||[]).map(p => `<div class="flex justify-between"><span>${p.f}</span><span class="text-emerald-500">+$${p.m}</span></div>`).join('');
+            document.getElementById('historial-metrics').innerHTML = (db[cur].met||[]).map(m => `<div class="flex justify-between"><span>${m.f}</span><span>IMC: ${m.imc}</span></div>`).join('');
         }
 
-        function guardarPerfil() {
+        function guardar() {
             let nombre = document.getElementById('ex-nombre').value;
-            if(idx === null) { db.push({nombre: nombre, pagos: [], metrics: []}); }
-            else { db[idx].nombre = nombre; }
-            localStorage.setItem('db', JSON.stringify(db));
+            if(cur === null) db.push({nombre, pagos:[], met:[]});
+            else db[cur].nombre = nombre;
+            localStorage.setItem('ciodaro_fitness_db', JSON.stringify(db));
             document.getElementById('modal').classList.add('hidden');
             renderizar();
         }
