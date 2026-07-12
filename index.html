@@ -55,18 +55,18 @@
             </div>
             
             <div class="box">
-                <h3 class="text-[10px] uppercase text-zinc-500 mb-3">Antropometría</h3>
+                <h3 class="text-[10px] uppercase text-yellow-500 mb-3 border-b border-zinc-800 pb-2">Antropometría Elegante</h3>
                 <div class="grid grid-cols-2 gap-2">
-                    <input type="number" id="m-c" placeholder="Cuello">
-                    <input type="number" id="m-t" placeholder="Tórax">
-                    <input type="number" id="m-b" placeholder="Bíceps">
-                    <input type="number" id="m-cin" placeholder="Cintura">
-                    <input type="number" id="m-g" placeholder="Glúteos">
-                    <input type="number" id="m-cuad" placeholder="Cuád." >
-                    <input type="number" id="m-pan" placeholder="Pantorrilla">
+                    <input type="number" id="m-c" placeholder="Cuello" class="input-dark">
+                    <input type="number" id="m-t" placeholder="Tórax" class="input-dark">
+                    <input type="number" id="m-b" placeholder="Bíceps" class="input-dark">
+                    <input type="number" id="m-cin" placeholder="Cintura" class="input-dark">
+                    <input type="number" id="m-g" placeholder="Glúteos" class="input-dark">
+                    <input type="number" id="m-cuad" placeholder="Cuád." class="input-dark">
+                    <input type="number" id="m-pan" placeholder="Pantorrilla" class="input-dark">
                 </div>
                 <button onclick="guardarMetrica()" class="btn bg-yellow-500 text-black mt-2 text-[10px]">Guardar y Calcular</button>
-                <div id="hist-met" class="mt-4 text-xs space-y-1"></div>
+                <div id="hist-met" class="mt-4 text-[11px] space-y-2"></div>
             </div>
             <button onclick="guardarCliente()" class="btn bg-zinc-800">GUARDAR TODO</button>
         </div>
@@ -78,10 +78,9 @@
 
         function render() {
             let totalPlanes = db.reduce((a, b) => a + parseFloat(b.plan||0), 0);
-            let totalRecaudado = db.reduce((a, b) => a + (b.pagos||[]).reduce((x, y) => x + parseFloat(y.monto), 0), 0);
+            let totalRecaudado = db.reduce((a, b) => a + (b.pagos||[]).reduce((x, y) => x + parseFloat(y.monto||0), 0), 0);
             document.getElementById('val-planes').innerText = `$${totalPlanes}`;
             document.getElementById('val-recaudado').innerText = `$${totalRecaudado}`;
-            
             document.getElementById('lista').innerHTML = db.map((c, i) => `
                 <div class="box flex justify-between items-center">
                     <div><h3 class="font-bold text-sm">${c.nom}</h3><span class="text-[10px] text-zinc-500">Plan: $${c.plan}</span></div>
@@ -98,13 +97,14 @@
                 document.getElementById('ex-peso').value = db[i].peso || '';
                 document.getElementById('ex-est').value = db[i].est || '';
                 renderPagos(); renderMetricas();
-            } else { document.getElementById('ex-nom').value = ''; }
+            } else { document.getElementById('ex-nom').value = ''; document.getElementById('hist-pagos').innerHTML = ''; document.getElementById('hist-met').innerHTML = ''; }
             document.getElementById('modal').classList.remove('hidden');
         }
 
         function agregarPago() {
             let monto = parseFloat(document.getElementById('pago-monto').value);
             let fecha = document.getElementById('pago-fecha').value;
+            if(isNaN(monto) || !fecha) return;
             if(!db[cur].pagos) db[cur].pagos = [];
             db[cur].pagos.push({fecha, monto});
             localStorage.setItem('ciodaro_db', JSON.stringify(db));
@@ -112,12 +112,13 @@
         }
 
         function renderPagos() {
-            document.getElementById('hist-pagos').innerHTML = (db[cur].pagos||[]).map(p => `<div class="border-b border-zinc-900 py-1 text-[10px]">${p.fecha}: $${p.monto}</div>`).join('');
+            document.getElementById('hist-pagos').innerHTML = (db[cur].pagos||[]).map(p => `<div class="flex justify-between border-b border-zinc-900 py-1 text-[10px]"><span>${p.fecha}</span><span class="text-emerald-500 font-bold">$${p.monto}</span></div>`).join('');
         }
 
         function guardarMetrica() {
             let p = parseFloat(document.getElementById('ex-peso').value);
             let h = parseFloat(document.getElementById('ex-est').value) / 100;
+            if(isNaN(p) || isNaN(h)) return;
             let imc = (p / (h * h)).toFixed(1);
             let grasa = (imc * 1.2).toFixed(1);
             if(!db[cur].met) db[cur].met = [];
@@ -129,12 +130,12 @@
 
         function renderMetricas() {
             document.getElementById('hist-met').innerHTML = (db[cur].met||[]).map(m => 
-                `<div class="flex justify-between border-b border-zinc-900 py-1"><span>${m.fecha}</span><span class="font-bold text-[10px]">IMC: ${m.imc} | Grasa: ${m.grasa}%</span></div>`
+                `<div class="flex justify-between bg-zinc-900 p-2 rounded-lg"><span>${m.fecha}</span><span class="font-bold text-yellow-500">IMC: ${m.imc} | GRASA: ${m.grasa}%</span></div>`
             ).join('');
         }
 
         function borrarCliente() {
-            if(confirm('¿Borrar alumno definitivamente?')) {
+            if(confirm('¿Borrar alumno?')) {
                 db.splice(cur, 1);
                 localStorage.setItem('ciodaro_db', JSON.stringify(db));
                 document.getElementById('modal').classList.add('hidden');
