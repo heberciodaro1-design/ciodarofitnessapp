@@ -3,501 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ciodarofitness Pro - Sistema Unificado</title>
+    <title>Ciodarofitness Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'ciodaro-black': '#09090b',
-                        'ciodaro-grey': '#1c1c1e',
-                        'ciodaro-input': '#2c2c2e',
-                        'ciodaro-yellow': '#facc15'
-                    }
-                }
-            }
-        }
+        tailwind.config = { theme: { extend: { colors: { 
+            'ciodaro-black': '#09090b', 'ciodaro-grey': '#1c1c1e', 
+            'ciodaro-input': '#2c2c2e', 'ciodaro-yellow': '#facc15' 
+        }}}}
     </script>
 </head>
 <body class="bg-ciodaro-black text-zinc-100 font-sans min-h-screen pb-12">
 
-    <!-- CONTENEDOR PRINCIPAL -->
     <div class="max-w-4xl mx-auto p-4 space-y-4">
-        
-        <!-- ENCABEZADO -->
-        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-ciodaro-grey p-4 rounded-xl border border-zinc-800 gap-3">
+        <!-- HEADER -->
+        <header class="flex flex-col sm:flex-row justify-between items-start bg-ciodaro-grey p-4 rounded-xl border border-zinc-800 gap-3">
             <div>
                 <h1 class="text-xl font-black text-ciodaro-yellow tracking-tight">CIODAROFITNESS</h1>
-                <p class="text-[9px] text-zinc-400 uppercase tracking-wider">Panel Integral de Alumnos</p>
             </div>
-            
             <div class="flex gap-2 w-full sm:w-auto">
-                <div class="flex-1 bg-ciodaro-black px-3 py-2 rounded-lg border border-zinc-800 text-right min-w-[110px]">
-                    <p class="text-[9px] text-zinc-500 uppercase font-bold tracking-wider">Caja Planes</p>
+                <div class="flex-1 bg-ciodaro-black px-3 py-2 rounded-lg border border-zinc-800 text-right">
+                    <p class="text-[9px] text-zinc-500 uppercase font-bold">Caja Planes</p>
                     <h2 id="txt-caja-total" class="text-sm font-black text-zinc-400">$0</h2>
-                </div>
-                <div class="flex-1 bg-ciodaro-black px-3 py-2 rounded-lg border border-zinc-800 text-right min-w-[110px]">
-                    <p class="text-[9px] text-zinc-500 uppercase font-bold tracking-wider">Caja Abonos</p>
-                    <h2 id="txt-caja-abonos" class="text-base font-black text-ciodaro-yellow">$0</h2>
                 </div>
             </div>
         </header>
 
-        <!-- ACCIONES -->
-        <div class="flex gap-2">
-            <input type="text" id="buscador" onkeyup="renderizar()" placeholder="🔍 Buscar alumno..." class="flex-1 px-3 py-2 bg-ciodaro-grey border border-zinc-800 rounded-lg outline-none focus:border-ciodaro-yellow text-sm text-white">
-            <button onclick="abrirExpedienteUnico(null)" class="bg-ciodaro-yellow text-black font-black px-3 rounded-lg hover:bg-yellow-500 transition text-xs shrink-0 uppercase tracking-wider">
-                ➕ Alumno
-            </button>
-        </div>
+        <button onclick="abrirExpedienteUnico(null)" class="w-full bg-ciodaro-yellow text-black font-black p-3 rounded-lg uppercase tracking-wider">➕ Nuevo Alumno</button>
 
-        <!-- LISTADO DE CLIENTES -->
-        <div id="contenedor-clientes" class="space-y-2">
-            <!-- Render dinámico -->
-        </div>
+        <div id="contenedor-clientes" class="space-y-2"></div>
     </div>
 
-    <!-- WINDOW PRINCIPAL: EXPEDIENTE ÚNICO DEL ALUMNO -->
-    <div id="modal-expediente" class="fixed inset-0 bg-black/95 hidden flex items-start justify-center p-4 z-50 overflow-y-auto backdrop-blur-md">
+    <!-- MODAL EXPEDIENTE -->
+    <div id="modal-expediente" class="fixed inset-0 bg-black/95 hidden flex items-start justify-center p-4 z-50 overflow-y-auto">
         <div class="bg-ciodaro-grey w-full max-w-2xl rounded-xl border border-zinc-800 p-4 space-y-5 my-2">
-            
-            <!-- Cabecera del Expediente -->
             <div class="flex justify-between items-center border-b border-zinc-800 pb-2">
-                <div>
-                    <h2 id="expediente-titulo" class="text-base font-black text-ciodaro-yellow uppercase tracking-tight">Ficha del Alumno</h2>
-                    <p class="text-[9px] text-zinc-400 uppercase">Historial Clínico, Financiero y de Métricas</p>
-                </div>
-                <button onclick="cerrarExpediente()" class="text-zinc-400 hover:text-white text-lg bg-zinc-800/50 w-7 h-7 rounded-full flex items-center justify-center">✕</button>
+                <h2 id="expediente-titulo" class="text-base font-black text-ciodaro-yellow uppercase">Ficha del Alumno</h2>
+                <button onclick="cerrarExpediente()" class="text-white text-xl">✕</button>
             </div>
 
-            <!-- SECCIÓN 1: DATOS PERSONALES Y VALOR DEL PLAN -->
-            <section class="bg-ciodaro-black/40 p-3 rounded-xl border border-zinc-800/80 space-y-3">
-                <h3 class="text-[11px] font-black text-ciodaro-yellow uppercase tracking-wider border-b border-zinc-800 pb-1">1. Información del Perfil</h3>
-                <form id="form-datos-basicos" onsubmit="event.preventDefault();" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
-                    <div class="col-span-2">
-                        <label class="block text-zinc-400 font-bold uppercase text-[10px] mb-0.5">Nombre Completo</label>
-                        <input type="text" id="ex-nombre" required class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white outline-none focus:border-ciodaro-yellow">
+            <!-- SECCIÓN 1: PERFIL (CORREGIDA) -->
+            <section class="bg-ciodaro-black/40 p-3 rounded-xl border border-zinc-800 space-y-3">
+                <h3 class="text-[11px] font-black text-ciodaro-yellow uppercase border-b border-zinc-800 pb-1">1. Perfil</h3>
+                <form id="form-datos-basicos" class="flex flex-col gap-3">
+                    <div class="flex flex-col"><label class="text-[9px] text-zinc-400 font-bold uppercase">Nombre</label>
+                        <input type="text" id="ex-nombre" class="bg-ciodaro-input p-2 rounded text-sm text-white">
                     </div>
-                    <div>
-                        <label class="block text-zinc-400 font-bold uppercase text-[10px] mb-0.5">Edad</label>
-                        <input type="number" id="ex-edad" required class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white outline-none">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="flex flex-col"><label class="text-[9px] text-zinc-400 font-bold uppercase">Edad</label>
+                            <input type="number" id="ex-edad" class="bg-ciodaro-input p-2 rounded text-sm text-white">
+                        </div>
+                        <div class="flex flex-col"><label class="text-[9px] text-zinc-400 font-bold uppercase">Género</label>
+                            <select id="ex-genero" class="bg-ciodaro-input p-2 rounded text-sm text-white"><option value="M">Masculino</option><option value="F">Femenino</option></select>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-zinc-400 font-bold uppercase text-[10px] mb-0.5">Género</label>
-                        <select id="ex-genero" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white outline-none">
-                            <option value="M">Masculino</option>
-                            <option value="F">Femenino</option>
-                        </select>
-                    </div>
-                    <div class="col-span-2">
-                        <label class="block text-zinc-400 font-bold uppercase text-[10px] mb-0.5">Fecha de Inicio</label>
-                        <input type="date" id="ex-fecha-inicio" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white text-xs">
-                    </div>
-                    <div class="col-span-2">
-                        <label class="block text-zinc-400 font-bold uppercase text-[10px] mb-0.5">Costo Plan ($)</label>
-                        <input type="number" id="ex-cuota" required class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white">
-                    </div>
-                    <div class="col-span-4 pt-1">
-                        <button type="button" onclick="guardarDatosPerfil()" class="w-full bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-ciodaro-yellow font-black py-2 rounded transition uppercase tracking-wider text-[11px]">
-                            💾 Guardar / Actualizar Perfil
-                        </button>
-                    </div>
+                    <input type="number" id="ex-cuota" placeholder="Costo Plan ($)" class="bg-ciodaro-input p-2 rounded text-sm text-white">
+                    <button type="button" onclick="guardarDatosPerfil()" class="bg-zinc-800 text-ciodaro-yellow font-black p-3 rounded uppercase text-[11px]">💾 Guardar Perfil</button>
                 </form>
             </section>
 
-            <!-- SECCIONES HISTÓRICAS PROGRESIVAS -->
             <div id="bloques-historial-progresivo" class="space-y-5 hidden">
-                
-                <!-- SECCIÓN 2: HISTORIAL PROGRESIVO DE PAGOS -->
-                <section class="bg-ciodaro-black/40 p-3 rounded-xl border border-zinc-800 space-y-2">
-                    <h3 class="text-[11px] font-black text-emerald-400 uppercase tracking-wider border-b border-zinc-800 pb-1">2. Historial de Pagos y Control de Saldo</h3>
-                    
-                    <div class="bg-ciodaro-grey/40 p-2 rounded border border-zinc-800/80 mb-2 flex justify-between items-center text-xs">
-                        <span class="text-zinc-400">Estado de cuenta actual:</span>
-                        <span id="txt-saldo-pendiente" class="font-bold text-white">-</span>
-                    </div>
-
-                    <form id="form-pago" onsubmit="agregarPago(event)" class="grid grid-cols-2 sm:grid-cols-4 gap-2 items-end text-xs">
-                        <div>
-                            <label class="block text-zinc-400 text-[10px] mb-0.5">Fecha de Abono</label>
-                            <input type="date" id="pago-fecha" required class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white">
-                        </div>
-                        <div>
-                            <label class="block text-zinc-400 text-[10px] mb-0.5">Monto ($)</label>
-                            <input type="number" id="pago-monto" required min="1" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white" placeholder="Ej: 20">
-                        </div>
-                        <div class="col-span-2">
-                            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-black font-black py-1.5 rounded uppercase tracking-wider text-[11px]">💵 Registrar Pago</button>
-                        </div>
+                <!-- SECCIÓN 2: PAGOS -->
+                <section class="bg-ciodaro-black/40 p-3 rounded-xl border border-zinc-800">
+                    <h3 class="text-[11px] font-black text-emerald-400 uppercase border-b border-zinc-800 pb-1">2. Pagos</h3>
+                    <form id="form-pago" onsubmit="agregarPago(event)" class="flex gap-2 mt-2">
+                        <input type="date" id="pago-fecha" class="bg-ciodaro-input p-1 rounded text-white text-xs">
+                        <input type="number" id="pago-monto" placeholder="$" class="bg-ciodaro-input p-1 rounded text-white text-xs w-16">
+                        <button class="bg-emerald-600 px-3 rounded text-black font-black uppercase text-[10px]">+</button>
                     </form>
-
-                    <div class="max-h-28 overflow-y-auto border border-zinc-800 rounded bg-black/40 p-2 space-y-1" id="lista-pagos-recientes">
-                        <!-- Pagos dinámicos -->
-                    </div>
+                    <div id="lista-pagos-recientes" class="mt-2 text-xs text-zinc-300"></div>
                 </section>
 
-                <!-- SECCIÓN 3: MÉTRICAS COMPARATIVAS MES A MES -->
-                <section class="bg-ciodaro-black/40 p-3 rounded-xl border border-zinc-800 space-y-2">
-                    <h3 class="text-[11px] font-black text-ciodaro-yellow uppercase tracking-wider border-b border-zinc-800 pb-1">3. Antropometría Progresiva (Evaluaciones)</h3>
-                    
-                    <form id="form-medidas-unico" onsubmit="agregarMetrica(event)" class="space-y-2 text-xs bg-ciodaro-grey/50 p-2.5 rounded border border-zinc-800">
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                            <div>
-                                <label class="block text-zinc-500 mb-0.5 text-[10px]">Fecha Evaluación:</label>
-                                <input type="date" id="m-fecha" required class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white">
-                            </div>
-                            <div>
-                                <label class="block text-zinc-500 mb-0.5 text-[10px]">Peso (kg):</label>
-                                <input type="number" step="0.1" id="m-peso" required class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white">
-                            </div>
-                            <div>
-                                <label class="block text-zinc-500 mb-0.5 text-[10px]">Estatura (cm):</label>
-                                <input type="number" step="0.1" id="m-estatura" required class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white">
-                            </div>
-                            <div>
-                                <label class="block text-zinc-500 mb-0.5 text-[10px]">Cintura (cm):</label>
-                                <input type="number" step="0.1" id="m-cintura" required class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
-                            <div>
-                                <label class="block text-zinc-600 mb-0.5 text-[9px]">Cuello (cm):</label>
-                                <input type="number" step="0.1" id="m-cuello" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1 text-white">
-                            </div>
-                            <div>
-                                <label class="block text-zinc-600 mb-0.5 text-[9px]">Tórax (cm):</label>
-                                <input type="number" step="0.1" id="m-torax" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1 text-white">
-                            </div>
-                            <div>
-                                <label class="block text-zinc-600 mb-0.5 text-[9px]">Bíceps (cm):</label>
-                                <input type="number" step="0.1" id="m-biceps" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1 text-white">
-                            </div>
-                            <div>
-                                <label class="block text-zinc-600 mb-0.5 text-[9px]">Glúteo (cm):</label>
-                                <input type="number" step="0.1" id="m-gluteos" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1 text-white">
-                            </div>
-                            <div>
-                                <label class="block text-zinc-600 mb-0.5 text-[9px]">Muslo (cm):</label>
-                                <input type="number" step="0.1" id="m-cuadriceps" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1 text-white">
-                            </div>
-                        </div>
-                        <div class="flex justify-end pt-1">
-                            <button type="submit" class="bg-ciodaro-yellow text-black font-black px-4 py-1.5 rounded uppercase text-[10px] tracking-wider">💾 Añadir Registro</button>
-                        </div>
+                <!-- SECCIÓN 3: MÉTRICAS (HISTORIAL COMPLETO) -->
+                <section class="bg-ciodaro-black/40 p-3 rounded-xl border border-zinc-800">
+                    <h3 class="text-[11px] font-black text-ciodaro-yellow uppercase border-b border-zinc-800 pb-1">3. Métricas (Registro Completo)</h3>
+                    <form id="form-medidas-unico" onsubmit="agregarMetrica(event)" class="grid grid-cols-2 gap-2 text-[10px] mt-2">
+                        <input type="date" id="m-fecha" class="bg-ciodaro-input p-1 rounded text-white">
+                        <input type="number" step="0.1" id="m-peso" placeholder="Peso kg" class="bg-ciodaro-input p-1 rounded text-white">
+                        <input type="number" step="0.1" id="m-cintura" placeholder="Cintura cm" class="bg-ciodaro-input p-1 rounded text-white">
+                        <input type="number" step="0.1" id="m-cuello" placeholder="Cuello cm" class="bg-ciodaro-input p-1 rounded text-white">
+                        <input type="number" step="0.1" id="m-torax" placeholder="Tórax cm" class="bg-ciodaro-input p-1 rounded text-white">
+                        <input type="number" step="0.1" id="m-biceps" placeholder="Bíceps cm" class="bg-ciodaro-input p-1 rounded text-white">
+                        <input type="number" step="0.1" id="m-gluteos" placeholder="Glúteo cm" class="bg-ciodaro-input p-1 rounded text-white">
+                        <input type="number" step="0.1" id="m-cuadriceps" placeholder="Muslo cm" class="bg-ciodaro-input p-1 rounded text-white">
+                        <button class="col-span-2 bg-ciodaro-yellow text-black font-black p-2 rounded uppercase text-[10px]">💾 Añadir Registro</button>
                     </form>
-
-                    <div class="space-y-2 max-h-56 overflow-y-auto pr-1" id="lista-metrics-progresivas">
-                        <!-- Tarjetas por fecha -->
-                    </div>
+                    <div id="lista-metrics-progresivas" class="space-y-3 mt-4"></div>
                 </section>
-            </div>
-
-            <div class="flex justify-end border-t border-zinc-800 pt-2">
-                <button onclick="cerrarExpediente()" class="px-4 py-1.5 bg-zinc-800 text-zinc-300 rounded font-bold text-xs uppercase">Salir de la Ficha</button>
             </div>
         </div>
     </div>
 
-    <!-- LOGIC SCRIPT -->
     <script>
-        let baseClientes = [];
+        let baseClientes = JSON.parse(localStorage.getItem('ciodaro_fitness_db')) || [];
         let clienteActualIndex = null;
-
-        try {
-            baseClientes = JSON.parse(localStorage.getItem('ciodaro_fitness_db')) || [];
-            if (!Array.isArray(baseClientes)) baseClientes = [];
-        } catch(e) { baseClientes = []; }
-
-        function calcularIMC(peso, estaturaCm) {
-            if (!peso || !estaturaCm) return "-";
-            let estaturaM = estaturaCm / 100;
-            return (peso / (estaturaM * estaturaM)).toFixed(1);
-        }
-
-        function calcularGrasaEstimada(genero, cintura, cuello, estatura, gluteo) {
-            if (!cintura || !estatura) return "-";
-            cintura = parseFloat(cintura);
-            estatura = parseFloat(estatura);
-            cuello = parseFloat(cuello) || (genero === 'M' ? 38 : 34);
-            gluteo = parseFloat(gluteo) || 95;
-
-            let log10 = Math.log10;
-            if (genero === 'M') {
-                if (cintura <= cuello) return "-";
-                let porc = 495 / (1.0324 - 0.19077 * log10(cintura - cuello) + 0.15456 * log10(estatura)) - 450;
-                return isNaN(porc) || porc < 2 ? "-" : porc.toFixed(1) + "%";
-            } else {
-                if ((cintura + gluteo) <= cuello) return "-";
-                let porc = 495 / (1.29579 - 0.35004 * log10(cintura + gluteo - cuello) + 0.22100 * log10(estatura)) - 450;
-                return isNaN(porc) || porc < 2 ? "-" : porc.toFixed(1) + "%";
-            }
-        }
 
         function abrirExpedienteUnico(index) {
             clienteActualIndex = index;
-            document.getElementById('form-datos-basicos').reset();
-            document.getElementById('form-pago').reset();
-            document.getElementById('form-medidas-unico').reset();
-
-            if (index === null) {
-                document.getElementById('expediente-titulo').innerText = "Nuevo Alumno";
-                document.getElementById('bloques-historial-progresivo').classList.add('hidden');
-            } else {
-                let cliente = baseClientes[index];
-                document.getElementById('expediente-titulo').innerText = `Expediente: ${cliente.nombre}`;
-                
-                document.getElementById('ex-nombre').value = cliente.nombre;
-                document.getElementById('ex-edad').value = cliente.edad;
-                document.getElementById('ex-genero').value = cliente.genero;
-                document.getElementById('ex-fecha-inicio').value = cliente.fechaInicio || '';
-                document.getElementById('ex-cuota').value = cliente.cuota || 0;
-
+            document.getElementById('modal-expediente').classList.remove('hidden');
+            if (index !== null) {
+                let c = baseClientes[index];
+                document.getElementById('ex-nombre').value = c.nombre;
+                document.getElementById('ex-edad').value = c.edad;
+                document.getElementById('ex-genero').value = c.genero;
+                document.getElementById('ex-cuota').value = c.cuota;
                 document.getElementById('bloques-historial-progresivo').classList.remove('hidden');
                 renderizarSeccionesInternas();
+            } else {
+                document.getElementById('form-datos-basicos').reset();
+                document.getElementById('bloques-historial-progresivo').classList.add('hidden');
             }
-            document.getElementById('modal-expediente').classList.remove('hidden');
         }
 
-        function cerrarExpediente() {
-            document.getElementById('modal-expediente').classList.add('hidden');
-            clienteActualIndex = null;
-            renderizar();
-        }
+        function cerrarExpediente() { document.getElementById('modal-expediente').classList.add('hidden'); renderizar(); }
 
         function guardarDatosPerfil() {
-            let nombre = document.getElementById('ex-nombre').value.trim();
-            if(!nombre) { alert("Por favor ingresa el nombre"); return; }
-
-            let cuotaPlan = parseFloat(document.getElementById('ex-cuota').value) || 0;
-
-            let datos = {
-                nombre: nombre,
-                edad: document.getElementById('ex-edad').value,
-                genero: document.getElementById('ex-genero').value,
-                fechaInicio: document.getElementById('ex-fecha-inicio').value,
-                cuota: cuotaPlan,
-                pagosHistorial: clienteActualIndex !== null ? (baseClientes[clienteActualIndex].pagosHistorial || []) : [],
-                mediciones: clienteActualIndex !== null ? (baseClientes[clienteActualIndex].mediciones || []) : []
+            let datos = { 
+                nombre: document.getElementById('ex-nombre').value, 
+                edad: document.getElementById('ex-edad').value, 
+                genero: document.getElementById('ex-genero').value, 
+                cuota: parseFloat(document.getElementById('ex-cuota').value) || 0,
+                pagosHistorial: clienteActualIndex !== null ? baseClientes[clienteActualIndex].pagosHistorial : [],
+                mediciones: clienteActualIndex !== null ? baseClientes[clienteActualIndex].mediciones : []
             };
-
-            if (clienteActualIndex === null) {
-                baseClientes.push(datos);
-                clienteActualIndex = baseClientes.length - 1;
-            } else {
-                baseClientes[clienteActualIndex] = { ...baseClientes[clienteActualIndex], ...datos };
-            }
-            
-            sincronizarStorage();
+            if(clienteActualIndex === null) { baseClientes.push(datos); clienteActualIndex = baseClientes.length - 1; }
+            else { baseClientes[clienteActualIndex] = {...baseClientes[clienteActualIndex], ...datos}; }
+            localStorage.setItem('ciodaro_fitness_db', JSON.stringify(baseClientes));
             document.getElementById('bloques-historial-progresivo').classList.remove('hidden');
-            document.getElementById('expediente-titulo').innerText = `Expediente: ${datos.nombre}`;
             renderizarSeccionesInternas();
-            renderizar(); 
         }
 
-        function agregarPago(e) {
-            e.preventDefault();
-            if(clienteActualIndex === null) return;
-
-            let nuevoPago = {
-                fecha: document.getElementById('pago-fecha').value,
-                monto: parseFloat(document.getElementById('pago-monto').value) || 0
-            };
-
-            let cliente = baseClientes[clienteActualIndex];
-            if(!cliente.pagosHistorial) cliente.pagosHistorial = [];
-            
-            cliente.pagosHistorial.push(nuevoPago);
-            cliente.pagosHistorial.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
-
-            sincronizarStorage();
-            document.getElementById('form-pago').reset();
+        function agregarPago(e) { e.preventDefault();
+            baseClientes[clienteActualIndex].pagosHistorial.push({fecha: document.getElementById('pago-fecha').value, monto: parseFloat(document.getElementById('pago-monto').value)});
+            localStorage.setItem('ciodaro_fitness_db', JSON.stringify(baseClientes));
             renderizarSeccionesInternas();
-            renderizar();
         }
 
-        function eliminarPago(idx) {
-            if(clienteActualIndex === null || !confirm("¿Eliminar este pago?")) return;
-            baseClientes[clienteActualIndex].pagosHistorial.splice(idx, 1);
-            sincronizarStorage();
+        function agregarMetrica(e) { e.preventDefault();
+            baseClientes[clienteActualIndex].mediciones.push({
+                fecha: document.getElementById('m-fecha').value, peso: document.getElementById('m-peso').value,
+                cintura: document.getElementById('m-cintura').value, cuello: document.getElementById('m-cuello').value,
+                torax: document.getElementById('m-torax').value, biceps: document.getElementById('m-biceps').value,
+                gluteos: document.getElementById('m-gluteos').value, cuadriceps: document.getElementById('m-cuadriceps').value
+            });
+            localStorage.setItem('ciodaro_fitness_db', JSON.stringify(baseClientes));
             renderizarSeccionesInternas();
-            renderizar();
-        }
-
-        function agregarMetrica(e) {
-            e.preventDefault();
-            if(clienteActualIndex === null) return;
-
-            let cliente = baseClientes[clienteActualIndex];
-            let peso = parseFloat(document.getElementById('m-peso').value) || 0;
-            let estatura = parseFloat(document.getElementById('m-estatura').value) || 0;
-            let cuello = parseFloat(document.getElementById('m-cuello').value) || 0;
-            let cintura = parseFloat(document.getElementById('m-cintura').value) || 0;
-            let gluteo = parseFloat(document.getElementById('m-gluteos').value) || 0;
-
-            let nuevaMedicion = {
-                fecha: document.getElementById('m-fecha').value,
-                peso: peso,
-                estatura: estatura,
-                cuello: cuello,
-                torax: parseFloat(document.getElementById('m-torax').value) || 0,
-                cintura: cintura,
-                biceps: parseFloat(document.getElementById('m-biceps').value) || 0,
-                gluteos: gluteo,
-                cuadriceps: parseFloat(document.getElementById('m-cuadriceps').value) || 0,
-                imc: calcularIMC(peso, estatura),
-                grasa: calcularGrasaEstimada(cliente.genero, cintura, cuello, estatura, gluteo)
-            };
-
-            if(!cliente.mediciones) cliente.mediciones = [];
-            cliente.mediciones.push(nuevaMedicion);
-            cliente.mediciones.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-
-            sincronizarStorage();
-            document.getElementById('form-medidas-unico').reset();
-            renderizarSeccionesInternas();
-            renderizar();
-        }
-
-        function eliminarMetrica(idx) {
-            if(clienteActualIndex === null || !confirm("¿Eliminar esta medición?")) return;
-            baseClientes[clienteActualIndex].mediciones.splice(idx, 1);
-            sincronizarStorage();
-            renderizarSeccionesInternas();
-            renderizar();
         }
 
         function renderizarSeccionesInternas() {
-            if(clienteActualIndex === null) return;
-            let cliente = baseClientes[clienteActualIndex];
-
-            // 1. CONTROL DE SALDO DINÁMICO
-            let totalAbonado = 0;
-            if(cliente.pagosHistorial) {
-                cliente.pagosHistorial.forEach(p => totalAbonado += p.monto);
-            }
-            let saldoRestante = (cliente.cuota || 0) - totalAbonado;
-            let indicadorSaldo = document.getElementById('txt-saldo-pendiente');
-            
-            if(saldoRestante <= 0 && (cliente.cuota > 0)) {
-                indicadorSaldo.innerText = "🟢 TOTALMENTE PAGADO";
-                indicadorSaldo.className = "font-black text-emerald-400 text-xs";
-            } else {
-                indicadorSaldo.innerText = `⏳ Restan: $${saldoRestante}`;
-                indicadorSaldo.className = "font-black text-yellow-500 text-xs";
-            }
-
-            // 2. LISTADO DE PAGOS
-            let boxPagos = document.getElementById('lista-pagos-recientes');
-            boxPagos.innerHTML = "";
-            if(cliente.pagosHistorial && cliente.pagosHistorial.length > 0) {
-                cliente.pagosHistorial.forEach((pago, pIdx) => {
-                    let div = document.createElement('div');
-                    div.className = "flex justify-between items-center text-[11px] bg-ciodaro-grey p-1.5 rounded border border-zinc-800 text-zinc-300";
-                    div.innerHTML = `
-                        <span>📅 <b>${pago.fecha.split('-').reverse().join('/')}</b> -> Abonó: <b class="text-emerald-400">$${pago.monto}</b></span>
-                        <button onclick="eliminarPago(${pIdx})" class="text-red-400 hover:underline text-[10px]">✕ Quitar</button>
-                    `;
-                    boxPagos.appendChild(div);
-                });
-            } else {
-                boxPagos.innerHTML = `<p class="text-[11px] text-zinc-500 italic p-1">Sin abonos en este mes.</p>`;
-            }
-
-            // 3. LISTADO DE MÉTRICAS
-            let boxMetrics = document.getElementById('lista-metrics-progresivas');
-            boxMetrics.innerHTML = "";
-            if(cliente.mediciones && cliente.mediciones.length > 0) {
-                cliente.mediciones.forEach((med, mIdx) => {
-                    let div = document.createElement('div');
-                    div.className = "bg-ciodaro-black p-2.5 rounded border border-zinc-800 text-[11px] space-y-1.5";
-                    div.innerHTML = `
-                        <div class="flex justify-between items-center border-b border-zinc-800 pb-1">
-                            <span class="text-ciodaro-yellow font-black">📅 Medida: ${med.fecha.split('-').reverse().join('/')}</span>
-                            <button onclick="eliminarMetrica(${mIdx})" class="text-red-400 text-[10px] hover:underline">🗑️ Eliminar</button>
-                        </div>
-                        <div class="grid grid-cols-2 sm:grid-cols-5 gap-x-2 gap-y-1 text-zinc-300">
-                            <div><b>Peso:</b> ${med.peso} kg</div>
-                            <div><b>Cintura:</b> ${med.cintura} cm</div>
-                            <div><b>Grasa:</b> <span class="text-emerald-400 font-bold">${med.grasa}</span></div>
-                            <div><b>IMC:</b> ${med.imc}</div>
-                            <div><b>Bíceps:</b> ${med.biceps || '-'} cm</div>
-                        </div>
-                    `;
-                    boxMetrics.appendChild(div);
-                });
-            } else {
-                boxMetrics.innerHTML = `<p class="text-[11px] text-zinc-500 italic p-1">No hay evaluaciones cargadas progresivamente.</p>`;
-            }
+            let c = baseClientes[clienteActualIndex];
+            document.getElementById('lista-pagos-recientes').innerHTML = c.pagosHistorial.map(p => `<div class="flex justify-between"><span>${p.fecha}</span><span class="text-emerald-400">$${p.monto}</span></div>`).join('');
+            document.getElementById('lista-metrics-progresivas').innerHTML = c.mediciones.map((m, i) => `
+                <div class="bg-ciodaro-black p-3 rounded border border-zinc-800 text-[11px] space-y-2">
+                    <div class="border-b border-zinc-700 pb-1 text-ciodaro-yellow font-black">📅 Evaluación: ${m.fecha}</div>
+                    <div class="grid grid-cols-3 gap-2 text-zinc-300">
+                        <div><b>Peso:</b> ${m.peso}kg</div><div><b>Cintura:</b> ${m.cintura}cm</div>
+                        <div><b>Cuello:</b> ${m.cuello || '-'}cm</div><div><b>Tórax:</b> ${m.torax || '-'}cm</div>
+                        <div><b>Bíceps:</b> ${m.biceps || '-'}cm</div><div><b>Glúteo:</b> ${m.gluteos || '-'}cm</div>
+                        <div><b>Muslo:</b> ${m.cuadriceps || '-'}cm</div>
+                    </div>
+                </div>
+            `).join('');
         }
 
         function renderizar() {
-            let contenedor = document.getElementById('contenedor-clientes');
-            if(!contenedor) return;
-
-            let busqueda = (document.getElementById('buscador')?.value || '').toLowerCase();
-            let totalCajaPlanes = 0;
-            let totalCajaAbonos = 0;
-            
-            contenedor.innerHTML = "";
-
-            baseClientes.forEach((cliente, index) => {
-                if(!cliente || !cliente.nombre) return;
-
-                totalCajaPlanes += (parseFloat(cliente.cuota) || 0);
-
-                let totalAbonadoPorCliente = 0;
-                if(cliente.pagosHistorial) {
-                    cliente.pagosHistorial.forEach(p => totalAbonadoPorCliente += p.monto);
-                }
-                totalCajaAbonos += totalAbonadoPorCliente;
-
-                if(!cliente.nombre.toLowerCase().includes(busqueda)) return;
-
-                let ult = (cliente.mediciones && cliente.mediciones.length > 0) ? cliente.mediciones[0] : null;
-                let penult = (cliente.mediciones && cliente.mediciones.length > 1) ? cliente.mediciones[1] : null;
-
-                let evalPeso = ult ? `${ult.peso}kg` : '-';
-                if(penult && ult) evalPeso = `${penult.peso}kg ➡️ ${ult.peso}kg`;
-
-                let evalGrasa = ult ? `${ult.grasa}` : '-';
-
-                let fila = document.createElement('div');
-                fila.className = "bg-ciodaro-grey p-4 rounded-lg border border-zinc-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-sm hover:border-zinc-700 transition";
-                fila.innerHTML = `
-                    <div class="flex-1 space-y-2 w-full">
-                        <div class="flex items-center justify-between sm:justify-start gap-2 flex-wrap">
-                            <h3 class="font-black text-white uppercase text-base tracking-tight">${cliente.nombre}</h3>
-                            <span class="text-xs text-zinc-500">(${cliente.edad || '?'} años)</span>
-                        </div>
-                        <div class="grid grid-cols-3 gap-1 text-center text-[10px] sm:text-[11px] bg-black/40 p-2 rounded border border-zinc-800/60">
-                            <div><span class="text-zinc-500 block text-[8px] uppercase font-bold">Plan / Abono</span><span class="text-zinc-300 font-bold">$${cliente.cuota} / <span class="text-emerald-400">$${totalAbonadoPorCliente}</span></span></div>
-                            <div><span class="text-zinc-500 block text-[8px] uppercase font-bold">Progreso Peso</span><span class="text-zinc-300">${evalPeso}</span></div>
-                            <div><span class="text-zinc-500 block text-[8px] uppercase font-bold">% Grasa</span><span class="text-ciodaro-yellow font-bold">${evalGrasa}</span></div>
-                        </div>
-                    </div>
-                    <div class="flex gap-1 w-full sm:w-auto justify-end shrink-0">
-                        <button onclick="abrirExpedienteUnico(${index})" class="bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-ciodaro-yellow px-3 py-2 rounded font-black text-xs uppercase tracking-wider flex-1 sm:flex-none">📂 Ver Expediente</button>
-                        <button onclick="eliminarCliente(${index})" class="bg-red-950/30 hover:bg-red-900/40 text-red-400 p-2 rounded text-xs">🗑️</button>
-                    </div>
-                `;
-                contenedor.appendChild(fila);
-            });
-
-            document.getElementById('txt-caja-total').innerText = `$${totalCajaPlanes.toLocaleString()}`;
-            document.getElementById('txt-caja-abonos').innerText = `$${totalCajaAbonos.toLocaleString()}`;
+            let total = baseClientes.reduce((acc, c) => acc + (c.cuota || 0), 0);
+            document.getElementById('txt-caja-total').innerText = `$${total}`;
+            document.getElementById('contenedor-clientes').innerHTML = baseClientes.map((c, i) => `
+                <div class="bg-ciodaro-grey p-4 rounded-lg border border-zinc-800 flex justify-between items-center">
+                    <h3 class="font-black text-sm">${c.nombre}</h3>
+                    <button onclick="abrirExpedienteUnico(${i})" class="bg-zinc-800 text-ciodaro-yellow px-3 py-1 rounded text-xs font-black">📂 EXPEDIENTE</button>
+                </div>
+            `).join('');
         }
-
-        function eliminarCliente(index) {
-            if(confirm(`¿Eliminar por completo este alumno con todos sus pagos y meses de métricas?`)) {
-                baseClientes.splice(index, 1);
-                sincronizarStorage();
-                renderizar();
-            }
-        }
-
-        function sincronizarStorage() { localStorage.setItem('ciodaro_fitness_db', JSON.stringify(baseClientes)); }
-        window.onload = function() { renderizar(); };
+        window.onload = renderizar;
     </script>
 </body>
 </html>
