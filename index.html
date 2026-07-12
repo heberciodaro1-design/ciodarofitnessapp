@@ -2,62 +2,61 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CiodaroFitness Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; }
-        .box { background: #09090b; border: 1px solid #1c1c1e; border-radius: 16px; padding: 20px; }
-        .input-dark { background: #000; border: 1px solid #27272a; padding: 12px; width: 100%; border-radius: 12px; color: #fff; }
-        .hidden-text { filter: blur(5px); pointer-events: none; }
+        body { background: #000; color: #fff; font-family: sans-serif; font-size: 18px; }
+        .box { background: #09090b; border: 1px solid #1c1c1e; border-radius: 20px; padding: 25px; margin-bottom: 20px; }
+        .input-dark { background: #000; border: 2px solid #27272a; padding: 20px; width: 100%; border-radius: 16px; color: #fff; font-size: 18px; margin-bottom: 15px; }
+        .btn { padding: 20px; border-radius: 16px; font-weight: 900; font-size: 18px; text-transform: uppercase; width: 100%; }
+        .hidden-text { filter: blur(8px); pointer-events: none; }
     </style>
 </head>
-<body class="p-4">
+<body class="p-5">
 
-    <!-- CABECERA PRINCIPAL -->
-    <header class="box mb-6">
-        <div class="flex justify-between items-center mb-4">
-            <h1 class="font-black text-yellow-500 text-2xl tracking-tighter">CIODAROFITNESS</h1>
-            <button onclick="toggleMontos()" class="text-[10px] bg-zinc-800 p-2 rounded-lg">👁️ OCULTAR MONTOS</button>
+    <header class="box">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="font-black text-yellow-500 text-3xl tracking-tighter">CIODAROFITNESS</h1>
+            <button onclick="toggleMontos()" class="text-xs bg-zinc-800 p-3 rounded-xl">👁️ OCULTAR</button>
         </div>
         <div class="grid grid-cols-2 gap-4">
-            <div><p class="text-[10px] text-zinc-500 uppercase">Valor Total Planes</p><span id="val-planes" class="text-xl font-black">$0</span></div>
-            <div><p class="text-[10px] text-zinc-500 uppercase">Total Recaudado</p><span id="val-recaudado" class="text-xl font-black text-emerald-500">$0</span></div>
+            <div><p class="text-[12px] text-zinc-500 uppercase">Valor Planes</p><span id="val-planes" class="text-3xl font-black">$0</span></div>
+            <div><p class="text-[12px] text-zinc-500 uppercase">Recaudado</p><span id="val-recaudado" class="text-3xl font-black text-emerald-500">$0</span></div>
         </div>
     </header>
 
-    <input type="text" id="busc" onkeyup="render()" placeholder="🔍 Buscar alumno..." class="input-dark mb-6">
-    <button onclick="abrirModal(null)" class="w-full bg-yellow-500 text-black font-black p-4 rounded-xl mb-6 uppercase">➕ Nuevo Alumno</button>
+    <input type="text" id="busc" onkeyup="render()" placeholder="🔍 Buscar alumno..." class="input-dark">
+    <button onclick="abrirModal(null)" class="btn bg-yellow-500 text-black mb-8">➕ Nuevo Alumno</button>
 
     <div id="lista" class="space-y-4"></div>
 
-    <!-- MODAL -->
-    <div id="modal" class="fixed inset-0 bg-black hidden p-4 overflow-y-auto">
-        <button onclick="document.getElementById('modal').classList.add('hidden')" class="mb-4">✕ Volver</button>
+    <div id="modal" class="fixed inset-0 bg-black hidden p-5 overflow-y-auto z-50">
+        <button onclick="document.getElementById('modal').classList.add('hidden')" class="mb-8 text-xl font-bold">✕ Cerrar</button>
         <div class="space-y-6">
             <input type="text" id="ex-nom" placeholder="Nombre" class="input-dark">
-            <div class="grid grid-cols-3 gap-2">
+            <div class="grid grid-cols-2 gap-4">
                 <input type="number" id="ex-edad" placeholder="Edad" class="input-dark">
-                <input type="number" id="ex-peso" placeholder="Peso" class="input-dark">
-                <input type="number" id="ex-est" placeholder="Estatura" class="input-dark">
+                <input type="number" id="ex-peso" placeholder="Peso (kg)" class="input-dark">
             </div>
+            <input type="number" id="ex-est" placeholder="Estatura (cm)" class="input-dark">
             <input type="number" id="ex-plan" placeholder="Valor del Plan" class="input-dark">
             
             <div class="box">
-                <h3 class="text-xs uppercase text-zinc-500 mb-4">Antropometría</h3>
-                <div class="grid grid-cols-2 gap-2 text-sm">
-                    <input type="number" id="m-c" placeholder="Cuello">
-                    <input type="number" id="m-t" placeholder="Tórax">
-                    <input type="number" id="m-b" placeholder="Bíceps">
-                    <input type="number" id="m-cin" placeholder="Cintura">
-                    <input type="number" id="m-g" placeholder="Glúteos">
-                    <input type="number" id="m-cuad" placeholder="Cuádriceps">
-                    <input type="number" id="m-pan" placeholder="Pantorrilla">
+                <h3 class="text-sm uppercase text-zinc-500 mb-6">Antropometría</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="number" id="m-c" placeholder="Cuello" class="input-dark">
+                    <input type="number" id="m-t" placeholder="Tórax" class="input-dark">
+                    <input type="number" id="m-b" placeholder="Bíceps" class="input-dark">
+                    <input type="number" id="m-cin" placeholder="Cintura" class="input-dark">
+                    <input type="number" id="m-g" placeholder="Glúteos" class="input-dark">
+                    <input type="number" id="m-cuad" placeholder="Cuád." class="input-dark">
+                    <input type="number" id="m-pan" placeholder="Pantorrilla" class="input-dark">
                 </div>
-                <button onclick="guardarMetrica()" class="w-full bg-yellow-500 text-black font-black p-3 mt-4 rounded-lg uppercase text-xs">Guardar Métrica y Calcular</button>
-                <div id="hist-met" class="mt-4 text-xs space-y-2"></div>
+                <button onclick="guardarMetrica()" class="btn bg-yellow-500 text-black mt-4">Guardar y Calcular</button>
+                <div id="hist-met" class="mt-8 text-base space-y-3"></div>
             </div>
-
-            <button onclick="guardarCliente()" class="w-full bg-zinc-800 p-4 rounded-xl font-bold">GUARDAR TODO</button>
+            <button onclick="guardarCliente()" class="btn bg-zinc-800">GUARDAR TODO</button>
         </div>
     </div>
 
@@ -68,7 +67,7 @@
 
         function toggleMontos() {
             montosVisibles = !montosVisibles;
-            document.querySelectorAll('span[id^="val-"], span.monto').forEach(el => el.classList.toggle('hidden-text', !montosVisibles));
+            document.querySelectorAll('span[id^="val-"], .monto').forEach(el => el.classList.toggle('hidden-text', !montosVisibles));
         }
 
         function render() {
@@ -79,8 +78,8 @@
             
             document.getElementById('lista').innerHTML = db.map((c, i) => `
                 <div class="box flex justify-between items-center">
-                    <div><h3 class="font-bold">${c.nom}</h3><span class="text-xs text-zinc-500">Plan: <span class="monto">$${c.plan}</span></span></div>
-                    <button onclick="abrirModal(${i})" class="bg-zinc-900 px-4 py-2 rounded-lg font-bold text-xs">EXPEDIENTE</button>
+                    <div><h3 class="font-bold text-xl">${c.nom}</h3><span class="text-sm text-zinc-500">Plan: <span class="monto">$${c.plan}</span></span></div>
+                    <button onclick="abrirModal(${i})" class="bg-zinc-900 px-6 py-4 rounded-xl font-bold text-sm border border-zinc-700">EXPEDIENTE</button>
                 </div>
             `).join('');
         }
@@ -108,7 +107,7 @@
 
         function renderMetricas() {
             document.getElementById('hist-met').innerHTML = (db[cur].met||[]).map(m => 
-                `<div class="flex justify-between border-b border-zinc-900 py-1"><span>${m.fecha}</span><span>IMC: ${m.imc} | Grasa: ${m.grasa}%</span></div>`
+                `<div class="flex justify-between border-b border-zinc-900 py-3"><span>${m.fecha}</span><span class="font-bold">IMC: ${m.imc} | Grasa: ${m.grasa}%</span></div>`
             ).join('');
         }
 
