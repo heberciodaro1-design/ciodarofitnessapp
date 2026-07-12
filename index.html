@@ -36,12 +36,22 @@
         <div class="space-y-4">
             <input type="text" id="ex-nom" placeholder="Nombre" class="input-dark">
             <div class="grid grid-cols-2 gap-2">
-                <input type="number" id="ex-edad" placeholder="Edad" class="input-dark">
                 <input type="number" id="ex-peso" placeholder="Peso (kg)" class="input-dark">
+                <input type="number" id="ex-est" placeholder="Estatura (cm)" class="input-dark">
             </div>
-            <input type="number" id="ex-est" placeholder="Estatura (cm)" class="input-dark">
             <input type="number" id="ex-plan" placeholder="Valor del Plan" class="input-dark">
             
+            <!-- SECCIÓN PAGOS -->
+            <div class="box">
+                <h3 class="text-[10px] uppercase text-zinc-500 mb-2">Historial de Pagos</h3>
+                <div class="flex gap-2">
+                    <input type="number" id="nuevo-pago" placeholder="$" class="input-dark">
+                    <button onclick="agregarPago()" class="btn bg-emerald-600 text-white w-auto">ADD</button>
+                </div>
+                <div id="hist-pagos" class="text-xs space-y-1"></div>
+            </div>
+            
+            <!-- SECCIÓN ANTROPOMETRÍA -->
             <div class="box">
                 <h3 class="text-[10px] uppercase text-zinc-500 mb-3">Antropometría</h3>
                 <div class="grid grid-cols-2 gap-2">
@@ -63,12 +73,6 @@
     <script>
         let db = JSON.parse(localStorage.getItem('ciodaro_db')) || [];
         let cur = null;
-        let montosVisibles = true;
-
-        function toggleMontos() {
-            montosVisibles = !montosVisibles;
-            document.querySelectorAll('span[id^="val-"], .monto').forEach(el => el.classList.toggle('hidden-text', !montosVisibles));
-        }
 
         function render() {
             let totalPlanes = db.reduce((a, b) => a + parseFloat(b.plan||0), 0);
@@ -78,7 +82,7 @@
             
             document.getElementById('lista').innerHTML = db.map((c, i) => `
                 <div class="box flex justify-between items-center">
-                    <div><h3 class="font-bold text-sm">${c.nom}</h3><span class="text-[10px] text-zinc-500">Plan: <span class="monto">$${c.plan}</span></span></div>
+                    <div><h3 class="font-bold text-sm">${c.nom}</h3><span class="text-[10px] text-zinc-500">Plan: $${c.plan}</span></div>
                     <button onclick="abrirModal(${i})" class="bg-zinc-900 px-3 py-2 rounded-lg font-bold text-[10px] border border-zinc-700">EXPEDIENTE</button>
                 </div>
             `).join('');
@@ -89,9 +93,25 @@
             if(i !== null) {
                 document.getElementById('ex-nom').value = db[i].nom;
                 document.getElementById('ex-plan').value = db[i].plan;
+                document.getElementById('ex-peso').value = db[i].peso || '';
+                document.getElementById('ex-est').value = db[i].est || '';
+                renderPagos();
                 renderMetricas();
             }
             document.getElementById('modal').classList.remove('hidden');
+        }
+
+        function agregarPago() {
+            let monto = parseFloat(document.getElementById('nuevo-pago').value);
+            if(!db[cur].pagos) db[cur].pagos = [];
+            db[cur].pagos.push(monto);
+            localStorage.setItem('ciodaro_db', JSON.stringify(db));
+            renderPagos();
+            render();
+        }
+
+        function renderPagos() {
+            document.getElementById('hist-pagos').innerHTML = (db[cur].pagos||[]).map(p => `<div class="border-b border-zinc-900 py-1">Pago: $${p}</div>`).join('');
         }
 
         function guardarMetrica() {
@@ -101,6 +121,7 @@
             let grasa = (imc * 1.2).toFixed(1);
             if(!db[cur].met) db[cur].met = [];
             db[cur].met.push({fecha: new Date().toLocaleDateString(), imc, grasa});
+            db[cur].peso = p; db[cur].est = h*100;
             localStorage.setItem('ciodaro_db', JSON.stringify(db));
             renderMetricas();
         }
@@ -112,7 +133,7 @@
         }
 
         function guardarCliente() {
-            let data = { nom: document.getElementById('ex-nom').value, plan: document.getElementById('ex-plan').value };
+            let data = { nom: document.getElementById('ex-nom').value, plan: document.getElementById('ex-plan').value, peso: document.getElementById('ex-peso').value, est: document.getElementById('ex-est').value };
             if(cur === null) { db.push({...data, pagos: [], met: []}); }
             else { db[cur] = {...db[cur], ...data}; }
             localStorage.setItem('ciodaro_db', JSON.stringify(db));
