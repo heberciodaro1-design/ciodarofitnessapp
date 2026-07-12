@@ -38,9 +38,10 @@
         </div>
         <div class="space-y-4">
             <input type="text" id="ex-nom" placeholder="Nombre" class="input-dark">
-            <div class="grid grid-cols-2 gap-2">
+            <div class="grid grid-cols-3 gap-2">
+                <input type="number" id="ex-edad" placeholder="Edad" class="input-dark">
                 <input type="number" id="ex-peso" placeholder="Peso (kg)" class="input-dark">
-                <input type="number" id="ex-est" placeholder="Estatura (cm)" class="input-dark">
+                <input type="number" id="ex-est" placeholder="Est. (cm)" class="input-dark">
             </div>
             <input type="number" id="ex-plan" placeholder="Valor del Plan" class="input-dark">
             
@@ -55,7 +56,7 @@
             </div>
             
             <div class="box">
-                <h3 class="text-[10px] uppercase text-yellow-500 mb-3 border-b border-zinc-800 pb-2">Antropometría Elegante</h3>
+                <h3 class="text-[10px] uppercase text-yellow-500 mb-3 border-b border-zinc-800 pb-2">ANTROPOMETRÍA</h3>
                 <div class="grid grid-cols-2 gap-2">
                     <input type="number" id="m-c" placeholder="Cuello" class="input-dark">
                     <input type="number" id="m-t" placeholder="Tórax" class="input-dark">
@@ -93,11 +94,12 @@
             cur = i;
             if(i !== null) {
                 document.getElementById('ex-nom').value = db[i].nom;
+                document.getElementById('ex-edad').value = db[i].edad || '';
                 document.getElementById('ex-plan').value = db[i].plan;
                 document.getElementById('ex-peso').value = db[i].peso || '';
                 document.getElementById('ex-est').value = db[i].est || '';
                 renderPagos(); renderMetricas();
-            } else { document.getElementById('ex-nom').value = ''; document.getElementById('hist-pagos').innerHTML = ''; document.getElementById('hist-met').innerHTML = ''; }
+            } else { document.getElementById('ex-nom').value = ''; document.getElementById('ex-edad').value = ''; document.getElementById('hist-pagos').innerHTML = ''; document.getElementById('hist-met').innerHTML = ''; }
             document.getElementById('modal').classList.remove('hidden');
         }
 
@@ -144,7 +146,7 @@
         }
 
         function guardarCliente() {
-            let data = { nom: document.getElementById('ex-nom').value, plan: document.getElementById('ex-plan').value, peso: document.getElementById('ex-peso').value, est: document.getElementById('ex-est').value };
+            let data = { nom: document.getElementById('ex-nom').value, edad: document.getElementById('ex-edad').value, plan: document.getElementById('ex-plan').value, peso: document.getElementById('ex-peso').value, est: document.getElementById('ex-est').value };
             if(cur === null) { db.push({...data, pagos: [], met: []}); }
             else { db[cur] = {...db[cur], ...data}; }
             localStorage.setItem('ciodaro_db', JSON.stringify(db));
