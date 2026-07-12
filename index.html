@@ -41,9 +41,9 @@
         <div class="space-y-4">
             <input type="text" id="ex-nom" placeholder="Nombre del Alumno" class="input-dark">
             <div class="grid grid-cols-3 gap-2">
-                <input type="number" id="ex-edad" placeholder="Edad (E)" class="input-dark">
-                <input type="number" id="ex-peso" placeholder="Peso (P)" class="input-dark">
-                <input type="number" id="ex-est" placeholder="Est. (H)" class="input-dark">
+                <input type="number" id="ex-edad" placeholder="E" class="input-dark">
+                <input type="number" id="ex-peso" placeholder="P" class="input-dark">
+                <input type="number" id="ex-est" placeholder="H" class="input-dark">
             </div>
             <input type="number" id="ex-plan" placeholder="Valor del Plan ($)" class="input-dark">
             
@@ -108,7 +108,7 @@
                 document.getElementById('ex-peso').value = db[i].peso || '';
                 document.getElementById('ex-est').value = db[i].est || '';
                 renderPagos(); renderMetricas();
-            } else { document.getElementById('ex-nom').value = ''; document.getElementById('hist-pagos').innerHTML = ''; document.getElementById('hist-met').innerHTML = ''; }
+            } else { document.getElementById('ex-nom').value = ''; document.getElementById('ex-edad').value = ''; document.getElementById('ex-peso').value = ''; document.getElementById('ex-est').value = ''; document.getElementById('ex-plan').value = ''; document.getElementById('hist-pagos').innerHTML = ''; document.getElementById('hist-met').innerHTML = ''; document.getElementById('m-c').value = ''; document.getElementById('m-t').value = ''; document.getElementById('m-b').value = ''; document.getElementById('m-cin').value = ''; document.getElementById('m-g').value = ''; document.getElementById('m-cuad').value = ''; document.getElementById('m-pan').value = ''; }
             document.getElementById('modal').classList.remove('hidden');
         }
 
@@ -151,10 +151,10 @@
             document.getElementById('hist-met').innerHTML = (db[cur].met||[]).map((m, i) => `<div class="comp-card">
                 <div class="flex justify-between font-bold text-yellow-500 mb-1"><span>FECHA: ${m.fecha}</span><button onclick="borrarMetrica(${i})" class="text-red-500 text-[10px]">ELIMINAR</button></div>
                 <div class="grid grid-cols-2 gap-1 text-[11px]">
-                    <span>IMC: <b>${m.imc}</b></span> <span>CUELLO: <b>${m.c}</b></span>
-                    <span>TÓRAX: <b>${m.t}</b></span> <span>BÍCEPS: <b>${m.b}</b></span>
-                    <span>CINTURA: <b>${m.cin}</b></span> <span>GLÚTEOS: <b>${m.g}</b></span>
-                    <span>CUÁD.: <b>${m.cuad}</b></span> <span>PANTO.: <b>${m.pan}</b></span>
+                    <span>IMC: <b>${m.imc}</b></span> <span>C: <b>${m.c}</b></span>
+                    <span>T: <b>${m.t}</b></span> <span>B: <b>${m.b}</b></span>
+                    <span>CI: <b>${m.cin}</b></span> <span>G: <b>${m.g}</b></span>
+                    <span>CU: <b>${m.cuad}</b></span> <span>P: <b>${m.pan}</b></span>
                 </div>
             </div>`).join('');
         }
