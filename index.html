@@ -3,161 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ciodarofitness Pro</title>
+    <title>Ciodarofitness</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = { theme: { extend: { colors: { 
-            'ciodaro-black': '#09090b', 'ciodaro-grey': '#1c1c1e', 
-            'ciodaro-input': '#2c2c2e', 'ciodaro-yellow': '#facc15' 
-        }}}}
-    </script>
+    <style>
+        body { background-color: #000; color: #fff; }
+        .bg-invisible { background-color: #09090b; border: 1px solid #18181b; }
+        .input-inv { background: #000; border: 1px solid #18181b; padding: 10px; width: 100%; border-radius: 8px; }
+    </style>
 </head>
-<body class="bg-ciodaro-black text-zinc-100 font-sans min-h-screen pb-12">
+<body class="p-4 max-w-md mx-auto">
 
-    <div class="max-w-4xl mx-auto p-4 space-y-4">
-        <!-- HEADER CON CAJA TOTAL -->
-        <header class="flex justify-between items-center bg-ciodaro-grey p-4 rounded-xl border border-zinc-800">
-            <div>
-                <h1 class="text-lg font-black text-ciodaro-yellow tracking-tighter">CIODAROFITNESS</h1>
-            </div>
-            <div class="text-right">
-                <p class="text-[9px] text-zinc-500 uppercase font-bold">Total Caja</p>
-                <h2 id="txt-caja-global" class="text-lg font-black text-emerald-400">$0</h2>
-            </div>
-        </header>
+    <!-- PANTALLA PRINCIPAL -->
+    <header class="bg-invisible p-5 rounded-2xl mb-4 flex justify-between items-center">
+        <h1 class="font-black text-yellow-500">CIODAROFITNESS</h1>
+        <div class="text-right">
+            <p class="text-[9px] text-zinc-600 uppercase">Total Caja</p>
+            <span id="txt-caja-global" class="font-black text-emerald-500">$0</span>
+        </div>
+    </header>
 
-        <!-- BUSCADOR -->
-        <input type="text" id="input-buscador" onkeyup="renderizar()" placeholder="🔍 Buscar alumno..." class="w-full bg-ciodaro-grey border border-zinc-800 p-3 rounded-lg text-sm outline-none focus:border-ciodaro-yellow transition-all">
-
-        <button onclick="abrirExpedienteUnico(null)" class="w-full bg-ciodaro-yellow text-black font-black p-3 rounded-lg uppercase tracking-wider text-sm">➕ Nuevo Alumno</button>
-
-        <div id="contenedor-clientes" class="space-y-2"></div>
-    </div>
+    <input type="text" id="input-buscador" onkeyup="renderizar()" placeholder="🔍 Buscar alumno..." class="input-inv mb-4 text-sm">
+    <button onclick="abrirExpediente(null)" class="w-full bg-yellow-500 text-black font-black p-3 rounded-xl mb-4 uppercase text-sm">➕ Nuevo Alumno</button>
+    <div id="contenedor-clientes" class="space-y-3"></div>
 
     <!-- MODAL EXPEDIENTE -->
-    <div id="modal-expediente" class="fixed inset-0 bg-black/95 hidden flex items-start justify-center p-4 z-50 overflow-y-auto">
-        <div class="bg-ciodaro-grey w-full max-w-2xl rounded-xl border border-zinc-800 p-4 space-y-5 my-2">
-            <div class="flex justify-between items-center border-b border-zinc-800 pb-2">
-                <h2 class="text-base font-black text-ciodaro-yellow uppercase">Ficha del Alumno</h2>
-                <button onclick="cerrarExpediente()" class="text-white text-xl">✕</button>
-            </div>
-
-            <!-- SECCIÓN 1: PERFIL -->
-            <section class="bg-ciodaro-black/40 p-3 rounded-xl border border-zinc-800 space-y-2">
-                <input type="text" id="ex-nombre" placeholder="Nombre completo" class="w-full bg-ciodaro-input p-2 rounded text-sm">
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="number" id="ex-edad" placeholder="Edad" class="bg-ciodaro-input p-2 rounded text-sm">
-                    <select id="ex-genero" class="bg-ciodaro-input p-2 rounded text-sm text-zinc-400"><option value="M">Masculino</option><option value="F">Femenino</option></select>
+    <div id="modal" class="fixed inset-0 bg-black hidden p-4 overflow-y-auto">
+        <button onclick="document.getElementById('modal').classList.add('hidden')" class="text-zinc-500 mb-4">← Volver</button>
+        <div id="contenido-modal" class="space-y-4">
+            <input type="text" id="ex-nombre" placeholder="Nombre" class="input-inv">
+            
+            <section class="bg-invisible p-4 rounded-xl">
+                <h3 class="text-[10px] text-zinc-500 uppercase mb-2">Registro de Pagos</h3>
+                <div class="flex gap-2 mb-2">
+                    <input type="date" id="pago-fecha" class="input-inv text-[10px]">
+                    <input type="number" id="pago-monto" placeholder="$" class="input-inv w-20">
+                    <button onclick="agregarPago()" class="bg-emerald-600 px-4 rounded-lg font-black">+</button>
                 </div>
-                <button type="button" onclick="guardarDatosPerfil()" class="w-full bg-zinc-800 text-ciodaro-yellow font-black p-2 rounded uppercase text-[11px]">💾 Guardar Perfil</button>
+                <div id="lista-pagos" class="text-xs"></div>
             </section>
 
-            <div id="bloques-historial-progresivo" class="space-y-5 hidden">
-                <!-- SECCIÓN 2: CAJA DE ABONOS -->
-                <section class="bg-ciodaro-black/40 p-3 rounded-xl border border-zinc-800">
-                    <h3 class="text-[11px] font-black text-emerald-400 uppercase border-b border-zinc-800 pb-1 mb-2">Caja de Abonos</h3>
-                    <div class="flex gap-2">
-                        <input type="number" id="pago-monto" placeholder="$" class="bg-ciodaro-input p-2 rounded text-sm w-20">
-                        <button onclick="agregarPago()" class="bg-emerald-600 px-4 rounded text-black font-black">+</button>
-                    </div>
-                    <div id="lista-pagos" class="mt-2 text-xs text-zinc-400"></div>
-                </section>
-
-                <!-- SECCIÓN 3: ANTROPOMETRÍA Y CÁLCULOS -->
-                <section class="bg-ciodaro-black/40 p-3 rounded-xl border border-zinc-800">
-                    <h3 class="text-[11px] font-black text-ciodaro-yellow uppercase border-b border-zinc-800 pb-1 mb-2">Antropometría</h3>
-                    <form onsubmit="agregarMetrica(event)" class="grid grid-cols-2 gap-2 text-[10px]">
-                        <input type="number" step="0.1" id="m-peso" placeholder="Peso (kg)" class="bg-ciodaro-input p-1 rounded">
-                        <input type="number" step="0.1" id="m-estatura" placeholder="Altura (cm)" class="bg-ciodaro-input p-1 rounded">
-                        <input type="number" step="0.1" id="m-cuello" placeholder="Cuello (cm)" class="bg-ciodaro-input p-1 rounded">
-                        <input type="number" step="0.1" id="m-torax" placeholder="Tórax (cm)" class="bg-ciodaro-input p-1 rounded">
-                        <input type="number" step="0.1" id="m-biceps" placeholder="Bíceps (cm)" class="bg-ciodaro-input p-1 rounded">
-                        <input type="number" step="0.1" id="m-cintura" placeholder="Cintura (cm)" class="bg-ciodaro-input p-1 rounded">
-                        <input type="number" step="0.1" id="m-gluteo" placeholder="Glúteo (cm)" class="bg-ciodaro-input p-1 rounded">
-                        <input type="number" step="0.1" id="m-muslo" placeholder="Muslo (cm)" class="bg-ciodaro-input p-1 rounded">
-                        <button class="col-span-2 bg-ciodaro-yellow text-black font-black p-2 rounded uppercase">💾 Calcular y Guardar</button>
-                    </form>
-                    <div id="lista-metrics" class="space-y-2 mt-4"></div>
-                </section>
-            </div>
+            <section class="bg-invisible p-4 rounded-xl">
+                <h3 class="text-[10px] text-zinc-500 uppercase mb-2">Métricas Mensuales</h3>
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <input type="number" id="m-peso" placeholder="Kg" class="input-inv">
+                    <input type="number" id="m-altura" placeholder="Cm" class="input-inv">
+                </div>
+                <button onclick="agregarMetrica()" class="w-full bg-yellow-500 text-black font-black p-2 rounded-lg text-xs uppercase">Guardar Métrica</button>
+                <div id="lista-metrics" class="mt-4 text-xs space-y-1"></div>
+            </section>
+            <button onclick="guardarPerfil()" class="w-full bg-zinc-800 p-3 rounded-xl font-bold">Guardar Cambios</button>
         </div>
     </div>
 
     <script>
-        let baseClientes = JSON.parse(localStorage.getItem('ciodaro_fitness_db')) || [];
-        let clienteActualIndex = null;
+        let db = JSON.parse(localStorage.getItem('db')) || [];
+        let idx = null;
 
-        function abrirExpedienteUnico(index) {
-            clienteActualIndex = index;
-            document.getElementById('modal-expediente').classList.remove('hidden');
-            if (index !== null) {
-                let c = baseClientes[index];
-                document.getElementById('ex-nombre').value = c.nombre;
-                document.getElementById('ex-edad').value = c.edad;
-                document.getElementById('ex-genero').value = c.genero;
-                document.getElementById('bloques-historial-progresivo').classList.remove('hidden');
-                renderizarSecciones();
-            } else { document.getElementById('bloques-historial-progresivo').classList.add('hidden'); }
+        function renderizar() {
+            let total = 0;
+            db.forEach(c => c.pagos.forEach(p => total += p.monto));
+            document.getElementById('txt-caja-global').innerText = `$${total}`;
+            
+            let filtro = document.getElementById('input-buscador').value.toLowerCase();
+            document.getElementById('contenedor-clientes').innerHTML = db.filter(c => c.nombre.toLowerCase().includes(filtro)).map((c, i) => `
+                <div class="bg-invisible p-4 rounded-2xl flex justify-between items-center">
+                    <span class="font-bold text-sm">${c.nombre}</span>
+                    <button onclick="abrirExpediente(${i})" class="text-[10px] bg-zinc-900 px-3 py-1 rounded-lg border border-zinc-700">📂 EXPEDIENTE</button>
+                </div>
+            `).join('');
         }
 
-        function cerrarExpediente() { document.getElementById('modal-expediente').classList.add('hidden'); renderizar(); }
-
-        function guardarDatosPerfil() {
-            let datos = { 
-                nombre: document.getElementById('ex-nombre').value, 
-                edad: document.getElementById('ex-edad').value,
-                genero: document.getElementById('ex-genero').value,
-                pagos: clienteActualIndex !== null ? baseClientes[clienteActualIndex].pagos : [], 
-                mediciones: clienteActualIndex !== null ? baseClientes[clienteActualIndex].mediciones : [] 
-            };
-            if(clienteActualIndex === null) { baseClientes.push(datos); clienteActualIndex = baseClientes.length - 1; }
-            else { baseClientes[clienteActualIndex] = {...baseClientes[clienteActualIndex], ...datos}; }
-            localStorage.setItem('ciodaro_fitness_db', JSON.stringify(baseClientes));
-            document.getElementById('bloques-historial-progresivo').classList.remove('hidden');
+        function abrirExpediente(i) {
+            idx = i;
+            if(i !== null) {
+                document.getElementById('ex-nombre').value = db[i].nombre;
+                renderizarModal();
+            }
+            document.getElementById('modal').classList.remove('hidden');
         }
 
         function agregarPago() {
             let m = parseFloat(document.getElementById('pago-monto').value);
-            if(!m) return;
-            baseClientes[clienteActualIndex].pagos.push(m);
-            localStorage.setItem('ciodaro_fitness_db', JSON.stringify(baseClientes));
-            renderizarSecciones();
+            let f = document.getElementById('pago-fecha').value;
+            db[idx].pagos.push({fecha: f, monto: m});
+            localStorage.setItem('db', JSON.stringify(db));
+            renderizarModal();
         }
 
-        function agregarMetrica(e) { e.preventDefault();
+        function agregarMetrica() {
             let p = parseFloat(document.getElementById('m-peso').value);
-            let h = parseFloat(document.getElementById('m-estatura').value) / 100;
+            let h = parseFloat(document.getElementById('m-altura').value) / 100;
             let imc = (p / (h * h)).toFixed(1);
-            let gen = document.getElementById('ex-genero').value === 'M' ? 1 : 0;
-            let grasa = (1.2 * imc + 0.23 * document.getElementById('ex-edad').value - 10.8 * gen - 5.4).toFixed(1);
-            
-            baseClientes[clienteActualIndex].mediciones.push({ imc, grasa, fecha: new Date().toLocaleDateString() });
-            localStorage.setItem('ciodaro_fitness_db', JSON.stringify(baseClientes));
-            renderizarSecciones();
+            db[idx].metrics.push({fecha: new Date().toLocaleDateString(), imc: imc});
+            localStorage.setItem('db', JSON.stringify(db));
+            renderizarModal();
         }
 
-        function renderizarSecciones() {
-            let c = baseClientes[clienteActualIndex];
-            document.getElementById('lista-pagos').innerHTML = c.pagos.map(p => `<div class="text-emerald-400">+$${p}</div>`).join('');
-            document.getElementById('lista-metrics').innerHTML = c.mediciones.map(m => `
-                <div class="bg-black p-2 rounded border border-zinc-800 flex justify-between">
-                    <span>${m.fecha}</span>
-                    <span class="font-bold">IMC: ${m.imc}</span>
-                    <span class="text-emerald-400 font-bold">Gr: ${m.grasa}%</span>
-                </div>
-            `).join('');
+        function renderizarModal() {
+            document.getElementById('lista-pagos').innerHTML = db[idx].pagos.map(p => `<div class="flex justify-between"><span>${p.fecha}</span><span class="text-emerald-500">+$${p.monto}</span></div>`).join('');
+            document.getElementById('lista-metrics').innerHTML = db[idx].metrics.map(m => `<div class="flex justify-between"><span>${m.fecha}</span><span class="font-bold">IMC: ${m.imc}</span></div>`).join('');
         }
 
-        function renderizar() {
-            let total = baseClientes.reduce((acc, c) => acc + (c.pagos ? c.pagos.reduce((a, b) => a + b, 0) : 0), 0);
-            document.getElementById('txt-caja-global').innerText = `$${total}`;
-            let filtro = document.getElementById('input-buscador').value.toLowerCase();
-            document.getElementById('contenedor-clientes').innerHTML = baseClientes.filter(c => c.nombre.toLowerCase().includes(filtro)).map((c, i) => `
-                <div class="bg-ciodaro-grey p-4 rounded-lg border border-zinc-800 flex justify-between items-center">
-                    <h3 class="font-black text-sm">${c.nombre}</h3>
-                    <button onclick="abrirExpedienteUnico(${i})" class="bg-zinc-800 text-ciodaro-yellow px-3 py-1 rounded text-xs font-black">📂 EXPEDIENTE</button>
-                </div>
-            `).join('');
+        function guardarPerfil() {
+            let nombre = document.getElementById('ex-nombre').value;
+            if(idx === null) { db.push({nombre: nombre, pagos: [], metrics: []}); }
+            else { db[idx].nombre = nombre; }
+            localStorage.setItem('db', JSON.stringify(db));
+            document.getElementById('modal').classList.add('hidden');
+            renderizar();
         }
         window.onload = renderizar;
     </script>
