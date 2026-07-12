@@ -2,124 +2,125 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ciodarofitness</title>
+    <title>CiodaroFitness Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #000; color: #fff; }
-        .inv { background: #09090b; border: 1px solid #1c1c1e; border-radius: 12px; }
-        input { background: #000; border: 1px solid #27272a; padding: 10px; width: 100%; border-radius: 8px; color: #fff; }
+        body { background: #000; color: #fff; font-family: sans-serif; }
+        .box { background: #09090b; border: 1px solid #1c1c1e; border-radius: 16px; padding: 20px; }
+        .input-dark { background: #000; border: 1px solid #27272a; padding: 12px; width: 100%; border-radius: 12px; color: #fff; }
+        .hidden-text { filter: blur(5px); pointer-events: none; }
     </style>
 </head>
 <body class="p-4">
 
     <!-- CABECERA PRINCIPAL -->
-    <header class="inv p-5 mb-4 flex justify-between items-center">
-        <h1 class="font-black text-yellow-500 tracking-tight">CIODAROFITNESS</h1>
-        <div class="text-right">
-            <p class="text-[9px] text-zinc-600 uppercase">Caja Total</p>
-            <span id="txt-caja-total" class="font-black text-emerald-500 text-xl">$0</span>
+    <header class="box mb-6">
+        <div class="flex justify-between items-center mb-4">
+            <h1 class="font-black text-yellow-500 text-2xl tracking-tighter">CIODAROFITNESS</h1>
+            <button onclick="toggleMontos()" class="text-[10px] bg-zinc-800 p-2 rounded-lg">👁️ OCULTAR MONTOS</button>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+            <div><p class="text-[10px] text-zinc-500 uppercase">Valor Total Planes</p><span id="val-planes" class="text-xl font-black">$0</span></div>
+            <div><p class="text-[10px] text-zinc-500 uppercase">Total Recaudado</p><span id="val-recaudado" class="text-xl font-black text-emerald-500">$0</span></div>
         </div>
     </header>
 
-    <input type="text" id="busc" onkeyup="renderizar()" placeholder="🔍 Buscar alumno..." class="mb-4">
-    <button onclick="abrirMod(null)" class="w-full bg-yellow-500 text-black font-black p-4 rounded-xl mb-6 uppercase">➕ Nuevo Alumno</button>
+    <input type="text" id="busc" onkeyup="render()" placeholder="🔍 Buscar alumno..." class="input-dark mb-6">
+    <button onclick="abrirModal(null)" class="w-full bg-yellow-500 text-black font-black p-4 rounded-xl mb-6 uppercase">➕ Nuevo Alumno</button>
 
-    <div id="lista" class="space-y-3"></div>
+    <div id="lista" class="space-y-4"></div>
 
     <!-- MODAL -->
     <div id="modal" class="fixed inset-0 bg-black hidden p-4 overflow-y-auto">
-        <button onclick="document.getElementById('modal').classList.add('hidden')" class="text-zinc-500 mb-4">✕ Volver</button>
+        <button onclick="document.getElementById('modal').classList.add('hidden')" class="mb-4">✕ Volver</button>
         <div class="space-y-6">
-            <input type="text" id="ex-nom" placeholder="Nombre completo">
+            <input type="text" id="ex-nom" placeholder="Nombre" class="input-dark">
+            <div class="grid grid-cols-3 gap-2">
+                <input type="number" id="ex-edad" placeholder="Edad" class="input-dark">
+                <input type="number" id="ex-peso" placeholder="Peso" class="input-dark">
+                <input type="number" id="ex-est" placeholder="Estatura" class="input-dark">
+            </div>
+            <input type="number" id="ex-plan" placeholder="Valor del Plan" class="input-dark">
             
-            <section class="inv p-4">
-                <h3 class="text-[10px] text-zinc-500 uppercase mb-3">Caja de Abonos</h3>
-                <div class="flex gap-2 mb-3">
-                    <input type="date" id="p-f">
-                    <input type="number" id="p-m" placeholder="$">
-                    <button onclick="addPago()" class="bg-emerald-600 px-6 rounded-lg font-black">+</button>
+            <div class="box">
+                <h3 class="text-xs uppercase text-zinc-500 mb-4">Antropometría</h3>
+                <div class="grid grid-cols-2 gap-2 text-sm">
+                    <input type="number" id="m-c" placeholder="Cuello">
+                    <input type="number" id="m-t" placeholder="Tórax">
+                    <input type="number" id="m-b" placeholder="Bíceps">
+                    <input type="number" id="m-cin" placeholder="Cintura">
+                    <input type="number" id="m-g" placeholder="Glúteos">
+                    <input type="number" id="m-cuad" placeholder="Cuádriceps">
+                    <input type="number" id="m-pan" placeholder="Pantorrilla">
                 </div>
-                <div id="list-pagos" class="text-sm"></div>
-            </section>
+                <button onclick="guardarMetrica()" class="w-full bg-yellow-500 text-black font-black p-3 mt-4 rounded-lg uppercase text-xs">Guardar Métrica y Calcular</button>
+                <div id="hist-met" class="mt-4 text-xs space-y-2"></div>
+            </div>
 
-            <section class="inv p-4">
-                <h3 class="text-[10px] text-zinc-500 uppercase mb-3">Métricas (Antropometría)</h3>
-                <div class="grid grid-cols-2 gap-2 text-xs">
-                    <input type="number" id="m-p" placeholder="Peso (kg)">
-                    <input type="number" id="m-e" placeholder="Altura (cm)">
-                    <input type="number" id="m-c" placeholder="Cuello (cm)">
-                    <input type="number" id="m-t" placeholder="Tórax (cm)">
-                    <input type="number" id="m-b" placeholder="Bíceps (cm)">
-                    <input type="number" id="m-g" placeholder="Glúteo (cm)">
-                    <input type="number" id="m-m" placeholder="Muslo (cm)">
-                </div>
-                <button onclick="addMet()" class="w-full bg-yellow-500 text-black font-black p-3 rounded-lg mt-3 uppercase text-xs">Calcular IMC y Grasa</button>
-                <div id="list-mets" class="mt-4 text-xs space-y-1"></div>
-            </section>
-            
-            <button onclick="guardar()" class="w-full bg-zinc-800 p-4 rounded-xl font-bold uppercase">Guardar Cambios</button>
+            <button onclick="guardarCliente()" class="w-full bg-zinc-800 p-4 rounded-xl font-bold">GUARDAR TODO</button>
         </div>
     </div>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('ciodaro_fitness_db')) || [];
+        let db = JSON.parse(localStorage.getItem('ciodaro_db')) || [];
         let cur = null;
+        let montosVisibles = true;
 
-        function renderizar() {
-            let total = 0;
-            db.forEach(c => (c.pagos||[]).forEach(p => total += parseFloat(p.m || 0)));
-            document.getElementById('txt-caja-total').innerText = `$${total}`;
-            let t = document.getElementById('busc').value.toLowerCase();
-            document.getElementById('lista').innerHTML = db.filter(c => c.nom.toLowerCase().includes(t)).map((c, i) => `
-                <div class="inv p-5 flex justify-between items-center">
-                    <span class="font-bold">${c.nom}</span>
-                    <button onclick="abrirMod(${i})" class="bg-zinc-900 px-4 py-2 rounded-lg border border-zinc-700 text-xs font-bold">📂 EXPEDIENTE</button>
+        function toggleMontos() {
+            montosVisibles = !montosVisibles;
+            document.querySelectorAll('span[id^="val-"], span.monto').forEach(el => el.classList.toggle('hidden-text', !montosVisibles));
+        }
+
+        function render() {
+            let totalPlanes = db.reduce((a, b) => a + parseFloat(b.plan||0), 0);
+            let totalRecaudado = db.reduce((a, b) => a + (b.pagos||[]).reduce((x, y) => x + parseFloat(y), 0), 0);
+            document.getElementById('val-planes').innerText = `$${totalPlanes}`;
+            document.getElementById('val-recaudado').innerText = `$${totalRecaudado}`;
+            
+            document.getElementById('lista').innerHTML = db.map((c, i) => `
+                <div class="box flex justify-between items-center">
+                    <div><h3 class="font-bold">${c.nom}</h3><span class="text-xs text-zinc-500">Plan: <span class="monto">$${c.plan}</span></span></div>
+                    <button onclick="abrirModal(${i})" class="bg-zinc-900 px-4 py-2 rounded-lg font-bold text-xs">EXPEDIENTE</button>
                 </div>
             `).join('');
         }
 
-        function abrirMod(i) {
+        function abrirModal(i) {
             cur = i;
-            if(i !== null) { document.getElementById('ex-nom').value = db[i].nom; mostrar(); }
-            else { document.getElementById('ex-nom').value = ''; document.getElementById('list-pagos').innerHTML = ''; document.getElementById('list-mets').innerHTML = ''; }
+            if(i !== null) {
+                document.getElementById('ex-nom').value = db[i].nom;
+                document.getElementById('ex-plan').value = db[i].plan;
+                renderMetricas();
+            }
             document.getElementById('modal').classList.remove('hidden');
         }
 
-        function addPago() {
-            let m = document.getElementById('p-m').value;
-            let f = document.getElementById('p-f').value;
-            if(!db[cur].pagos) db[cur].pagos = [];
-            db[cur].pagos.push({f, m});
-            localStorage.setItem('ciodaro_fitness_db', JSON.stringify(db));
-            mostrar();
-        }
-
-        function addMet() {
-            let p = parseFloat(document.getElementById('m-p').value);
-            let h = parseFloat(document.getElementById('m-e').value)/100;
-            let imc = (p/(h*h)).toFixed(1);
-            let grasa = (imc * 1.2).toFixed(1); // Cálculo básico
+        function guardarMetrica() {
+            let p = parseFloat(document.getElementById('ex-peso').value);
+            let h = parseFloat(document.getElementById('ex-est').value) / 100;
+            let imc = (p / (h * h)).toFixed(1);
+            let grasa = (imc * 1.2).toFixed(1);
             if(!db[cur].met) db[cur].met = [];
-            db[cur].met.push({f: new Date().toLocaleDateString(), imc, grasa});
-            localStorage.setItem('ciodaro_fitness_db', JSON.stringify(db));
-            mostrar();
+            db[cur].met.push({fecha: new Date().toLocaleDateString(), imc, grasa});
+            localStorage.setItem('ciodaro_db', JSON.stringify(db));
+            renderMetricas();
         }
 
-        function mostrar() {
-            document.getElementById('list-pagos').innerHTML = (db[cur].pagos||[]).map(p => `<div class="flex justify-between border-b border-zinc-900 py-1"><span>${p.f}</span><span class="text-emerald-500">+$${p.m}</span></div>`).join('');
-            document.getElementById('list-mets').innerHTML = (db[cur].met||[]).map(m => `<div class="flex justify-between py-1 text-zinc-300"><span>${m.f}</span><span>IMC: ${m.imc} | Grasa: ${m.grasa}%</span></div>`).join('');
+        function renderMetricas() {
+            document.getElementById('hist-met').innerHTML = (db[cur].met||[]).map(m => 
+                `<div class="flex justify-between border-b border-zinc-900 py-1"><span>${m.fecha}</span><span>IMC: ${m.imc} | Grasa: ${m.grasa}%</span></div>`
+            ).join('');
         }
 
-        function guardar() {
-            let nom = document.getElementById('ex-nom').value;
-            if(cur === null) db.push({nom, pagos:[], met:[]});
-            else db[cur].nom = nom;
-            localStorage.setItem('ciodaro_fitness_db', JSON.stringify(db));
+        function guardarCliente() {
+            let data = { nom: document.getElementById('ex-nom').value, plan: document.getElementById('ex-plan').value };
+            if(cur === null) { db.push({...data, pagos: [], met: []}); }
+            else { db[cur] = {...db[cur], ...data}; }
+            localStorage.setItem('ciodaro_db', JSON.stringify(db));
             document.getElementById('modal').classList.add('hidden');
-            renderizar();
+            render();
         }
-        window.onload = renderizar;
+        window.onload = render;
     </script>
 </body>
 </html>
