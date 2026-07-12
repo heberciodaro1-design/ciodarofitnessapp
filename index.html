@@ -26,8 +26,8 @@
             <button onclick="toggleVisibility()" class="text-xs bg-zinc-800 px-3 py-1 rounded">👁️</button>
         </div>
         <div class="grid grid-cols-2 gap-2 mt-4">
-            <div><p class="text-[9px] text-zinc-500 uppercase">Valor Planes</p><span id="val-planes" class="text-lg font-black">$0</span></div>
-            <div><p class="text-[9px] text-zinc-500 uppercase">Recaudado (Julio)</p><span id="val-recaudado" class="text-lg font-black text-emerald-500">$0</span></div>
+            <div><p class="text-[9px] text-zinc-500 uppercase">Valor Planes</p><span id="val-planes" class="text-lg font-black ${mostrar ? '' : 'hidden-monto'}">$0</span></div>
+            <div><p class="text-[9px] text-zinc-500 uppercase">Recaudado (Julio)</p><span id="val-recaudado" class="text-lg font-black text-emerald-500 ${mostrar ? '' : 'hidden-monto'}">$0</span></div>
         </div>
     </header>
 
@@ -100,6 +100,10 @@
             document.getElementById('val-planes').innerText = `$${totalPlanes}`;
             document.getElementById('val-recaudado').innerText = `$${totalRecaudado}`;
             document.getElementById('total-alumnos').innerText = `Alumnos: ${db.length}`;
+            
+            // Actualizar clases de visibilidad
+            document.getElementById('val-planes').className = `text-lg font-black ${mostrar ? '' : 'hidden-monto'}`;
+            document.getElementById('val-recaudado').className = `text-lg font-black text-emerald-500 ${mostrar ? '' : 'hidden-monto'}`;
             
             document.getElementById('lista').innerHTML = db.map((c, i) => {
                 let yaPagado = (c.pagos||[]).reduce((x, y) => x + parseFloat(y.monto||0), 0);
