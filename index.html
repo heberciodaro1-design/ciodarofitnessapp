@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ciodarofitness Pro - Panel Simple</title>
+    <title>Ciodarofitness Pro - Panel de Control</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -32,7 +32,6 @@
                 <p class="text-[10px] text-zinc-400 uppercase tracking-wider">Control de Alumnos y Pagos</p>
             </div>
             
-            <!-- CONTENEDORES DE CAJA DOBLE -->
             <div class="flex gap-2 w-full sm:w-auto">
                 <div class="flex-1 bg-ciodaro-black px-4 py-2 rounded-lg border border-zinc-800 text-right min-w-[120px]">
                     <p class="text-[9px] text-zinc-500 uppercase font-bold tracking-wider">Caja Proyectada</p>
@@ -60,98 +59,162 @@
     </div>
 
     <!-- MODAL REGISTRO / EDICIÓN -->
-    <div id="modal-cliente" class="fixed inset-0 bg-black/85 hidden flex items-center justify-center p-4 z-50 overflow-y-auto backdrop-blur-sm">
+    <div id="modal-cliente" class="fixed inset-0 bg-black/90 hidden flex items-start justify-center p-4 z-50 overflow-y-auto backdrop-blur-sm">
         <div class="bg-ciodaro-grey w-full max-w-xl rounded-xl border border-zinc-800 p-5 space-y-4 my-4">
+            
             <div class="flex justify-between items-center border-b border-zinc-800 pb-2">
                 <h2 id="modal-titulo" class="text-base font-black text-ciodaro-yellow uppercase">Perfil del Alumno</h2>
-                <button onclick="cerrarModal()" class="text-zinc-400 hover:text-white">✕</button>
+                <button onclick="cerrarModal()" class="text-zinc-400 hover:text-white text-lg">✕</button>
             </div>
             
-            <form id="form-cliente" onsubmit="guardarCliente(event)" class="space-y-4 text-sm">
+            <form id="form-cliente" onsubmit="guardarCliente(event)" class="space-y-5 text-sm">
                 <input type="hidden" id="edit-index">
                 
-                <!-- Datos Principales Corregidos para Móvil (Se apilan en móvil, lado a lado en PC) -->
-                <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                    <div class="sm:col-span-2">
-                        <label class="block text-[11px] font-bold text-zinc-400 uppercase mb-0.5">Nombre Completo</label>
-                        <input type="text" id="m-nombre" required class="w-full bg-ciodaro-input border border-zinc-700 rounded p-2 text-white outline-none focus:border-ciodaro-yellow">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-zinc-400 uppercase mb-0.5">Valor Plan ($)</label>
-                        <input type="number" id="m-cuota" required min="0" oninput="calcularSaldoModal()" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-2 text-white outline-none focus:border-ciodaro-yellow">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-zinc-400 uppercase mb-0.5">Total Abonado ($)</label>
-                        <input type="number" id="m-abonado" min="0" oninput="calcularSaldoModal()" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-2 text-white outline-none focus:border-ciodaro-yellow" placeholder="Ej: 20">
-                    </div>
-                </div>
-
-                <!-- Estado de Cuenta y Fechas Corregidos para Móvil -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-ciodaro-black/40 p-3 rounded border border-zinc-800">
-                    <div>
-                        <label class="block text-[11px] font-bold text-zinc-400 uppercase mb-0.5">Fecha de Inicio</label>
-                        <input type="date" id="m-fecha-inicio" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-xs text-white outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-zinc-400 uppercase mb-0.5">Género</label>
-                        <select id="m-genero" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white outline-none">
-                            <option value="M">Masculino</option>
-                            <option value="F">Femenino</option>
-                        </select>
-                    </div>
-                    <div class="flex flex-col justify-center items-center pt-2 sm:pt-0 border-t sm:border-t-0 border-zinc-800/60">
-                        <span class="text-[10px] uppercase text-zinc-500 font-bold">Estado de Cuenta</span>
-                        <span id="modal-saldo-status" class="text-sm font-black mt-0.5 text-white">Restan: $0</span>
-                    </div>
-                </div>
-
-                <!-- SECCIÓN DOBLE: COMPARATIVA DE MÉTRICAS OPTIMIZADA -->
-                <div class="border-t border-zinc-800 pt-3">
-                    <h3 class="text-xs font-black text-ciodaro-yellow uppercase mb-2 tracking-wider">Comparativa Métrica Mensual</h3>
+                <!-- BLOQUE 1: DATOS PERSONALES Y FINANZAS -->
+                <div class="space-y-3 bg-ciodaro-black/40 p-3 rounded-lg border border-zinc-800">
+                    <p class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">💳 Información de Cuenta</p>
                     
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <!-- Columna Mes Pasado / Inicial -->
-                        <div class="bg-ciodaro-black p-3 rounded-lg border border-zinc-800 space-y-2">
-                            <p class="text-[10px] font-bold text-zinc-400 uppercase border-b border-zinc-800 pb-1">📉 Mes Pasado / Inicial</p>
-                            <div class="space-y-1 text-xs">
-                                <label class="block text-zinc-500">Peso (kg):</label>
-                                <input type="number" step="0.1" id="m-peso" required class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1 text-white">
-                                <label class="block text-zinc-500">Estatura (m o cm):</label>
-                                <input type="number" step="0.01" id="m-estatura" required class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1 text-white">
-                                <label class="block text-zinc-500">Cintura (cm):</label>
-                                <input type="number" step="0.1" id="m-cintura" required class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1 text-white">
-                                <label class="block text-zinc-500">Glúteo (cm):</label>
-                                <input type="number" step="0.1" id="m-gluteos" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1 text-white">
+                    <div class="space-y-2">
+                        <div>
+                            <label class="block text-[11px] font-bold text-zinc-400 uppercase mb-1">Nombre Completo</label>
+                            <input type="text" id="m-nombre" required class="w-full bg-ciodaro-input border border-zinc-700 rounded p-2 text-white outline-none focus:border-ciodaro-yellow">
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[11px] font-bold text-zinc-400 uppercase mb-1">Edad</label>
+                                <input type="number" id="m-edad" required class="w-full bg-ciodaro-input border border-zinc-700 rounded p-2 text-white outline-none focus:border-ciodaro-yellow">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-zinc-400 uppercase mb-1">Género</label>
+                                <select id="m-genero" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-2 text-white outline-none focus:border-ciodaro-yellow">
+                                    <option value="M">Masculino</option>
+                                    <option value="F">Femenino</option>
+                                </select>
                             </div>
                         </div>
 
-                        <!-- Columna Mes Actual / Nuevo -->
-                        <div class="bg-zinc-900/60 p-3 rounded-lg border border-zinc-700/40 space-y-2">
-                            <p class="text-[10px] font-bold text-ciodaro-yellow uppercase border-b border-zinc-800 pb-1">🔥 Mes Actual / Progreso</p>
-                            <div class="space-y-1 text-xs">
-                                <label class="block text-zinc-400">Peso Actual (kg):</label>
-                                <input type="number" step="0.1" id="m-peso-act" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1 text-white focus:border-ciodaro-yellow">
-                                <label class="block text-zinc-400">Estatura (m):</label>
-                                <input type="number" step="0.01" id="m-estatura-act" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1 text-white focus:border-ciodaro-yellow">
-                                <label class="block text-zinc-400">Cintura Actual (cm):</label>
-                                <input type="number" step="0.1" id="m-cintura-act" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1 text-white focus:border-ciodaro-yellow">
-                                <label class="block text-zinc-400">Glúteo Actual (cm):</label>
-                                <input type="number" step="0.1" id="m-gluteos-act" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1 text-white focus:border-ciodaro-yellow">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[11px] font-bold text-zinc-400 uppercase mb-1">Valor Plan ($)</label>
+                                <input type="number" id="m-cuota" required min="0" oninput="calcularSaldoModal()" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-2 text-white outline-none focus:border-ciodaro-yellow">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-zinc-400 uppercase mb-1">Total Abonado ($)</label>
+                                <input type="number" id="m-abonado" min="0" oninput="calcularSaldoModal()" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-2 text-white outline-none focus:border-ciodaro-yellow" placeholder="Ej: 20">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 pt-1 items-center">
+                            <div>
+                                <label class="block text-[11px] font-bold text-zinc-400 uppercase mb-1">Fecha de Inicio</label>
+                                <input type="date" id="m-fecha-inicio" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-2 text-xs text-white outline-none">
+                            </div>
+                            <div class="text-center bg-ciodaro-black/80 py-2 rounded border border-zinc-800">
+                                <span class="text-[9px] uppercase text-zinc-500 font-bold block">Historial / Estado</span>
+                                <span id="modal-saldo-status" class="text-xs font-black text-white uppercase">Restan: $0</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Notas Básicas -->
-                <div>
-                    <label class="block text-[11px] font-bold text-zinc-400 uppercase mb-0.5">Anotaciones del Plan / Evolución</label>
-                    <textarea id="m-comparaciones" rows="2" placeholder="Detalles de entrenamiento o recordatorios..." class="w-full bg-ciodaro-input border border-zinc-700 rounded p-2 text-xs text-white resize-none outline-none"></textarea>
+                <!-- BLOQUE 2: COMPARATIVA MÉTRICA EVOLUTIVA -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-black text-ciodaro-yellow uppercase tracking-wider border-b border-zinc-800 pb-1">📊 Historial de Antropometría</h3>
+                    
+                    <div class="grid grid-cols-1 gap-4">
+                        
+                        <!-- Tarjeta Mes Pasado / Inicial -->
+                        <div class="bg-ciodaro-black p-3 rounded-lg border border-zinc-800 space-y-3">
+                            <p class="text-[10px] font-bold text-zinc-400 uppercase border-b border-zinc-800 pb-1">📉 Registro Pasado / Inicial</p>
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <div>
+                                    <label class="text-zinc-500 block mb-0.5">Estatura (cm):</label>
+                                    <input type="number" step="0.1" id="m-estatura" required placeholder="Ej: 175" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white">
+                                </div>
+                                <div>
+                                    <label class="text-zinc-500 block mb-0.5">Peso (kg):</label>
+                                    <input type="number" step="0.1" id="m-peso" required class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white">
+                                </div>
+                                <div>
+                                    <label class="text-zinc-500 block mb-0.5">Cuello (cm):</label>
+                                    <input type="number" step="0.1" id="m-cuello" placeholder="Opcional" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white">
+                                </div>
+                                <div>
+                                    <label class="text-zinc-500 block mb-0.5">Tórax (cm):</label>
+                                    <input type="number" step="0.1" id="m-torax" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white">
+                                </div>
+                                <div>
+                                    <label class="text-zinc-500 block mb-0.5">Cintura (cm):</label>
+                                    <input type="number" step="0.1" id="m-cintura" required class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white">
+                                </div>
+                                <div>
+                                    <label class="text-zinc-500 block mb-0.5">Bíceps (cm):</label>
+                                    <input type="number" step="0.1" id="m-biceps" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white">
+                                </div>
+                                <div>
+                                    <label class="text-zinc-500 block mb-0.5">Glúteo (cm):</label>
+                                    <input type="number" step="0.1" id="m-gluteos" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white">
+                                </div>
+                                <div>
+                                    <label class="text-zinc-500 block mb-0.5">Cuádriceps (cm):</label>
+                                    <input type="number" step="0.1" id="m-cuadriceps" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tarjeta Mes Actual / Progreso -->
+                        <div class="bg-zinc-900/60 p-3 rounded-lg border border-zinc-700/50 space-y-3">
+                            <p class="text-[10px] font-bold text-ciodaro-yellow uppercase border-b border-zinc-800 pb-1">🔥 Registro Actual / Progreso</p>
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <div>
+                                    <label class="text-zinc-400 block mb-0.5">Estatura Actual (cm):</label>
+                                    <input type="number" step="0.1" id="m-estatura-act" placeholder="Ej: 175" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white focus:border-ciodaro-yellow">
+                                </div>
+                                <div>
+                                    <label class="text-zinc-400 block mb-0.5">Peso Actual (kg):</label>
+                                    <input type="number" step="0.1" id="m-peso-act" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white focus:border-ciodaro-yellow">
+                                </div>
+                                <div>
+                                    <label class="text-zinc-400 block mb-0.5">Cuello Actual (cm):</label>
+                                    <input type="number" step="0.1" id="m-cuello-act" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white focus:border-ciodaro-yellow">
+                                </div>
+                                <div>
+                                    <label class="text-zinc-400 block mb-0.5">Tórax Actual (cm):</label>
+                                    <input type="number" step="0.1" id="m-torax-act" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white focus:border-ciodaro-yellow">
+                                </div>
+                                <div>
+                                    <label class="text-zinc-400 block mb-0.5">Cintura Actual (cm):</label>
+                                    <input type="number" step="0.1" id="m-cintura-act" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white focus:border-ciodaro-yellow">
+                                </div>
+                                <div>
+                                    <label class="text-zinc-400 block mb-0.5">Bíceps Actual (cm):</label>
+                                    <input type="number" step="0.1" id="m-biceps-act" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white focus:border-ciodaro-yellow">
+                                </div>
+                                <div>
+                                    <label class="text-zinc-400 block mb-0.5">Glúteo Actual (cm):</label>
+                                    <input type="number" step="0.1" id="m-gluteos-act" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white focus:border-ciodaro-yellow">
+                                </div>
+                                <div>
+                                    <label class="text-zinc-400 block mb-0.5">Cuádriceps Act. (cm):</label>
+                                    <input type="number" step="0.1" id="m-cuadriceps-act" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-white focus:border-ciodaro-yellow">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
 
-                <!-- Botones de Acción -->
+                <!-- NOTAS -->
+                <div>
+                    <label class="block text-[11px] font-bold text-zinc-400 uppercase mb-1">Anotaciones del Plan / Evolución</label>
+                    <textarea id="m-comparaciones" rows="2" placeholder="Notas sobre el entrenamiento, sensaciones o ajustes..." class="w-full bg-ciodaro-input border border-zinc-700 rounded p-2 text-xs text-white resize-none outline-none"></textarea>
+                </div>
+
+                <!-- BOTONES -->
                 <div class="flex justify-end gap-2 border-t border-zinc-800 pt-2">
-                    <button type="button" onclick="cerrarModal()" class="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded text-xs font-medium">Cancelar</button>
-                    <button type="submit" class="px-4 py-1.5 bg-ciodaro-yellow text-black font-black rounded text-xs uppercase tracking-wider">Guardar Ficha</button>
+                    <button type="button" onclick="cerrarModal()" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded text-xs font-medium">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 bg-ciodaro-yellow text-black font-black rounded text-xs uppercase tracking-wider">Guardar Ficha</button>
                 </div>
             </form>
         </div>
@@ -165,10 +228,35 @@
             if (!Array.isArray(baseClientes)) baseClientes = [];
         } catch(e) { baseClientes = []; }
 
-        function calcularMetricas(peso, estatura) {
-            if (estatura > 3) estatura = estatura / 100;
-            let imc = (peso / (estatura * estatura)).toFixed(1);
-            return (isNaN(imc) || !isFinite(imc)) ? "0.0" : imc;
+        // Función para calcular IMC (Estatura esperada en cm)
+        function calcularIMC(peso, estaturaCm) {
+            if (!peso || !estaturaCm) return "-";
+            let estaturaM = estaturaCm / 100;
+            return (peso / (estaturaM * estaturaM)).toFixed(1);
+        }
+
+        // Estimación de % de Grasa usando la fórmula de la Marina de EE.UU.
+        function calcularGrasaEstimada(genero, cintura, cuello, estatura, gluteo) {
+            if (!cintura || !estatura) return "-";
+            cintura = parseFloat(cintura);
+            estatura = parseFloat(estatura);
+            cuello = parseFloat(cuello) || (genero === 'M' ? 38 : 34); // Valores por defecto si quedan vacíos
+            gluteo = parseFloat(gluteo) || 95;
+
+            let log10 = Math.log10;
+            try {
+                if (genero === 'M') {
+                    if (cintura <= cuello) return "-";
+                    let porcentaje = 495 / (1.0324 - 0.19077 * log10(cintura - cuello) + 0.15456 * log10(estatura)) - 450;
+                    return isNaN(porcentaje) || porcentaje < 2 ? "-" : porcentaje.toFixed(1) + "%";
+                } else {
+                    if ((cintura + gluteo) <= cuello) return "-";
+                    let porcentaje = 495 / (1.29579 - 0.35004 * log10(cintura + gluteo - cuello) + 0.22100 * log10(estatura)) - 450;
+                    return isNaN(porcentaje) || porcentaje < 2 ? "-" : porcentaje.toFixed(1) + "%";
+                }
+            } catch (e) {
+                return "-";
+            }
         }
 
         function calcularSaldoModal() {
@@ -179,10 +267,10 @@
 
             if (saldo <= 0 && cuota > 0) {
                 statusLabel.innerText = "🟢 PAGADO";
-                statusLabel.className = "text-sm font-black mt-0.5 text-emerald-400";
+                statusLabel.className = "text-xs font-black text-emerald-400";
             } else {
                 statusLabel.innerText = `Restan: $${saldo}`;
-                statusLabel.className = "text-sm font-black mt-0.5 text-yellow-500";
+                statusLabel.className = "text-xs font-black text-yellow-500";
             }
         }
 
@@ -194,35 +282,45 @@
             let abonado = parseFloat(document.getElementById('m-abonado').value) || 0;
             let saldoRestante = cuota - abonado;
 
+            let genero = document.getElementById('m-genero').value;
             let pesoPasado = parseFloat(document.getElementById('m-peso').value) || 0;
-            let estPasada = parseFloat(document.getElementById('m-estatura').value) || 1;
-            if (estPasada > 3) estPasada = estPasada / 100;
+            let estPasada = parseFloat(document.getElementById('m-estatura').value) || 0;
+            let cuelloPasado = parseFloat(document.getElementById('m-cuello').value) || 0;
+            let cinturaPasada = parseFloat(document.getElementById('m-cintura').value) || 0;
+            let gluteoPasado = parseFloat(document.getElementById('m-gluteos').value) || 0;
 
             let pesoAct = parseFloat(document.getElementById('m-peso-act').value) || 0;
             let estAct = parseFloat(document.getElementById('m-estatura-act').value) || estPasada;
-            if (estAct > 3) estAct = estAct / 100;
+            let cuelloAct = parseFloat(document.getElementById('m-cuello-act').value) || cuelloPasado;
+            let cinturaAct = parseFloat(document.getElementById('m-cintura-act').value) || cinturaPasada;
+            let gluteoAct = parseFloat(document.getElementById('m-gluteos-act').value) || gluteoPasado;
 
             let datosCliente = {
                 nombre: (document.getElementById('m-nombre').value || '').trim(),
+                edad: document.getElementById('m-edad').value,
+                genero: genero,
                 cuota: cuota,
                 abonado: abonado,
                 saldo: saldoRestante <= 0 ? 0 : saldoRestante,
                 estadoPago: (saldoRestante <= 0 && cuota > 0) ? 'PAGADO' : 'DEBE',
-                genero: document.getElementById('m-genero').value,
                 fechaInicio: document.getElementById('m-fecha-inicio').value || '',
                 comparaciones: (document.getElementById('m-comparaciones').value || '').trim(),
                 
-                peso: pesoPasado,
-                estatura: estPasada,
-                imc: calcularMetricas(pesoPasado, estPasada),
-                cintura: parseFloat(document.getElementById('m-cintura').value) || 0,
-                gluteos: parseFloat(document.getElementById('m-gluteos').value) || 0,
+                // Pasado
+                estatura: estPasada, peso: pesoPasado, cuello: cuelloPasado,
+                torax: parseFloat(document.getElementById('m-torax').value) || 0,
+                cintura: cinturaPasada, biceps: parseFloat(document.getElementById('m-biceps').value) || 0,
+                gluteos: gluteoPasado, cuadriceps: parseFloat(document.getElementById('m-cuadriceps').value) || 0,
+                imc: calcularIMC(pesoPasado, estPasada),
+                grasa: calcularGrasaEstimada(genero, cinturaPasada, cuelloPasado, estPasada, gluteoPasado),
                 
-                pesoAct: pesoAct,
-                estaturaAct: estAct,
-                imcAct: pesoAct > 0 ? calcularMetricas(pesoAct, estAct) : '-',
-                cinturaAct: parseFloat(document.getElementById('m-cintura-act').value) || 0,
-                gluteosAct: parseFloat(document.getElementById('m-gluteos-act').value) || 0
+                // Actual
+                estaturaAct: estAct, pesoAct: pesoAct, cuelloAct: cuelloAct,
+                toraxAct: parseFloat(document.getElementById('m-torax-act').value) || 0,
+                cinturaAct: cinturaAct, bicepsAct: parseFloat(document.getElementById('m-biceps-act').value) || 0,
+                gluteosAct: gluteoAct, cuadricepsAct: parseFloat(document.getElementById('m-cuadriceps-act').value) || 0,
+                imcAct: pesoAct > 0 ? calcularIMC(pesoAct, estAct) : '-',
+                grasaAct: pesoAct > 0 ? calcularGrasaEstimada(genero, cinturaAct, cuelloAct, estAct, gluteoAct) : '-'
             };
 
             if (index === "") baseClientes.push(datosCliente);
@@ -238,7 +336,6 @@
             if(!contenedor) return;
 
             let busqueda = (document.getElementById('buscador')?.value || '').toLowerCase();
-            
             let totalCajaProyectada = 0;
             let totalCajaAbonos = 0;
             
@@ -252,38 +349,49 @@
                 
                 if (!cliente.nombre.toLowerCase().includes(busqueda)) return;
 
-                let displayFecha = "Sin fecha";
-                if (cliente.fechaInicio) {
-                    let partes = cliente.fechaInicio.split('-');
-                    if(partes.length === 3) displayFecha = `${partes[2]}/${partes[1]}`;
-                }
-
-                let etiquetaPago = "";
-                if (cliente.estadoPago === 'PAGADO') {
-                    etiquetaPago = `<span class="bg-emerald-950 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded text-[10px] font-black uppercase">✅ Pagado</span>`;
-                } else {
-                    etiquetaPago = `<span class="bg-red-950 text-red-400 border border-red-500/20 px-2 py-0.5 rounded text-[10px] font-black">⏳ Restan: $${cliente.saldo}</span>`;
-                }
+                let etiquetaPago = cliente.estadoPago === 'PAGADO' 
+                    ? `<span class="bg-emerald-950 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded text-[10px] font-black uppercase">✅ Pagado</span>`
+                    : `<span class="bg-red-950 text-red-400 border border-red-500/20 px-2 py-0.5 rounded text-[10px] font-black">⏳ Debe: $${cliente.saldo}</span>`;
 
                 let fila = document.createElement('div');
-                fila.className = "bg-ciodaro-grey p-3 rounded-lg border border-zinc-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-sm";
+                fila.className = "bg-ciodaro-grey p-4 rounded-lg border border-zinc-800 flex flex-col gap-3 text-sm";
                 
                 fila.innerHTML = `
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2">
-                            <h3 class="font-bold text-white uppercase truncate text-sm">${cliente.nombre}</h3>
-                            ${etiquetaPago}
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h3 class="font-bold text-white uppercase text-base">${cliente.nombre}</h3>
+                                <span class="text-xs text-zinc-500">(${cliente.edad || '?'} años)</span>
+                                ${etiquetaPago}
+                            </div>
+                            <p class="text-xs text-zinc-400 mt-1">
+                                Plan: <span class="text-ciodaro-yellow font-bold">$${cliente.cuota}</span> (Abonó: $${cliente.abonado})
+                            </p>
                         </div>
-                        <p class="text-[11px] text-zinc-400 mt-1">
-                            Plan: <span class="text-ciodaro-yellow font-bold">$${cliente.cuota}</span> (Abonó: $${cliente.abonado || 0}) 
-                            | Cintura: <span class="text-zinc-300 font-mono">${cliente.cintura}cm</span> ➡️ <span class="text-ciodaro-yellow font-bold font-mono">${cliente.cinturaAct || '-'}cm</span> 
-                            | Inicio: ${displayFecha}
-                        </p>
+                        <div class="flex gap-1 shrink-0">
+                            <button onclick="editarCliente(${index})" class="bg-zinc-800 hover:bg-zinc-700 text-ciodaro-yellow px-3 py-1.5 rounded font-bold text-xs">✏️ Ver / Editar</button>
+                            <button onclick="eliminarCliente(${index})" class="bg-red-950/20 hover:bg-red-900/30 text-red-400 p-1.5 rounded text-xs">🗑️</button>
+                        </div>
                     </div>
                     
-                    <div class="flex items-center gap-1 self-end sm:self-center shrink-0">
-                        <button onclick="editarCliente(${index})" class="bg-zinc-800 hover:bg-zinc-700 text-ciodaro-yellow px-3 py-1.5 rounded font-bold text-xs flex items-center gap-1">✏️ Ver / Comparar</button>
-                        <button onclick="eliminarCliente(${index})" class="bg-red-950/20 hover:bg-red-900/30 text-red-400 p-1.5 rounded text-xs">🗑️</button>
+                    <!-- Resumen rápido de Cambios -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center bg-ciodaro-black/60 p-2 rounded border border-zinc-800/80 text-[11px]">
+                        <div>
+                            <span class="text-zinc-500 block uppercase font-bold text-[9px]">Peso</span>
+                            <span class="text-zinc-300">${cliente.peso}kg ➡️ <b class="text-ciodaro-yellow">${cliente.pesoAct || '-'}kg</b></span>
+                        </div>
+                        <div>
+                            <span class="text-zinc-500 block uppercase font-bold text-[9px]">Cintura</span>
+                            <span class="text-zinc-300">${cliente.cintura}cm ➡️ <b class="text-ciodaro-yellow">${cliente.cinturaAct || '-'}cm</b></span>
+                        </div>
+                        <div>
+                            <span class="text-zinc-500 block uppercase font-bold text-[9px]">IMC</span>
+                            <span class="text-zinc-300">${cliente.imc} ➡️ <b class="text-ciodaro-yellow">${cliente.imcAct}</b></span>
+                        </div>
+                        <div>
+                            <span class="text-zinc-500 block uppercase font-bold text-[9px]">Grasa %</span>
+                            <span class="text-zinc-300">${cliente.grasa} ➡️ <b class="text-ciodaro-yellow">${cliente.grasaAct}</b></span>
+                        </div>
                     </div>
                 `;
                 contenedor.appendChild(fila);
@@ -301,21 +409,32 @@
             document.getElementById('edit-index').value = index;
             
             document.getElementById('m-nombre').value = cliente.nombre || '';
+            document.getElementById('m-edad').value = cliente.edad || '';
             document.getElementById('m-cuota').value = cliente.cuota || 0;
             document.getElementById('m-abonado').value = cliente.abonado || 0;
             document.getElementById('m-genero').value = cliente.genero || 'M';
             document.getElementById('m-fecha-inicio').value = cliente.fechaInicio || '';
             document.getElementById('m-comparaciones').value = cliente.comparaciones || '';
             
-            document.getElementById('m-peso').value = cliente.peso || '';
+            // Pasado
             document.getElementById('m-estatura').value = cliente.estatura || '';
+            document.getElementById('m-peso').value = cliente.peso || '';
+            document.getElementById('m-cuello').value = cliente.cuello || '';
+            document.getElementById('m-torax').value = cliente.torax || '';
             document.getElementById('m-cintura').value = cliente.cintura || '';
+            document.getElementById('m-biceps').value = cliente.biceps || '';
             document.getElementById('m-gluteos').value = cliente.gluteos || '';
+            document.getElementById('m-cuadriceps').value = cliente.cuadriceps || '';
 
-            document.getElementById('m-peso-act').value = cliente.pesoAct || '';
+            // Actual
             document.getElementById('m-estatura-act').value = cliente.estaturaAct || '';
+            document.getElementById('m-peso-act').value = cliente.pesoAct || '';
+            document.getElementById('m-cuello-act').value = cliente.cuelloAct || '';
+            document.getElementById('m-torax-act').value = cliente.toraxAct || '';
             document.getElementById('m-cintura-act').value = cliente.cinturaAct || '';
+            document.getElementById('m-biceps-act').value = cliente.bicepsAct || '';
             document.getElementById('m-gluteos-act').value = cliente.gluteosAct || '';
+            document.getElementById('m-cuadriceps-act').value = cliente.cuadricepsAct || '';
 
             calcularSaldoModal();
             abrirModal();
