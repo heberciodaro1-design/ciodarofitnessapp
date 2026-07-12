@@ -19,7 +19,10 @@
 
     <header class="box">
         <div class="flex justify-between items-center">
-            <h1 class="font-black text-yellow-500 text-xl tracking-tighter">CIODAROFITNESS</h1>
+            <div>
+                <h1 class="font-black text-yellow-500 text-xl tracking-tighter">CIODAROFITNESS</h1>
+                <p id="total-alumnos" class="text-[10px] text-zinc-500 uppercase font-bold mt-1"></p>
+            </div>
             <button onclick="toggleVisibility()" class="text-xs bg-zinc-800 px-3 py-1 rounded">👁️</button>
         </div>
         <div class="grid grid-cols-2 gap-2 mt-4">
@@ -96,6 +99,7 @@
             
             document.getElementById('val-planes').innerText = `$${totalPlanes}`;
             document.getElementById('val-recaudado').innerText = `$${totalRecaudado}`;
+            document.getElementById('total-alumnos').innerText = `Alumnos: ${db.length}`;
             
             document.getElementById('lista').innerHTML = db.map((c, i) => {
                 let yaPagado = (c.pagos||[]).reduce((x, y) => x + parseFloat(y.monto||0), 0);
