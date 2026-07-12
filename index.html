@@ -2,112 +2,108 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ciodarofitness | Gestión Avanzada</title>
+    <title>CIODAROFITNESS PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); }
+    <script>
+        tailwind.config = { theme: { extend: { colors: { 'custom-yellow': '#F59E0B', 'custom-black': '#09090b', 'custom-grey': '#27272a' } } } }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans">
+<body class="bg-custom-black text-white min-h-screen p-4 md:p-8">
 
-    <!-- BARRA DE NAVEGACIÓN -->
-    <nav class="p-6 border-b border-slate-800 glass sticky top-0 z-50">
-        <div class="max-w-5xl mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-black text-orange-500 tracking-tighter">CIODAROFITNESS<span class="text-slate-500">PRO</span></h1>
-            <div id="reloj" class="text-slate-400 text-sm font-mono">10:26 AM</div>
+    <div class="max-w-5xl mx-auto">
+        <!-- HEADER Y DASHBOARD -->
+        <header class="mb-8 border-b border-zinc-800 pb-6">
+            <h1 class="text-3xl font-black text-custom-yellow mb-6">CIODAROFITNESS PRO</h1>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-custom-grey p-6 rounded-2xl border border-zinc-700">
+                    <p class="text-zinc-400 uppercase text-xs font-bold mb-2">Total Caja Mensual</p>
+                    <div class="flex items-center gap-4">
+                        <h2 id="total-caja" class="text-4xl font-black text-custom-yellow">***</h2>
+                        <button onclick="toggleDinero()" class="text-zinc-500 hover:text-white">👁️</button>
+                    </div>
+                </div>
+                <div class="bg-custom-grey p-6 rounded-2xl border border-zinc-700 flex flex-col justify-center">
+                    <input type="text" id="buscador" onkeyup="render()" placeholder="🔍 Buscar cliente..." class="bg-black border border-zinc-600 p-3 rounded-lg outline-none focus:border-custom-yellow">
+                </div>
+                <div class="bg-custom-grey p-6 rounded-2xl border border-zinc-700">
+                    <button onclick="abrirModal()" class="w-full h-full bg-custom-yellow text-black font-bold rounded-xl hover:bg-yellow-500">➕ Agregar Nuevo Cliente</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- LISTA -->
+        <div id="lista-clientes" class="grid gap-4">
+            <!-- Los clientes aparecerán aquí -->
         </div>
-    </nav>
+    </div>
 
-    <main class="max-w-5xl mx-auto p-6 space-y-8">
-        
-        <!-- DASHBOARD DE MÉTRICAS -->
-        <section class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-lg">
-                <p class="text-slate-400 text-xs uppercase mb-1">Total Recaudado</p>
-                <h2 id="total-recaudado" class="text-3xl font-bold text-white">$0.00</h2>
-            </div>
-            <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-lg">
-                <p class="text-slate-400 text-xs uppercase mb-1">Meta del Mes</p>
-                <input type="number" id="meta-objetivo" value="1200" oninput="actualizarDashboard()" class="bg-transparent text-2xl font-bold text-blue-400 w-full outline-none">
-            </div>
-            <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-lg">
-                <p class="text-slate-400 text-xs uppercase mb-1">Progreso</p>
-                <h2 id="porcentaje-meta" class="text-3xl font-bold text-emerald-400">0%</h2>
-            </div>
-            <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-lg">
-                <p class="text-slate-400 text-xs uppercase mb-1">Comparativa vs Mes Anterior</p>
-                <h2 id="crecimiento" class="text-3xl font-bold text-orange-500">+8.5%</h2>
-            </div>
-        </section>
-
-        <!-- FILTROS Y BÚSQUEDA -->
-        <div class="flex gap-4 items-center">
-            <input type="text" id="buscador" onkeyup="filtrarClientes()" placeholder="🔍 Buscar cliente en la base de datos..." class="flex-1 p-4 bg-slate-900 border border-slate-800 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none">
-            <button onclick="exportarDatos()" class="p-4 bg-slate-800 rounded-xl hover:bg-slate-700">💾</button>
+    <!-- MODAL AGREGAR -->
+    <div id="modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4">
+        <div class="bg-custom-grey p-8 rounded-2xl w-full max-w-lg border border-zinc-700">
+            <h2 class="text-xl font-bold mb-4 text-custom-yellow">Nuevo Alumno</h2>
+            <input type="text" id="in-nombre" placeholder="Nombre" class="w-full bg-black p-3 mb-2 rounded border border-zinc-600">
+            <input type="number" id="in-cuota" placeholder="Plan Mensual ($)" class="w-full bg-black p-3 mb-2 rounded border border-zinc-600">
+            <input type="number" id="in-peso" placeholder="Peso (kg)" class="w-full bg-black p-3 mb-2 rounded border border-zinc-600">
+            <button onclick="guardarCliente()" class="w-full bg-custom-yellow text-black font-bold p-3 rounded mt-4">Guardar</button>
+            <button onclick="document.getElementById('modal').classList.add('hidden')" class="w-full mt-2 text-zinc-400">Cancelar</button>
         </div>
-
-        <!-- TABLA DE GESTIÓN AVANZADA -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
-            <table class="w-full text-left">
-                <thead class="bg-slate-950 text-slate-400 text-xs uppercase tracking-wider">
-                    <tr>
-                        <th class="p-6">Cliente / Alumno</th>
-                        <th class="p-6">Historial Pago</th>
-                        <th class="p-6">Cuota Mensual</th>
-                        <th class="p-6 text-center">Estado Actual</th>
-                    </tr>
-                </thead>
-                <tbody id="lista-clientes">
-                    <!-- FILA EJEMPLO (Copia y pega esto 28 veces) -->
-                    <tr class="fila-cliente border-b border-slate-800 hover:bg-slate-800/50 transition">
-                        <td class="p-6 font-semibold nombre-cliente">Angie Chavarría</td>
-                        <td class="p-6 text-sm text-slate-400">Pagó puntual (Julio)</td>
-                        <td class="p-6">
-                            <input type="number" class="cuota-cliente bg-slate-950 border border-slate-800 w-20 p-2 rounded" value="50" oninput="actualizarDashboard()">
-                        </td>
-                        <td class="p-6 text-center">
-                            <input type="checkbox" class="estado-pago w-6 h-6 accent-orange-500" onchange="actualizarDashboard()">
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </main>
+    </div>
 
     <script>
-        lucide.createIcons();
+        let clientes = JSON.parse(localStorage.getItem('ciodaro_db')) || [];
+        let dineroVisible = false;
 
-        function actualizarDashboard() {
-            let filas = document.getElementsByClassName('fila-cliente');
+        function guardarCliente() {
+            let nuevo = {
+                nombre: document.getElementById('in-nombre').value,
+                cuota: document.getElementById('in-cuota').value,
+                peso: document.getElementById('in-peso').value,
+                pagado: false,
+                imc: (document.getElementById('in-peso').value / 1.75**2).toFixed(1)
+            };
+            clientes.push(nuevo);
+            localStorage.setItem('ciodaro_db', JSON.stringify(clientes));
+            document.getElementById('modal').classList.add('hidden');
+            render();
+        }
+
+        function toggleDinero() {
+            dineroVisible = !dineroVisible;
+            render();
+        }
+
+        function render() {
+            let busqueda = document.getElementById('buscador').value.toLowerCase();
+            let lista = document.getElementById('lista-clientes');
             let total = 0;
-            let meta = parseFloat(document.getElementById('meta-objetivo').value) || 1;
+            lista.innerHTML = "";
 
-            for(let f of filas) {
-                if(f.querySelector('.estado-pago').checked) {
-                    total += parseFloat(f.querySelector('.cuota-cliente').value || 0);
-                    f.classList.add('bg-orange-900/10');
-                } else {
-                    f.classList.remove('bg-orange-900/10');
-                }
-            }
-            
-            document.getElementById('total-recaudado').innerText = "$" + total.toLocaleString();
-            let porc = (total / meta) * 100;
-            document.getElementById('porcentaje-meta').innerText = Math.round(porc) + "%";
+            clientes.filter(c => c.nombre.toLowerCase().includes(busqueda)).forEach((c, index) => {
+                if(c.pagado) total += parseFloat(c.cuota);
+                lista.innerHTML += `
+                    <div class="bg-custom-grey p-4 rounded-xl border border-zinc-700 flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-lg">${c.nombre}</h3>
+                            <p class="text-sm text-zinc-400">IMC: ${c.imc} | Plan: $${c.cuota}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="checkbox" ${c.pagado ? 'checked' : ''} onchange="togglePago(${index})" class="w-6 h-6 accent-custom-yellow">
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('total-caja').innerText = dineroVisible ? `$${total}` : '***';
         }
 
-        function filtrarClientes() {
-            let val = document.getElementById('buscador').value.toLowerCase();
-            let filas = document.getElementsByClassName('fila-cliente');
-            for(let f of filas) {
-                let nombre = f.querySelector('.nombre-cliente').innerText.toLowerCase();
-                f.style.display = nombre.includes(val) ? "" : "none";
-            }
+        function togglePago(index) {
+            clientes[index].pagado = !clientes[index].pagado;
+            localStorage.setItem('ciodaro_db', JSON.stringify(clientes));
+            render();
         }
 
-        window.onload = actualizarDashboard;
+        function abrirModal() { document.getElementById('modal').classList.remove('hidden'); }
+        window.onload = render;
     </script>
 </body>
 </html>
