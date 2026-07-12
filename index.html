@@ -107,6 +107,10 @@
             document.getElementById('val-faltante').innerText = `$${totalFaltante}`;
             document.getElementById('total-alumnos').innerText = `Alumnos: ${db.length}`;
             
+            document.getElementById('val-planes').className = `text-md font-black ${mostrar ? '' : 'hidden-monto'}`;
+            document.getElementById('val-recaudado').className = `text-md font-black text-emerald-500 ${mostrar ? '' : 'hidden-monto'}`;
+            document.getElementById('val-faltante').className = `text-md font-black text-red-500 ${mostrar ? '' : 'hidden-monto'}`;
+            
             let listaFiltrada = db.filter(c => c.nom.toLowerCase().includes(busqueda)).sort((a, b) => {
                 let sA = parseFloat(a.plan||0) - (a.pagos||[]).reduce((x, y) => x + parseFloat(y.monto||0), 0);
                 let sB = parseFloat(b.plan||0) - (b.pagos||[]).reduce((x, y) => x + parseFloat(y.monto||0), 0);
