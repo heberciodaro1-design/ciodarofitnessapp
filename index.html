@@ -26,14 +26,22 @@
     <div class="max-w-4xl mx-auto p-4 space-y-4">
         
         <!-- ENCABEZADO -->
-        <header class="flex justify-between items-center bg-ciodaro-grey p-4 rounded-xl border border-zinc-800">
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-ciodaro-grey p-4 rounded-xl border border-zinc-800 gap-4">
             <div>
                 <h1 class="text-2xl font-black text-ciodaro-yellow tracking-tight">CIODAROFITNESS</h1>
                 <p class="text-[10px] text-zinc-400 uppercase tracking-wider">Control de Alumnos y Pagos</p>
             </div>
-            <div class="bg-ciodaro-black px-4 py-2 rounded-lg border border-zinc-800 text-right">
-                <p class="text-[9px] text-zinc-500 uppercase font-bold">Caja Total Proyectada</p>
-                <h2 id="txt-caja" class="text-lg font-black text-ciodaro-yellow">$0</h2>
+            
+            <!-- CONTENEDORES DE CAJA DOBLE -->
+            <div class="flex gap-2 w-full sm:w-auto">
+                <div class="flex-1 bg-ciodaro-black px-4 py-2 rounded-lg border border-zinc-800 text-right min-w-[120px]">
+                    <p class="text-[9px] text-zinc-500 uppercase font-bold tracking-wider">Caja Proyectada</p>
+                    <h2 id="txt-caja-total" class="text-base font-black text-zinc-400">$0</h2>
+                </div>
+                <div class="flex-1 bg-ciodaro-black px-4 py-2 rounded-lg border border-zinc-800 text-right min-w-[120px]">
+                    <p class="text-[9px] text-zinc-500 uppercase font-bold tracking-wider">Caja Real (Abonos)</p>
+                    <h2 id="txt-caja-abonos" class="text-lg font-black text-ciodaro-yellow">$0</h2>
+                </div>
             </div>
         </header>
 
@@ -231,13 +239,20 @@
             if(!contenedor) return;
 
             let busqueda = (document.getElementById('buscador')?.value || '').toLowerCase();
-            let totalCaja = 0;
+            
+            // VARIABLES DE CONTEO DOBLE
+            let totalCajaProyectada = 0;
+            let totalCajaAbonos = 0;
+            
             contenedor.innerHTML = "";
 
             baseClientes.forEach((cliente, index) => {
                 if (!cliente || !cliente.nombre) return;
                 
-                totalCaja += (parseFloat(cliente.cuota) || 0);
+                // Sumamos ambos flujos de dinero
+                totalCajaProyectada += (parseFloat(cliente.cuota) || 0);
+                totalCajaAbonos += (parseFloat(cliente.abonado) || 0);
+                
                 if (!cliente.nombre.toLowerCase().includes(busqueda)) return;
 
                 let displayFecha = "Sin fecha";
@@ -278,7 +293,9 @@
                 contenedor.appendChild(fila);
             });
 
-            document.getElementById('txt-caja').innerText = `$${totalCaja.toLocaleString()}`;
+            // Asignación de los dos totales correspondientes
+            document.getElementById('txt-caja-total').innerText = `$${totalCajaProyectada.toLocaleString()}`;
+            document.getElementById('txt-caja-abonos').innerText = `$${totalCajaAbonos.toLocaleString()}`;
         }
 
         function editarCliente(index) {
