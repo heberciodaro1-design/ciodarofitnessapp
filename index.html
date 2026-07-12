@@ -8,17 +8,17 @@
     <style>
         body { background: #000; color: #fff; font-family: sans-serif; font-size: 14px; }
         .box { background: #09090b; border: 1px solid #1c1c1e; border-radius: 12px; padding: 15px; margin-bottom: 12px; }
-        .input-dark { background: #000; border: 1px solid #27272a; padding: 10px; width: 100%; border-radius: 8px; color: #fff; font-size: 14px; margin-bottom: 8px; }
+        /* INPUTS CON FONDO OSCURO Y TEXTO BLANCO */
+        .input-dark { background: #18181b; border: 1px solid #3f3f46; padding: 10px; width: 100%; border-radius: 8px; color: #fff !important; font-size: 14px; margin-bottom: 8px; }
+        ::placeholder { color: #71717a; }
         .btn { padding: 10px; border-radius: 8px; font-weight: bold; font-size: 14px; text-transform: uppercase; width: 100%; }
     </style>
 </head>
 <body class="p-4">
 
     <header class="box">
-        <div class="flex justify-between items-center mb-4">
-            <h1 class="font-black text-yellow-500 text-xl tracking-tighter">CIODAROFITNESS</h1>
-        </div>
-        <div class="grid grid-cols-2 gap-2">
+        <h1 class="font-black text-yellow-500 text-xl tracking-tighter">CIODAROFITNESS</h1>
+        <div class="grid grid-cols-2 gap-2 mt-4">
             <div><p class="text-[9px] text-zinc-500 uppercase">Valor Planes</p><span id="val-planes" class="text-lg font-black">$0</span></div>
             <div><p class="text-[9px] text-zinc-500 uppercase">Recaudado</p><span id="val-recaudado" class="text-lg font-black text-emerald-500">$0</span></div>
         </div>
@@ -32,16 +32,16 @@
     <div id="modal" class="fixed inset-0 bg-black hidden p-4 overflow-y-auto z-50">
         <div class="flex justify-between mb-4">
             <button onclick="document.getElementById('modal').classList.add('hidden')" class="text-sm font-bold">✕ Cerrar</button>
-            <button onclick="borrarCliente()" class="text-sm font-bold text-red-500">🗑️ BORRAR ALUMNO</button>
+            <button onclick="borrarCliente()" class="text-sm font-bold text-red-500">🗑️ BORRAR</button>
         </div>
         <div class="space-y-4">
-            <input type="text" id="ex-nom" placeholder="Nombre" class="input-dark">
+            <input type="text" id="ex-nom" placeholder="Nombre del Alumno" class="input-dark">
             <div class="grid grid-cols-3 gap-2">
-                <input type="number" id="ex-edad" placeholder="Edad" class="input-dark">
-                <input type="number" id="ex-peso" placeholder="Peso (kg)" class="input-dark">
-                <input type="number" id="ex-est" placeholder="Est. (cm)" class="input-dark">
+                <input type="number" id="ex-edad" placeholder="Edad (E)" class="input-dark">
+                <input type="number" id="ex-peso" placeholder="Peso (P)" class="input-dark">
+                <input type="number" id="ex-est" placeholder="Est. (H)" class="input-dark">
             </div>
-            <input type="number" id="ex-plan" placeholder="Valor del Plan" class="input-dark">
+            <input type="number" id="ex-plan" placeholder="Valor del Plan ($)" class="input-dark">
             
             <div class="box">
                 <h3 class="text-[10px] uppercase text-zinc-500 mb-2">Historial de Pagos</h3>
@@ -56,13 +56,13 @@
             <div class="box">
                 <h3 class="text-[10px] uppercase text-yellow-500 mb-3 border-b border-zinc-800 pb-2">ANTROPOMETRÍA</h3>
                 <div class="grid grid-cols-2 gap-2">
-                    <input type="number" id="m-c" placeholder="Cuello">
-                    <input type="number" id="m-t" placeholder="Tórax">
-                    <input type="number" id="m-b" placeholder="Bíceps">
-                    <input type="number" id="m-cin" placeholder="Cintura">
-                    <input type="number" id="m-g" placeholder="Glúteos">
-                    <input type="number" id="m-cuad" placeholder="Cuád.">
-                    <input type="number" id="m-pan" placeholder="Pantorrilla">
+                    <input type="number" id="m-c" placeholder="Cuello" class="input-dark">
+                    <input type="number" id="m-t" placeholder="Tórax" class="input-dark">
+                    <input type="number" id="m-b" placeholder="Bíceps" class="input-dark">
+                    <input type="number" id="m-cin" placeholder="Cintura" class="input-dark">
+                    <input type="number" id="m-g" placeholder="Glúteos" class="input-dark">
+                    <input type="number" id="m-cuad" placeholder="Cuád." class="input-dark">
+                    <input type="number" id="m-pan" placeholder="Pantorrilla" class="input-dark">
                 </div>
                 <button onclick="guardarMetrica()" class="btn bg-yellow-500 text-black mt-2 text-[10px]">Guardar y Calcular</button>
                 <div id="hist-met" class="mt-4 text-[10px] space-y-2"></div>
@@ -105,6 +105,7 @@
             let monto = parseFloat(document.getElementById('pago-monto').value);
             let fecha = document.getElementById('pago-fecha').value;
             if(isNaN(monto) || !fecha) return;
+            if(!db[cur].pagos) db[cur].pagos = [];
             db[cur].pagos.push({fecha, monto});
             localStorage.setItem('ciodaro_db', JSON.stringify(db));
             renderPagos(); render();
@@ -113,7 +114,7 @@
         function borrarPago(idx) { db[cur].pagos.splice(idx, 1); localStorage.setItem('ciodaro_db', JSON.stringify(db)); renderPagos(); render(); }
 
         function renderPagos() {
-            document.getElementById('hist-pagos').innerHTML = db[cur].pagos.map((p, i) => `<div class="flex justify-between border-b border-zinc-900 py-1"><span>${p.fecha}: $${p.monto}</span><button onclick="borrarPago(${i})" class="text-red-500">🗑️</button></div>`).join('');
+            document.getElementById('hist-pagos').innerHTML = (db[cur].pagos||[]).map((p, i) => `<div class="flex justify-between border-b border-zinc-900 py-1"><span>${p.fecha}: $${p.monto}</span><button onclick="borrarPago(${i})" class="text-red-500">🗑️</button></div>`).join('');
         }
 
         function guardarMetrica() {
@@ -125,6 +126,7 @@
                 pan: document.getElementById('m-pan').value,
                 imc: (document.getElementById('ex-peso').value / Math.pow(document.getElementById('ex-est').value/100, 2)).toFixed(1)
             };
+            if(!db[cur].met) db[cur].met = [];
             db[cur].met.push(met);
             localStorage.setItem('ciodaro_db', JSON.stringify(db));
             renderMetricas();
@@ -133,7 +135,7 @@
         function borrarMetrica(idx) { db[cur].met.splice(idx, 1); localStorage.setItem('ciodaro_db', JSON.stringify(db)); renderMetricas(); }
 
         function renderMetricas() {
-            document.getElementById('hist-met').innerHTML = db[cur].met.map((m, i) => `<div class="bg-zinc-900 p-2 rounded-lg">
+            document.getElementById('hist-met').innerHTML = (db[cur].met||[]).map((m, i) => `<div class="bg-zinc-900 p-2 rounded-lg">
                 <div class="flex justify-between font-bold text-yellow-500"><span>${m.fecha}</span><button onclick="borrarMetrica(${i})" class="text-red-500">🗑️</button></div>
                 <div>IMC: ${m.imc} | C:${m.c} T:${m.t} B:${m.b} Ci:${m.cin} G:${m.g} Cu:${m.cuad} P:${m.pan}</div>
             </div>`).join('');
@@ -142,7 +144,9 @@
         function borrarCliente() { if(confirm('¿Borrar?')) { db.splice(cur, 1); localStorage.setItem('ciodaro_db', JSON.stringify(db)); document.getElementById('modal').classList.add('hidden'); render(); } }
 
         function guardarCliente() {
-            db[cur] = {...db[cur], nom: document.getElementById('ex-nom').value, edad: document.getElementById('ex-edad').value, plan: document.getElementById('ex-plan').value, peso: document.getElementById('ex-peso').value, est: document.getElementById('ex-est').value};
+            let data = { nom: document.getElementById('ex-nom').value, edad: document.getElementById('ex-edad').value, plan: document.getElementById('ex-plan').value, peso: document.getElementById('ex-peso').value, est: document.getElementById('ex-est').value };
+            if(cur === null) { db.push({...data, pagos: [], met: []}); }
+            else { db[cur] = {...db[cur], ...data}; }
             localStorage.setItem('ciodaro_db', JSON.stringify(db)); document.getElementById('modal').classList.add('hidden'); render();
         }
         window.onload = render;
