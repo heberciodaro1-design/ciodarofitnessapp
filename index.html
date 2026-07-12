@@ -24,7 +24,7 @@
         </div>
         <div class="grid grid-cols-2 gap-2 mt-4">
             <div><p class="text-[9px] text-zinc-500 uppercase">Valor Planes</p><span id="val-planes" class="text-lg font-black">$0</span></div>
-            <div><p class="text-[9px] text-zinc-500 uppercase">Recaudado</p><span id="val-recaudado" class="text-lg font-black text-emerald-500">$0</span></div>
+            <div><p class="text-[9px] text-zinc-500 uppercase">Recaudado (Julio)</p><span id="val-recaudado" class="text-lg font-black text-emerald-500">$0</span></div>
         </div>
     </header>
 
@@ -45,7 +45,10 @@
                 <input type="number" id="ex-peso" placeholder="P" class="input-dark">
                 <input type="number" id="ex-est" placeholder="H" class="input-dark">
             </div>
-            <input type="number" id="ex-plan" placeholder="Valor del Plan ($)" class="input-dark">
+            <div class="flex gap-2">
+                <input type="number" id="ex-plan" placeholder="Valor del Plan ($)" class="input-dark">
+                <button onclick="pagoTotal()" class="btn bg-zinc-800 w-auto text-[10px]">PAGO TOTAL</button>
+            </div>
             
             <div class="box">
                 <h3 class="text-[10px] uppercase text-zinc-500 mb-2">Historial de Pagos</h3>
@@ -86,7 +89,9 @@
 
         function render() {
             let totalPlanes = db.reduce((a, b) => a + parseFloat(b.plan||0), 0);
-            let totalRecaudado = db.reduce((a, b) => a + (b.pagos||[]).reduce((x, y) => x + parseFloat(y.monto||0), 0), 0);
+            // Cálculo exclusivo de Julio 2026
+            let totalRecaudado = db.reduce((a, b) => a + (b.pagos||[]).filter(p => p.fecha.startsWith('2026-07')).reduce((x, y) => x + parseFloat(y.monto||0), 0), 0);
+            
             document.getElementById('val-planes').innerText = `$${totalPlanes}`;
             document.getElementById('val-recaudado').innerText = `$${totalRecaudado}`;
             
@@ -113,8 +118,21 @@
             document.getElementById('modal').classList.remove('hidden');
         }
 
+        function pagoTotal() {
+            if(cur === null) { alert("Guarda al alumno primero."); return; }
+            let plan = parseFloat(document.getElementById('ex-plan').value || 0);
+            let yaPagado = (db[cur].pagos||[]).reduce((x, y) => x + parseFloat(y.monto||0), 0);
+            let restante = plan - yaPagado;
+            if(restante > 0) {
+                if(!db[cur].pagos) db[cur].pagos = [];
+                db[cur].pagos.push({fecha: new Date().toISOString().split('T')[0], monto: restante});
+                localStorage.setItem('ciodaro_db', JSON.stringify(db));
+                renderPagos(); render();
+            }
+        }
+
         function agregarPago() {
-            if(cur === null) { alert("Primero guarda al alumno."); return; }
+            if(cur === null) { guardarCliente(); }
             let monto = parseFloat(document.getElementById('pago-monto').value);
             let fecha = document.getElementById('pago-fecha').value;
             if(isNaN(monto) || !fecha) return;
@@ -131,20 +149,10 @@
         }
 
         function guardarMetrica() {
-            if(cur === null) { 
-                // Si es un nuevo cliente, guardamos primero sus datos básicos
-                guardarCliente(); 
-                // Pequeña pausa para que cur sea el último elemento creado
-                setTimeout(() => { guardarMetricaActual(); }, 100);
-            } else {
-                guardarMetricaActual();
-            }
-        }
-
-        function guardarMetricaActual() {
+            if(cur === null) { guardarCliente(); }
             let p = parseFloat(document.getElementById('ex-peso').value);
             let h = parseFloat(document.getElementById('ex-est').value) / 100;
-            let fecha = document.getElementById('m-fecha').value || new Date().toLocaleDateString();
+            let fecha = document.getElementById('m-fecha').value || new Date().toISOString().split('T')[0];
             let met = {
                 fecha: fecha,
                 c: document.getElementById('m-c').value, t: document.getElementById('m-t').value,
@@ -177,7 +185,7 @@
 
         function guardarCliente() {
             let datos = { nom: document.getElementById('ex-nom').value, edad: document.getElementById('ex-edad').value, plan: document.getElementById('ex-plan').value, peso: document.getElementById('ex-peso').value, est: document.getElementById('ex-est').value };
-            if(cur === null) { db.push(datos); cur = db.length - 1; } 
+            if(cur === null) { db.push({...datos, pagos: [], met: []}); cur = db.length - 1; } 
             else { db[cur] = {...db[cur], ...datos}; }
             localStorage.setItem('ciodaro_db', JSON.stringify(db)); render();
         }
