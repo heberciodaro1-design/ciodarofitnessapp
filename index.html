@@ -20,7 +20,6 @@
         }
     </script>
     <style>
-        /* Ocultar flechas en inputs de número */
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
     </style>
@@ -59,7 +58,7 @@
 
         <!-- LISTADO DE CLIENTES -->
         <div id="contenedor-clientes" class="space-y-4">
-            <!-- Render dinámico desde JavaScript -->
+            <!-- Render dinámico -->
         </div>
 
     </div>
@@ -153,7 +152,6 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        // Cargar Base de datos o iniciar vacía
         let baseClientes = JSON.parse(localStorage.getItem('ciodaro_fitness_db')) || [];
         let cajaVisible = JSON.parse(localStorage.getItem('ciodaro_caja_visible')) ?? false;
 
@@ -163,8 +161,6 @@
             let index = document.getElementById('edit-index').value;
             let peso = parseFloat(document.getElementById('m-peso').value) || 0;
             let estatura = parseFloat(document.getElementById('m-estatura').value) || 1;
-            
-            // Fórmula Automática del IMC: Peso / (Estatura * Estatura)
             let imcCalculado = (peso / (estatura * estatura)).toFixed(1);
 
             let datosCliente = {
@@ -186,10 +182,8 @@
             };
 
             if (index === "") {
-                // Agregar nuevo
                 baseClientes.push(datosCliente);
             } else {
-                // Editar existente
                 baseClientes[index] = datosCliente;
             }
 
@@ -205,15 +199,12 @@
             contenedor.innerHTML = "";
 
             baseClientes.forEach((cliente, index) => {
-                // Sumar a la caja únicamente si tiene el check de pago activado
                 if (cliente.pagoDelMes) {
                     totalCaja += cliente.cuota;
                 }
 
-                // Filtrado por buscador
                 if (!cliente.nombre.toLowerCase().includes(busqueda)) return;
 
-                // Determinar el color del estado de IMC
                 let colorImc = "text-zinc-400";
                 if(cliente.imc < 18.5) colorImc = "text-blue-400";
                 else if(cliente.imc >= 18.5 && cliente.imc < 25) colorImc = "text-emerald-400";
@@ -224,7 +215,6 @@
                 card.className = `bg-ciodaro-grey rounded-2xl border ${cliente.pagoDelMes ? 'border-emerald-500/30 bg-emerald-950/5' : 'border-zinc-800'} p-5 transition relative overflow-hidden`;
                 card.innerHTML = `
                     <div class="flex flex-col lg:flex-row justify-between gap-4">
-                        <!-- Bloque de datos e historial -->
                         <div class="space-y-3 flex-1">
                             <div class="flex flex-wrap items-center gap-3">
                                 <h3 class="text-xl font-black tracking-tight text-white uppercase">${cliente.nombre}</h3>
@@ -234,23 +224,21 @@
                             
                             <p class="text-xs text-zinc-400 bg-ciodaro-black/40 p-2 rounded border border-zinc-800/60"><strong class="text-ciodaro-yellow">Historial de Pagos:</strong> ${cliente.historial || 'Sin registros'}</p>
                             
-                            <!-- Grilla de Métricas -->
                             <div class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-9 gap-2 bg-ciodaro-black/60 p-3 rounded-xl border border-zinc-800 text-center text-[11px]">
-                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Peso</p class="font-mono">${cliente.peso}kg</div>
-                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Cuello</p class="font-mono">${cliente.cuello}cm</div>
-                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Tórax</p class="font-mono">${cliente.torax}cm</div>
-                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Bíceps</p class="font-mono">${cliente.biceps}cm</div>
-                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Cadera</p class="font-mono">${cliente.cadera}cm</div>
-                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Glúteos</p class="font-mono">${cliente.gluteos}cm</div>
-                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Cuádricep</p class="font-mono">${cliente.cuadriceps}cm</div>
-                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Pantorr.</p class="font-mono">${cliente.pantorrillas}cm</div>
-                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Talla</p class="font-mono">${cliente.estatura}m</div>
+                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Peso</p><span class="font-mono">${cliente.peso}kg</span></div>
+                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Cuello</p><span class="font-mono">${cliente.cuello}cm</span></div>
+                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Tórax</p><span class="font-mono">${cliente.torax}cm</span></div>
+                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Bíceps</p><span class="font-mono">${cliente.biceps}cm</span></div>
+                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Cadera</p><span class="font-mono">${cliente.cadera}cm</span></div>
+                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Glúteos</p><span class="font-mono">${cliente.gluteos}cm</span></div>
+                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Cuádricep</p><span class="font-mono">${cliente.cuadriceps}cm</span></div>
+                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Pantorr.</p><span class="font-mono">${cliente.pantorrillas}cm</span></div>
+                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Talla</p><span class="font-mono">${cliente.estatura}m</span></div>
                             </div>
 
                             <p class="text-xs text-zinc-400 italic bg-zinc-900/30 p-2 rounded"><strong class="text-zinc-300 not-italic block text-[10px] uppercase font-bold tracking-wider mb-0.5">Comparativa mensual de progresos:</strong> ${cliente.comparaciones || 'Sin comparaciones registradas aún.'}</p>
                         </div>
 
-                        <!-- Bloque de acciones / Switch Pago -->
                         <div class="flex lg:flex-col justify-between items-end lg:justify-center gap-4 border-t lg:border-t-0 lg:border-l border-zinc-800 pt-4 lg:pt-0 lg:pl-6 min-w-[140px]">
                             <div class="text-center w-full lg:w-auto">
                                 <label class="block text-[10px] text-zinc-400 uppercase font-black mb-1 tracking-widest">¿Pagó este mes?</label>
@@ -267,7 +255,6 @@
                 contenedor.appendChild(card);
             });
 
-            // Renderizado Dinámico del total de caja
             let txtCaja = document.getElementById('txt-caja');
             let btnOjo = document.getElementById('btn-ojo');
             if (cajaVisible) {
@@ -314,4 +301,16 @@
             document.getElementById('m-biceps').value = cliente.biceps === '-' ? '' : cliente.biceps;
             document.getElementById('m-cadera').value = cliente.cadera === '-' ? '' : cliente.cadera;
             document.getElementById('m-gluteos').value = cliente.gluteos === '-' ? '' : cliente.gluteos;
-       
+            document.getElementById('m-cuadriceps').value = cliente.cuadriceps === '-' ? '' : cliente.cuadriceps;
+            document.getElementById('m-pantorrillas').value = cliente.pantorrillas === '-' ? '' : cliente.pantorrillas;
+            document.getElementById('m-comparaciones').value = cliente.comparaciones;
+
+            abrirModal();
+        }
+
+        function abrirModal() {
+            document.getElementById('modal-cliente').classList.remove('hidden');
+        }
+
+        function cerrarModal() {
+            document.getElementById('modal-cliente').classLi
