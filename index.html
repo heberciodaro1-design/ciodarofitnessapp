@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -152,8 +153,20 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        let baseClientes = JSON.parse(localStorage.getItem('ciodaro_fitness_db')) || [];
-        let cajaVisible = JSON.parse(localStorage.getItem('ciodaro_caja_visible')) ?? false;
+        let baseClientes = [];
+        try {
+            baseClientes = JSON.parse(localStorage.getItem('ciodaro_fitness_db')) || [];
+            if (!Array.isArray(baseClientes)) baseClientes = [];
+        } catch(e) {
+            baseClientes = [];
+        }
+
+        let cajaVisible = false;
+        try {
+            cajaVisible = JSON.parse(localStorage.getItem('ciodaro_caja_visible')) || false;
+        } catch(e) {
+            cajaVisible = false;
+        }
 
         function guardarCliente(e) {
             e.preventDefault();
@@ -164,9 +177,9 @@
             let imcCalculado = (peso / (estatura * estatura)).toFixed(1);
 
             let datosCliente = {
-                nombre: document.getElementById('m-nombre').value.trim(),
+                nombre: (document.getElementById('m-nombre').value || '').trim(),
                 cuota: parseFloat(document.getElementById('m-cuota').value) || 0,
-                historial: document.getElementById('m-historial').value.trim(),
+                historial: (document.getElementById('m-historial').value || '').trim(),
                 peso: peso,
                 estatura: estatura,
                 imc: imcCalculado,
@@ -177,8 +190,8 @@
                 gluteos: document.getElementById('m-gluteos').value || '-',
                 cuadriceps: document.getElementById('m-cuadriceps').value || '-',
                 pantorrillas: document.getElementById('m-pantorrillas').value || '-',
-                comparaciones: document.getElementById('m-comparaciones').value.trim(),
-                pagoDelMes: index !== "" ? baseClientes[index].pagoDelMes : false
+                comparaciones: (document.getElementById('m-comparaciones').value || '').trim(),
+                pagoDelMes: (index !== "" && baseClientes[index]) ? baseClientes[index].pagoDelMes : false
             };
 
             if (index === "") {
@@ -194,22 +207,28 @@
 
         function renderizar() {
             let contenedor = document.getElementById('contenedor-clientes');
-            let busqueda = document.getElementById('buscador').value.toLowerCase();
+            if(!contenedor) return;
+
+            let buscadorInput = document.getElementById('buscador');
+            let busqueda = buscadorInput ? buscadorInput.value.toLowerCase() : '';
             let totalCaja = 0;
             contenedor.innerHTML = "";
 
             baseClientes.forEach((cliente, index) => {
+                if (!cliente || !cliente.nombre) return;
+
                 if (cliente.pagoDelMes) {
-                    totalCaja += cliente.cuota;
+                    totalCaja += (parseFloat(cliente.cuota) || 0);
                 }
 
                 if (!cliente.nombre.toLowerCase().includes(busqueda)) return;
 
+                let imcVal = parseFloat(cliente.imc) || 0;
                 let colorImc = "text-zinc-400";
-                if(cliente.imc < 18.5) colorImc = "text-blue-400";
-                else if(cliente.imc >= 18.5 && cliente.imc < 25) colorImc = "text-emerald-400";
-                else if(cliente.imc >= 25 && cliente.imc < 30) colorImc = "text-yellow-400";
-                else if(cliente.imc >= 30) colorImc = "text-red-400";
+                if(imcVal < 18.5) colorImc = "text-blue-400";
+                else if(imcVal >= 18.5 && imcVal < 25) colorImc = "text-emerald-400";
+                else if(imcVal >= 25 && imcVal < 30) colorImc = "text-yellow-400";
+                else if(imcVal >= 30) colorImc = "text-red-400";
 
                 let card = document.createElement('div');
                 card.className = `bg-ciodaro-grey rounded-2xl border ${cliente.pagoDelMes ? 'border-emerald-500/30 bg-emerald-950/5' : 'border-zinc-800'} p-5 transition relative overflow-hidden`;
@@ -218,22 +237,22 @@
                         <div class="space-y-3 flex-1">
                             <div class="flex flex-wrap items-center gap-3">
                                 <h3 class="text-xl font-black tracking-tight text-white uppercase">${cliente.nombre}</h3>
-                                <span class="bg-ciodaro-black px-2.5 py-0.5 rounded text-xs font-bold text-ciodaro-yellow border border-zinc-800">Plan: $${cliente.cuota}</span>
-                                <span class="text-xs font-bold ${colorImc}">IMC: ${cliente.imc}</span>
+                                <span class="bg-ciodaro-black px-2.5 py-0.5 rounded text-xs font-bold text-ciodaro-yellow border border-zinc-800">Plan: $${cliente.cuota || 0}</span>
+                                <span class="text-xs font-bold ${colorImc}">IMC: ${cliente.imc || '-'}</span>
                             </div>
                             
                             <p class="text-xs text-zinc-400 bg-ciodaro-black/40 p-2 rounded border border-zinc-800/60"><strong class="text-ciodaro-yellow">Historial de Pagos:</strong> ${cliente.historial || 'Sin registros'}</p>
                             
                             <div class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-9 gap-2 bg-ciodaro-black/60 p-3 rounded-xl border border-zinc-800 text-center text-[11px]">
-                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Peso</p><span class="font-mono">${cliente.peso}kg</span></div>
-                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Cuello</p><span class="font-mono">${cliente.cuello}cm</span></div>
-                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Tórax</p><span class="font-mono">${cliente.torax}cm</span></div>
-                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Bíceps</p><span class="font-mono">${cliente.biceps}cm</span></div>
-                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Cadera</p><span class="font-mono">${cliente.cadera}cm</span></div>
-                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Glúteos</p><span class="font-mono">${cliente.gluteos}cm</span></div>
-                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Cuádricep</p><span class="font-mono">${cliente.cuadriceps}cm</span></div>
-                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Pantorr.</p><span class="font-mono">${cliente.pantorrillas}cm</span></div>
-                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Talla</p><span class="font-mono">${cliente.estatura}m</span></div>
+                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Peso</p><span class="font-mono">${cliente.peso || 0}kg</span></div>
+                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Cuello</p><span class="font-mono">${cliente.cuello || '-'}cm</span></div>
+                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Tórax</p><span class="font-mono">${cliente.torax || '-'}cm</span></div>
+                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Bíceps</p><span class="font-mono">${cliente.biceps || '-'}cm</span></div>
+                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Cadera</p><span class="font-mono">${cliente.cadera || '-'}cm</span></div>
+                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Glúteos</p><span class="font-mono">${cliente.gluteos || '-'}cm</span></div>
+                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Cuádricep</p><span class="font-mono">${cliente.cuadriceps || '-'}cm</span></div>
+                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Pantorr.</p><span class="font-mono">${cliente.pantorrillas || '-'}cm</span></div>
+                                <div><p class="text-zinc-500 font-bold uppercase text-[9px]">Talla</p><span class="font-mono">${cliente.estatura || 0}m</span></div>
                             </div>
 
                             <p class="text-xs text-zinc-400 italic bg-zinc-900/30 p-2 rounded"><strong class="text-zinc-300 not-italic block text-[10px] uppercase font-bold tracking-wider mb-0.5">Comparativa mensual de progresos:</strong> ${cliente.comparaciones || 'Sin comparaciones registradas aún.'}</p>
@@ -255,10 +274,16 @@
                 contenedor.appendChild(card);
             });
 
+            actualizarCajaVisual(totalCaja);
+        }
+
+        function actualizarCajaVisual(total) {
             let txtCaja = document.getElementById('txt-caja');
             let btnOjo = document.getElementById('btn-ojo');
+            if(!txtCaja || !btnOjo) return;
+
             if (cajaVisible) {
-                txtCaja.innerText = `$${totalCaja.toLocaleString()}`;
+                txtCaja.innerText = `$${total.toLocaleString()}`;
                 btnOjo.innerText = "🔒";
             } else {
                 txtCaja.innerText = "***";
@@ -267,9 +292,11 @@
         }
 
         function togglePago(index) {
-            baseClientes[index].pagoDelMes = !baseClientes[index].pagoDelMes;
-            sincronizarStorage();
-            renderizar();
+            if(baseClientes[index]) {
+                baseClientes[index].pagoDelMes = !baseClientes[index].pagoDelMes;
+                sincronizarStorage();
+                renderizar();
+            }
         }
 
         function toggleVisibilidadCaja() {
@@ -279,7 +306,7 @@
         }
 
         function eliminarCliente(index) {
-            if (confirm(`¿Estás seguro de eliminar a ${baseClientes[index].nombre}?`)) {
+            if (baseClientes[index] && confirm(`¿Estás seguro de eliminar a ${baseClientes[index].nombre}?`)) {
                 baseClientes.splice(index, 1);
                 sincronizarStorage();
                 renderizar();
@@ -288,22 +315,24 @@
 
         function editarCliente(index) {
             let cliente = baseClientes[index];
+            if(!cliente) return;
+
             document.getElementById('modal-titulo').innerText = "EDITAR DATOS DEL ALUMNO";
             document.getElementById('edit-index').value = index;
             
-            document.getElementById('m-nombre').value = cliente.nombre;
-            document.getElementById('m-cuota').value = cliente.cuota;
-            document.getElementById('m-historial').value = cliente.historial;
-            document.getElementById('m-peso').value = cliente.peso;
-            document.getElementById('m-estatura').value = cliente.estatura;
-            document.getElementById('m-cuello').value = cliente.cuello === '-' ? '' : cliente.cuello;
-            document.getElementById('m-torax').value = cliente.torax === '-' ? '' : cliente.torax;
-            document.getElementById('m-biceps').value = cliente.biceps === '-' ? '' : cliente.biceps;
-            document.getElementById('m-cadera').value = cliente.cadera === '-' ? '' : cliente.cadera;
-            document.getElementById('m-gluteos').value = cliente.gluteos === '-' ? '' : cliente.gluteos;
-            document.getElementById('m-cuadriceps').value = cliente.cuadriceps === '-' ? '' : cliente.cuadriceps;
-            document.getElementById('m-pantorrillas').value = cliente.pantorrillas === '-' ? '' : cliente.pantorrillas;
-            document.getElementById('m-comparaciones').value = cliente.comparaciones;
+            document.getElementById('m-nombre').value = cliente.nombre || '';
+            document.getElementById('m-cuota').value = cliente.cuota || 0;
+            document.getElementById('m-historial').value = cliente.historial || '';
+            document.getElementById('m-peso').value = cliente.peso || '';
+            document.getElementById('m-estatura').value = cliente.estatura || '';
+            document.getElementById('m-cuello').value = cliente.cuello === '-' ? '' : (cliente.cuello || '');
+            document.getElementById('m-torax').value = cliente.torax === '-' ? '' : (cliente.torax || '');
+            document.getElementById('m-biceps').value = cliente.biceps === '-' ? '' : (cliente.biceps || '');
+            document.getElementById('m-cadera').value = cliente.cadera === '-' ? '' : (cliente.cadera || '');
+            document.getElementById('m-gluteos').value = cliente.gluteos === '-' ? '' : (cliente.gluteos || '');
+            document.getElementById('m-cuadriceps').value = cliente.cuadriceps === '-' ? '' : (cliente.cuadriceps || '');
+            document.getElementById('m-pantorrillas').value = cliente.pantorrillas === '-' ? '' : (cliente.pantorrillas || '');
+            document.getElementById('m-comparaciones').value = cliente.comparaciones || '';
 
             abrirModal();
         }
@@ -313,4 +342,19 @@
         }
 
         function cerrarModal() {
-            document.getElementById('modal-cliente').classLi
+            document.getElementById('modal-cliente').classList.add('hidden');
+            document.getElementById('form-cliente').reset();
+            document.getElementById('edit-index').value = "";
+            document.getElementById('modal-titulo').innerText = "REGISTRAR NUEVO ALUMNO";
+        }
+
+        function sincronizarStorage() {
+            localStorage.setItem('ciodaro_fitness_db', JSON.stringify(baseClientes));
+        }
+
+        window.onload = function() {
+            renderizar();
+        };
+    </script>
+</body>
+</html>
