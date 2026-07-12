@@ -59,7 +59,7 @@
         </div>
     </div>
 
-    <!-- MODAL REGISTRO / EDICIÓN (DATOS BÁSICOS Y EVALUACIÓN) -->
+    <!-- MODAL REGISTRO / EDICIÓN -->
     <div id="modal-cliente" class="fixed inset-0 bg-black/85 hidden flex items-center justify-center p-4 z-50 overflow-y-auto backdrop-blur-sm">
         <div class="bg-ciodaro-grey w-full max-w-xl rounded-xl border border-zinc-800 p-5 space-y-4 my-4">
             <div class="flex justify-between items-center border-b border-zinc-800 pb-2">
@@ -70,8 +70,8 @@
             <form id="form-cliente" onsubmit="guardarCliente(event)" class="space-y-4 text-sm">
                 <input type="hidden" id="edit-index">
                 
-                <!-- Datos Principales -->
-                <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
+                <!-- Datos Principales Corregidos para Móvil (Se apilan en móvil, lado a lado en PC) -->
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                     <div class="sm:col-span-2">
                         <label class="block text-[11px] font-bold text-zinc-400 uppercase mb-0.5">Nombre Completo</label>
                         <input type="text" id="m-nombre" required class="w-full bg-ciodaro-input border border-zinc-700 rounded p-2 text-white outline-none focus:border-ciodaro-yellow">
@@ -86,7 +86,8 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-ciodaro-black/40 p-2 rounded border border-zinc-800">
+                <!-- Estado de Cuenta y Fechas Corregidos para Móvil -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-ciodaro-black/40 p-3 rounded border border-zinc-800">
                     <div>
                         <label class="block text-[11px] font-bold text-zinc-400 uppercase mb-0.5">Fecha de Inicio</label>
                         <input type="date" id="m-fecha-inicio" class="w-full bg-ciodaro-input border border-zinc-700 rounded p-1.5 text-xs text-white outline-none">
@@ -98,17 +99,17 @@
                             <option value="F">Femenino</option>
                         </select>
                     </div>
-                    <div class="flex flex-col justify-center items-center">
+                    <div class="flex flex-col justify-center items-center pt-2 sm:pt-0 border-t sm:border-t-0 border-zinc-800/60">
                         <span class="text-[10px] uppercase text-zinc-500 font-bold">Estado de Cuenta</span>
                         <span id="modal-saldo-status" class="text-sm font-black mt-0.5 text-white">Restan: $0</span>
                     </div>
                 </div>
 
-                <!-- SECCIÓN DOBLE: COMPARATIVA DE MÉTRICAS (MES PASADO VS MES ACTUAL) -->
+                <!-- SECCIÓN DOBLE: COMPARATIVA DE MÉTRICAS OPTIMIZADA -->
                 <div class="border-t border-zinc-800 pt-3">
                     <h3 class="text-xs font-black text-ciodaro-yellow uppercase mb-2 tracking-wider">Comparativa Métrica Mensual</h3>
                     
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <!-- Columna Mes Pasado / Inicial -->
                         <div class="bg-ciodaro-black p-3 rounded-lg border border-zinc-800 space-y-2">
                             <p class="text-[10px] font-bold text-zinc-400 uppercase border-b border-zinc-800 pb-1">📉 Mes Pasado / Inicial</p>
@@ -211,14 +212,12 @@
                 fechaInicio: document.getElementById('m-fecha-inicio').value || '',
                 comparaciones: (document.getElementById('m-comparaciones').value || '').trim(),
                 
-                // Métricas antiguas (Mes Pasado)
                 peso: pesoPasado,
                 estatura: estPasada,
                 imc: calcularMetricas(pesoPasado, estPasada),
                 cintura: parseFloat(document.getElementById('m-cintura').value) || 0,
                 gluteos: parseFloat(document.getElementById('m-gluteos').value) || 0,
                 
-                // Métricas Nuevas (Mes Actual)
                 pesoAct: pesoAct,
                 estaturaAct: estAct,
                 imcAct: pesoAct > 0 ? calcularMetricas(pesoAct, estAct) : '-',
@@ -240,7 +239,6 @@
 
             let busqueda = (document.getElementById('buscador')?.value || '').toLowerCase();
             
-            // VARIABLES DE CONTEO DOBLE
             let totalCajaProyectada = 0;
             let totalCajaAbonos = 0;
             
@@ -249,7 +247,6 @@
             baseClientes.forEach((cliente, index) => {
                 if (!cliente || !cliente.nombre) return;
                 
-                // Sumamos ambos flujos de dinero
                 totalCajaProyectada += (parseFloat(cliente.cuota) || 0);
                 totalCajaAbonos += (parseFloat(cliente.abonado) || 0);
                 
@@ -261,7 +258,6 @@
                     if(partes.length === 3) displayFecha = `${partes[2]}/${partes[1]}`;
                 }
 
-                // Generar etiqueta de balance simplificada
                 let etiquetaPago = "";
                 if (cliente.estadoPago === 'PAGADO') {
                     etiquetaPago = `<span class="bg-emerald-950 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded text-[10px] font-black uppercase">✅ Pagado</span>`;
@@ -293,7 +289,6 @@
                 contenedor.appendChild(fila);
             });
 
-            // Asignación de los dos totales correspondientes
             document.getElementById('txt-caja-total').innerText = `$${totalCajaProyectada.toLocaleString()}`;
             document.getElementById('txt-caja-abonos').innerText = `$${totalCajaAbonos.toLocaleString()}`;
         }
@@ -312,13 +307,11 @@
             document.getElementById('m-fecha-inicio').value = cliente.fechaInicio || '';
             document.getElementById('m-comparaciones').value = cliente.comparaciones || '';
             
-            // Datos Mes anterior
             document.getElementById('m-peso').value = cliente.peso || '';
             document.getElementById('m-estatura').value = cliente.estatura || '';
             document.getElementById('m-cintura').value = cliente.cintura || '';
             document.getElementById('m-gluteos').value = cliente.gluteos || '';
 
-            // Datos Mes actual
             document.getElementById('m-peso-act').value = cliente.pesoAct || '';
             document.getElementById('m-estatura-act').value = cliente.estaturaAct || '';
             document.getElementById('m-cintura-act').value = cliente.cinturaAct || '';
