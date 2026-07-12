@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ciodarofitness - Panel Todo en Uno</title>
+    <title>Ciodarofitness - Panel Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans pb-12">
 
-    <!-- ENCABEZADO -->
     <header class="bg-slate-800/50 backdrop-blur-md border-b border-slate-700/50 p-4 sticky top-0 z-50 shadow-lg">
         <div class="flex justify-between items-center max-w-xl mx-auto">
             <h1 class="text-xl font-black tracking-wider text-orange-500">CIODAROFITNESS<span class="text-slate-400 text-xs font-normal lowercase pl-1">pro</span></h1>
@@ -21,9 +20,8 @@
 
     <main class="max-w-xl mx-auto p-4 space-y-6">
 
-        <!-- DASHBOARD FINANCIERO Y ESTADÍSTICAS -->
+        <!-- DASHBOARD -->
         <section class="grid grid-cols-2 gap-4">
-            <!-- Clientes Activos -->
             <div class="bg-slate-800 border border-slate-700/60 p-4 rounded-xl shadow-md">
                 <div class="flex justify-between items-center text-slate-400 mb-1">
                     <span class="text-xs font-semibold uppercase tracking-wider">Clientes Activos</span>
@@ -32,205 +30,121 @@
                 <div class="text-2xl font-bold text-white" id="stat-clientes">0</div>
             </div>
             
-            <!-- Monto Proyectado (Editable) -->
             <div class="bg-slate-800 border border-slate-700/60 p-4 rounded-xl shadow-md">
                 <div class="flex justify-between items-center text-slate-400 mb-1">
-                    <span class="text-xs font-semibold uppercase tracking-wider">Monto Proyectado</span>
+                    <span class="text-xs font-semibold uppercase tracking-wider">Meta Mensual ($)</span>
                     <i data-lucide="target" class="w-4 h-4 text-blue-400"></i>
                 </div>
-                <div class="flex items-center gap-1">
-                    <span class="text-xl font-bold text-blue-400">$</span>
-                    <input type="number" id="metaMensual" value="600" oninput="calcularFinanzas()" class="w-20 bg-slate-700 text-white font-bold text-xl rounded px-1 focus:outline-none focus:ring-1 focus:ring-blue-400">
-                </div>
+                <input type="number" id="metaMensual" value="600" oninput="calcularFinanzas()" class="w-full bg-slate-700 text-white font-bold text-xl rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400">
             </div>
 
-            <!-- Total Recaudado -->
             <div class="bg-slate-800 border border-slate-700/60 p-4 rounded-xl shadow-md">
                 <div class="flex justify-between items-center text-slate-400 mb-1">
-                    <span class="text-xs font-semibold uppercase tracking-wider">Total Recaudado</span>
+                    <span class="text-xs font-semibold uppercase tracking-wider">Recaudado</span>
                     <i data-lucide="dollar-sign" class="w-4 h-4 text-emerald-500"></i>
                 </div>
                 <div class="text-2xl font-bold text-emerald-400" id="stat-ingresos">$0.00</div>
             </div>
 
-            <!-- Resta por Recaudar (Lo que falta para el ahorro) -->
             <div class="bg-slate-800 border border-slate-700/60 p-4 rounded-xl shadow-md">
                 <div class="flex justify-between items-center text-slate-400 mb-1">
-                    <span class="text-xs font-semibold uppercase tracking-wider">Resta por Recaudar</span>
+                    <span class="text-xs font-semibold uppercase tracking-wider">Falta cobrar</span>
                     <i data-lucide="trending-down" class="w-4 h-4 text-orange-400"></i>
                 </div>
                 <div class="text-2xl font-bold text-orange-400" id="stat-restante">$0.00</div>
             </div>
         </section>
 
-        <!-- BARRA DE BÚSQUEDA RÁPIDA (CON LUPITA) -->
+        <!-- BUSCADOR -->
         <section class="relative">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                 <i data-lucide="search" class="w-5 h-5"></i>
             </div>
-            <input type="text" id="buscadorCliente" onkeyup="filtrarClientes()" placeholder="Buscar cliente por nombre..." class="w-full pl-10 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition shadow-md">
+            <input type="text" id="buscadorCliente" onkeyup="filtrarClientes()" placeholder="Buscar cliente..." class="w-full pl-10 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 transition shadow-md">
         </section>
 
-        <!-- SECCIÓN DE GESTIÓN DE ALUMNOS -->
+        <!-- LISTA CLIENTES -->
         <section class="bg-slate-800 border border-slate-700/60 rounded-xl shadow-md overflow-hidden">
-            <div class="p-4 border-b border-slate-700/60 bg-slate-800/50">
-                <h2 class="text-sm font-bold uppercase tracking-wider text-slate-300">Gestión de Alumnos</h2>
-            </div>
-            <div class="divide-y divide-slate-700/50" id="contenedor-clientes">
-                
-                <!-- Alumno 1 -->
-                <div class="p-4 flex justify-between items-center cliente-fila transition duration-150">
+            <div id="contenedor-clientes" class="divide-y divide-slate-700/50">
+                <!-- Los clientes van aquí. Ejemplo: -->
+                <div class="p-4 flex justify-between items-center cliente-fila">
                     <div>
                         <p class="font-semibold text-white nombre-cliente">Angie Chavarría</p>
-                        <div class="flex items-center gap-1 text-xs text-slate-400 mt-1">
-                            <span>Cuota: $</span>
-                            <input type="number" class="cuota-cliente bg-slate-700 text-white rounded px-1 w-12 text-center focus:outline-none focus:ring-1 focus:ring-orange-500" value="40" oninput="calcularFinanzas()">
-                        </div>
+                        <input type="number" class="cuota-cliente bg-slate-700 text-white rounded px-2 w-16 text-sm mt-1" value="40" oninput="calcularFinanzas()">
                     </div>
-                    <div>
-                        <label class="flex items-center gap-2 cursor-pointer bg-slate-700/50 px-3 py-2 rounded-lg border border-slate-600/50 hover:bg-slate-700 transition">
-                            <input type="checkbox" class="pago-status accent-emerald-500 w-4 h-4" onchange="calcularFinanzas()">
-                            <span class="text-xs font-medium text-slate-300 select-none">Pagó</span>
-                        </label>
-                    </div>
+                    <label class="flex items-center gap-2 cursor-pointer bg-slate-700/50 px-3 py-2 rounded-lg border border-slate-600/50">
+                        <input type="checkbox" class="pago-status accent-emerald-500 w-5 h-5" onchange="calcularFinanzas()">
+                    </label>
                 </div>
-
-                <!-- Alumno 2 -->
-                <div class="p-4 flex justify-between items-center cliente-fila transition duration-150">
+                
+                <div class="p-4 flex justify-between items-center cliente-fila">
                     <div>
                         <p class="font-semibold text-white nombre-cliente">César Lares</p>
-                        <div class="flex items-center gap-1 text-xs text-slate-400 mt-1">
-                            <span>Cuota: $</span>
-                            <input type="number" class="cuota-cliente bg-slate-700 text-white rounded px-1 w-12 text-center focus:outline-none focus:ring-1 focus:ring-orange-500" value="35" oninput="calcularFinanzas()">
-                        </div>
+                        <input type="number" class="cuota-cliente bg-slate-700 text-white rounded px-2 w-16 text-sm mt-1" value="35" oninput="calcularFinanzas()">
                     </div>
-                    <div>
-                        <label class="flex items-center gap-2 cursor-pointer bg-slate-700/50 px-3 py-2 rounded-lg border border-slate-600/50 hover:bg-slate-700 transition">
-                            <input type="checkbox" class="pago-status accent-emerald-500 w-4 h-4" onchange="calcularFinanzas()">
-                            <span class="text-xs font-medium text-slate-300 select-none">Pagó</span>
-                        </label>
-                    </div>
+                    <label class="flex items-center gap-2 cursor-pointer bg-slate-700/50 px-3 py-2 rounded-lg border border-slate-600/50">
+                        <input type="checkbox" class="pago-status accent-emerald-500 w-5 h-5" onchange="calcularFinanzas()">
+                    </label>
                 </div>
-
-                <!-- Alumno 3 -->
-                <div class="p-4 flex justify-between items-center cliente-fila transition duration-150">
-                    <div>
-                        <p class="font-semibold text-white nombre-cliente">Wendy Lunar</p>
-                        <div class="flex items-center gap-1 text-xs text-slate-400 mt-1">
-                            <span>Cuota: $</span>
-                            <input type="number" class="cuota-cliente bg-slate-700 text-white rounded px-1 w-12 text-center focus:outline-none focus:ring-1 focus:ring-orange-500" value="50" oninput="calcularFinanzas()">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="flex items-center gap-2 cursor-pointer bg-slate-700/50 px-3 py-2 rounded-lg border border-slate-600/50 hover:bg-slate-700 transition">
-                            <input type="checkbox" class="pago-status accent-emerald-500 w-4 h-4" onchange="calcularFinanzas()">
-                            <span class="text-xs font-medium text-slate-300 select-none">Pagó</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Alumno 4 -->
-                <div class="p-4 flex justify-between items-center cliente-fila transition duration-150">
-                    <div>
-                        <p class="font-semibold text-white nombre-cliente">Ivonne Pirela</p>
-                        <div class="flex items-center gap-1 text-xs text-slate-400 mt-1">
-                            <span>Cuota: $</span>
-                            <input type="number" class="cuota-cliente bg-slate-700 text-white rounded px-1 w-12 text-center focus:outline-none focus:ring-1 focus:ring-orange-500" value="40" oninput="calcularFinanzas()">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="flex items-center gap-2 cursor-pointer bg-slate-700/50 px-3 py-2 rounded-lg border border-slate-600/50 hover:bg-slate-700 transition">
-                            <input type="checkbox" class="pago-status accent-emerald-500 w-4 h-4" onchange="calcularFinanzas()">
-                            <span class="text-xs font-medium text-slate-300 select-none">Pagó</span>
-                        </label>
-                    </div>
-                </div>
-
             </div>
         </section>
-
     </main>
 
-    <!-- LÓGICA DE CONTROL -->
     <script>
-        // Inicializar los iconos Lucide
         lucide.createIcons();
-
-        // Control de visibilidad para ocultar números (Botón Ojo)
         let visible = true;
+
         function toggleVisibilidad() {
             visible = !visible;
             const icono = document.getElementById('icono-ojo');
+            icono.setAttribute('data-lucide', visible ? 'eye' : 'eye-off');
+            lucide.createIcons();
+            calcularFinanzas(); // Recalcular inmediatamente
+        }
+
+        function filtrarClientes() {
+            const filter = document.getElementById('buscadorCliente').value.toLowerCase();
+            const filas = document.querySelectorAll('.cliente-fila');
             
+            filas.forEach(fila => {
+                const nombre = fila.querySelector('.nombre-cliente').innerText.toLowerCase();
+                fila.classList.toggle('hidden', !nombre.includes(filter));
+            });
+        }
+
+        function calcularFinanzas() {
+            const metaTotal = parseFloat(document.getElementById('metaMensual').value) || 0;
+            const filas = document.querySelectorAll('.cliente-fila');
+            let totalRecaudado = 0;
+            let activos = 0;
+
+            filas.forEach(fila => {
+                const cuota = parseFloat(fila.querySelector('.cuota-cliente').value) || 0;
+                const pagado = fila.querySelector('.pago-status').checked;
+                
+                if (pagado) {
+                    totalRecaudado += cuota;
+                    fila.classList.add('opacity-40');
+                } else {
+                    fila.classList.remove('opacity-40');
+                }
+                activos++;
+            });
+
+            const resta = Math.max(0, metaTotal - totalRecaudado);
+
+            // Actualizar UI
+            document.getElementById('stat-clientes').innerText = activos;
             if (visible) {
-                icono.setAttribute('data-lucide', 'eye');
-                calcularFinanzas();
+                document.getElementById('stat-ingresos').innerText = `$${totalRecaudado.toFixed(2)}`;
+                document.getElementById('stat-restante').innerText = `$${resta.toFixed(2)}`;
             } else {
-                icono.setAttribute('data-lucide', 'eye-off');
                 document.getElementById('stat-ingresos').innerText = '***';
                 document.getElementById('stat-restante').innerText = '***';
             }
-            lucide.createIcons();
         }
 
-        // FUNCIÓN FILTRADORA (LA LUPITA)
-        function filtrarClientes() {
-            let input = document.getElementById('buscadorCliente');
-            let filter = input.value.toLowerCase();
-            let filas = document.getElementsByClassName('cliente-fila');
-
-            for (let i = 0; i < filas.length; i++) {
-                let nombreElemento = filas[i].getElementsByClassName('nombre-cliente')[0];
-                if (nombreElemento) {
-                    let nombreTexto = nombreElemento.textContent || nombreElemento.innerText;
-                    // Muestra u oculta usando clases nativas de Tailwind
-                    if (nombreTexto.toLowerCase().indexOf(filter) > -1) {
-                        filas[i].classList.remove('hidden');
-                        filas[i].classList.add('flex');
-                    } else {
-                        filas[i].classList.remove('flex');
-                        filas[i].classList.add('hidden');
-                    }
-                }
-            }
-        }
-
-        // CONTROL MATEMÁTICO DE ENTRADAS Y RESTAS
-        function calcularFinanzas() {
-            let metaTotal = parseFloat(document.getElementById('metaMensual').value) || 0;
-            let filas = document.getElementsByClassName('cliente-fila');
-            
-            let totalClientes = filas.length;
-            let totalRecaudado = 0;
-
-            for (let i = 0; i < filas.length; i++) {
-                let cuota = parseFloat(filas[i].getElementsByClassName('cuota-cliente')[0].value) || 0;
-                let estaPagado = filas[i].getElementsByClassName('pago-status')[0].checked;
-
-                if (estaPagado) {
-                    totalRecaudado += cuota;
-                    filas[i].classList.add('opacity-40'); // Atenuado visual elegante
-                } else {
-                    filas[i].classList.remove('opacity-40');
-                }
-            }
-
-            let restaPorRecaudar = metaTotal - totalRecaudado;
-            if (restaPorRecaudar < 0) restaPorRecaudar = 0;
-
-            // Mostrar resultados en los paneles correspondientes
-            document.getElementById('stat-clientes').innerText = totalClientes;
-            
-            if (visible) {
-                document.getElementById('stat-ingresos').innerText = `$${totalRecaudado.toFixed(2)}`;
-                document.getElementById('stat-restante').innerText = `$${restaPorRecaudar.toFixed(2)}`;
-            }
-        }
-
-        // Ejecución inicial automática
-        window.onload = function() {
-            calcularFinanzas();
-        };
+        window.onload = calcularFinanzas;
     </script>
 </body>
 </html>
