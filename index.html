@@ -25,9 +25,10 @@
             </div>
             <button onclick="toggleVisibility()" class="text-xs bg-zinc-800 px-3 py-1 rounded">👁️</button>
         </div>
-        <div class="grid grid-cols-2 gap-2 mt-4">
-            <div><p class="text-[9px] text-zinc-500 uppercase">Valor Planes</p><span id="val-planes" class="text-lg font-black ${mostrar ? '' : 'hidden-monto'}">$0</span></div>
-            <div><p class="text-[9px] text-zinc-500 uppercase">Recaudado (Julio)</p><span id="val-recaudado" class="text-lg font-black text-emerald-500 ${mostrar ? '' : 'hidden-monto'}">$0</span></div>
+        <div class="grid grid-cols-3 gap-2 mt-4">
+            <div><p class="text-[9px] text-zinc-500 uppercase">Planes</p><span id="val-planes" class="text-md font-black ${mostrar ? '' : 'hidden-monto'}">$0</span></div>
+            <div><p class="text-[9px] text-zinc-500 uppercase">Recaudado</p><span id="val-recaudado" class="text-md font-black text-emerald-500 ${mostrar ? '' : 'hidden-monto'}">$0</span></div>
+            <div><p class="text-[9px] text-zinc-500 uppercase">Faltante</p><span id="val-faltante" class="text-md font-black text-red-500 ${mostrar ? '' : 'hidden-monto'}">$0</span></div>
         </div>
     </header>
 
@@ -96,26 +97,29 @@
 
         function render() {
             let busqueda = document.getElementById('busc').value.toLowerCase();
-            let listaFiltrada = db.filter(c => c.nom.toLowerCase().includes(busqueda));
-
+            
             let totalPlanes = db.reduce((a, b) => a + parseFloat(b.plan||0), 0);
-            let totalRecaudado = db.reduce((a, b) => a + (b.pagos||[]).filter(p => p.fecha.startsWith('2026-07')).reduce((x, y) => x + parseFloat(y.monto||0), 0), 0);
+            let totalRecaudado = db.reduce((a, b) => a + (b.pagos||[]).reduce((x, y) => x + parseFloat(y.monto||0), 0), 0);
+            let totalFaltante = totalPlanes - totalRecaudado;
             
             document.getElementById('val-planes').innerText = `$${totalPlanes}`;
             document.getElementById('val-recaudado').innerText = `$${totalRecaudado}`;
+            document.getElementById('val-faltante').innerText = `$${totalFaltante}`;
             document.getElementById('total-alumnos').innerText = `Alumnos: ${db.length}`;
             
-            document.getElementById('val-planes').className = `text-lg font-black ${mostrar ? '' : 'hidden-monto'}`;
-            document.getElementById('val-recaudado').className = `text-lg font-black text-emerald-500 ${mostrar ? '' : 'hidden-monto'}`;
+            let listaFiltrada = db.filter(c => c.nom.toLowerCase().includes(busqueda)).sort((a, b) => {
+                let sA = parseFloat(a.plan||0) - (a.pagos||[]).reduce((x, y) => x + parseFloat(y.monto||0), 0);
+                let sB = parseFloat(b.plan||0) - (b.pagos||[]).reduce((x, y) => x + parseFloat(y.monto||0), 0);
+                return (sB > 0) - (sA > 0);
+            });
             
             document.getElementById('lista').innerHTML = listaFiltrada.map((c, i) => {
                 let yaPagado = (c.pagos||[]).reduce((x, y) => x + parseFloat(y.monto||0), 0);
                 let saldo = parseFloat(c.plan||0) - yaPagado;
                 let textoSaldo = saldo <= 0 ? "Pagado (0)" : `Resta: $${saldo}`;
-                // Buscamos el índice real en la base de datos completa para abrir el modal correcto
                 let idxOriginal = db.indexOf(c);
                 return `
-                <div class="box flex justify-between items-center">
+                <div class="box flex justify-between items-center ${saldo > 0 ? 'border-red-900/50' : ''}">
                     <div>
                         <h3 class="font-bold text-sm">${c.nom}</h3>
                         <span class="text-[10px] ${saldo <= 0 ? 'text-emerald-500' : 'text-red-500'} font-bold ${mostrar ? '' : 'hidden-monto'}">${textoSaldo}</span>
