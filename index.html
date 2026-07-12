@@ -12,12 +12,16 @@
         ::placeholder { color: #71717a; }
         .btn { padding: 10px; border-radius: 8px; font-weight: bold; font-size: 14px; text-transform: uppercase; width: 100%; }
         .comp-card { background: #18181b; padding: 10px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #eab308; }
+        .hidden-monto { filter: blur(5px); pointer-events: none; user-select: none; }
     </style>
 </head>
 <body class="p-4">
 
     <header class="box">
-        <h1 class="font-black text-yellow-500 text-xl tracking-tighter">CIODAROFITNESS</h1>
+        <div class="flex justify-between items-center">
+            <h1 class="font-black text-yellow-500 text-xl tracking-tighter">CIODAROFITNESS</h1>
+            <button onclick="toggleVisibility()" class="text-xs bg-zinc-800 px-3 py-1 rounded">👁️</button>
+        </div>
         <div class="grid grid-cols-2 gap-2 mt-4">
             <div><p class="text-[9px] text-zinc-500 uppercase">Valor Planes</p><span id="val-planes" class="text-lg font-black">$0</span></div>
             <div><p class="text-[9px] text-zinc-500 uppercase">Recaudado</p><span id="val-recaudado" class="text-lg font-black text-emerald-500">$0</span></div>
@@ -65,7 +69,6 @@
                     <input type="number" id="m-pan" placeholder="Pantorrilla" class="input-dark">
                 </div>
                 <button onclick="guardarMetrica()" class="btn bg-yellow-500 text-black mt-2 text-[10px]">Guardar y Calcular</button>
-                
                 <h3 class="text-[10px] uppercase text-zinc-500 mt-6 mb-2">Historial Comparativo</h3>
                 <div id="hist-met" class="mt-2 text-[11px] space-y-2"></div>
             </div>
@@ -76,6 +79,9 @@
     <script>
         let db = JSON.parse(localStorage.getItem('ciodaro_db')) || [];
         let cur = null;
+        let mostrar = false;
+
+        function toggleVisibility() { mostrar = !mostrar; render(); }
 
         function render() {
             let totalPlanes = db.reduce((a, b) => a + parseFloat(b.plan||0), 0);
@@ -84,12 +90,13 @@
             document.getElementById('val-recaudado').innerText = `$${totalRecaudado}`;
             document.getElementById('lista').innerHTML = db.map((c, i) => `
                 <div class="box flex justify-between items-center">
-                    <div><h3 class="font-bold text-sm">${c.nom}</h3><span class="text-[10px] text-zinc-500">Plan: $${c.plan}</span></div>
+                    <div><h3 class="font-bold text-sm">${c.nom}</h3><span class="text-[10px] text-zinc-500 ${mostrar ? '' : 'hidden-monto'}">Plan: $${c.plan}</span></div>
                     <button onclick="abrirModal(${i})" class="bg-zinc-900 px-3 py-2 rounded-lg font-bold text-[10px] border border-zinc-700">EXPEDIENTE</button>
                 </div>
             `).join('');
         }
-
+        
+        // ... (rest of functions remain exactly as before: abrirModal, agregarPago, borrarPago, renderPagos, guardarMetrica, borrarMetrica, renderMetricas, borrarCliente, guardarCliente)
         function abrirModal(i) {
             cur = i;
             if(i !== null) {
