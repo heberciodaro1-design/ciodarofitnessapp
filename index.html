@@ -23,8 +23,8 @@
             <button onclick="toggleVisibility()" class="text-xs bg-zinc-800 px-3 py-1 rounded">👁️</button>
         </div>
         <div class="grid grid-cols-2 gap-2 mt-4">
-            <div><p class="text-[9px] text-zinc-500 uppercase">Valor Planes</p><span id="val-planes" class="text-lg font-black">$0</span></div>
-            <div><p class="text-[9px] text-zinc-500 uppercase">Recaudado</p><span id="val-recaudado" class="text-lg font-black text-emerald-500">$0</span></div>
+            <div><p class="text-[9px] text-zinc-500 uppercase">Valor Planes</p><span id="val-planes" class="text-lg font-black ${mostrar ? '' : 'hidden-monto'}">$0</span></div>
+            <div><p class="text-[9px] text-zinc-500 uppercase">Recaudado</p><span id="val-recaudado" class="text-lg font-black text-emerald-500 ${mostrar ? '' : 'hidden-monto'}">$0</span></div>
         </div>
     </header>
 
@@ -88,6 +88,9 @@
             let totalRecaudado = db.reduce((a, b) => a + (b.pagos||[]).reduce((x, y) => x + parseFloat(y.monto||0), 0), 0);
             document.getElementById('val-planes').innerText = `$${totalPlanes}`;
             document.getElementById('val-recaudado').innerText = `$${totalRecaudado}`;
+            document.getElementById('val-planes').className = `text-lg font-black ${mostrar ? '' : 'hidden-monto'}`;
+            document.getElementById('val-recaudado').className = `text-lg font-black text-emerald-500 ${mostrar ? '' : 'hidden-monto'}`;
+            
             document.getElementById('lista').innerHTML = db.map((c, i) => `
                 <div class="box flex justify-between items-center">
                     <div><h3 class="font-bold text-sm">${c.nom}</h3><span class="text-[10px] text-zinc-500 ${mostrar ? '' : 'hidden-monto'}">Plan: $${c.plan}</span></div>
@@ -96,7 +99,6 @@
             `).join('');
         }
         
-        // ... (rest of functions remain exactly as before: abrirModal, agregarPago, borrarPago, renderPagos, guardarMetrica, borrarMetrica, renderMetricas, borrarCliente, guardarCliente)
         function abrirModal(i) {
             cur = i;
             if(i !== null) {
