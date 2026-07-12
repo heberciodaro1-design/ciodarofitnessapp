@@ -70,6 +70,7 @@
                 <h3 class="text-[10px] uppercase text-yellow-500 mb-3 border-b border-zinc-800 pb-2">ANTROPOMETRÍA</h3>
                 <input type="date" id="m-fecha" class="input-dark text-[10px]">
                 <div class="grid grid-cols-2 gap-2">
+                    <input type="number" id="m-p" placeholder="Peso" class="input-dark">
                     <input type="number" id="m-c" placeholder="Cuello" class="input-dark">
                     <input type="number" id="m-t" placeholder="Tórax" class="input-dark">
                     <input type="number" id="m-b" placeholder="Bíceps" class="input-dark">
@@ -167,11 +168,12 @@
 
         function guardarMetrica() {
             if(cur === null) { guardarCliente(); }
-            let p = parseFloat(document.getElementById('ex-peso').value);
+            let p = parseFloat(document.getElementById('m-p').value) || parseFloat(document.getElementById('ex-peso').value);
             let h = parseFloat(document.getElementById('ex-est').value) / 100;
             let fecha = document.getElementById('m-fecha').value || new Date().toISOString().split('T')[0];
             let met = {
                 fecha: fecha,
+                p: document.getElementById('m-p').value,
                 c: document.getElementById('m-c').value, t: document.getElementById('m-t').value,
                 b: document.getElementById('m-b').value, cin: document.getElementById('m-cin').value,
                 g: document.getElementById('m-g').value, cuad: document.getElementById('m-cuad').value,
@@ -190,10 +192,11 @@
             document.getElementById('hist-met').innerHTML = (db[cur].met||[]).map((m, i) => `<div class="comp-card">
                 <div class="flex justify-between font-bold text-yellow-500 mb-1"><span>FECHA: ${m.fecha}</span><button onclick="borrarMetrica(${i})" class="text-red-500 text-[10px]">ELIMINAR</button></div>
                 <div class="grid grid-cols-2 gap-1 text-[11px]">
-                    <span>IMC: <b>${m.imc}</b></span> <span>C: <b>${m.c}</b></span>
-                    <span>T: <b>${m.t}</b></span> <span>B: <b>${m.b}</b></span>
-                    <span>CI: <b>${m.cin}</b></span> <span>G: <b>${m.g}</b></span>
-                    <span>CU: <b>${m.cuad}</b></span> <span>P: <b>${m.pan}</b></span>
+                    <span>PESO: <b>${m.p || '-'}</b></span> <span>IMC: <b>${m.imc}</b></span>
+                    <span>C: <b>${m.c}</b></span> <span>T: <b>${m.t}</b></span>
+                    <span>B: <b>${m.b}</b></span> <span>CI: <b>${m.cin}</b></span>
+                    <span>G: <b>${m.g}</b></span> <span>CU: <b>${m.cuad}</b></span>
+                    <span>PAN: <b>${m.pan}</b></span> <span></span>
                 </div>
             </div>`).join('');
         }
