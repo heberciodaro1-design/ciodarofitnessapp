@@ -44,7 +44,6 @@
         </div>
         <div class="space-y-4">
             <input type="text" id="ex-nom" placeholder="Nombre del Alumno" class="input-dark">
-            <!-- Nuevo campo de teléfono integrado en el expediente -->
             <input type="text" id="ex-tel" placeholder="WhatsApp / Teléfono" class="input-dark">
             <div class="grid grid-cols-3 gap-2">
                 <input type="number" id="ex-edad" placeholder="E" class="input-dark">
@@ -97,7 +96,6 @@
 
         function toggleVisibility() { mostrar = !mostrar; render(); }
 
-        // Muestra el teléfono en la lista principal si existe
         function render() {
             let busqueda = document.getElementById('busc').value.toLowerCase();
             
@@ -125,12 +123,13 @@
                 let saldo = parseFloat(c.plan||0) - yaPagado;
                 let textoSaldo = saldo <= 0 ? "Pagado (0)" : `Resta: $${saldo}`;
                 let idxOriginal = db.indexOf(c);
-                let tlfTexto = c.tel ? `<p class="text-[11px] text-zinc-400">📱 ${c.tel}</p>` : '';
+                // El link de WhatsApp aquí:
+                let tlfLink = c.tel ? `<a href="https://wa.me/${c.tel}" target="_blank" class="text-[11px] text-emerald-400 font-bold block">💬 ${c.tel}</a>` : '';
                 return `
                 <div class="box flex justify-between items-center ${saldo > 0 ? 'border-red-900/50' : ''}">
                     <div>
                         <h3 class="font-bold text-sm">${c.nom}</h3>
-                        ${tlfTexto}
+                        ${tlfLink}
                         <span class="text-[10px] ${saldo <= 0 ? 'text-emerald-500' : 'text-red-500'} font-bold ${mostrar ? '' : 'hidden-monto'}">${textoSaldo}</span>
                     </div>
                     <button onclick="abrirModal(${idxOriginal})" class="bg-zinc-900 px-3 py-2 rounded-lg font-bold text-[10px] border border-zinc-700">EXPEDIENTE</button>
@@ -138,7 +137,6 @@
             `}).join('');
         }
         
-        // Carga el teléfono en el input al abrir el modal
         function abrirModal(i) {
             cur = i;
             if(i !== null) {
@@ -244,7 +242,6 @@
 
         function borrarCliente() { if(confirm('¿Borrar?')) { db.splice(cur, 1); localStorage.setItem('ciodaro_db', JSON.stringify(db)); document.getElementById('modal').classList.add('hidden'); render(); } }
 
-        // Procesa y guarda el nuevo campo de teléfono en el localStorage
         function guardarCliente() {
             let datos = { 
                 nom: document.getElementById('ex-nom').value, 
