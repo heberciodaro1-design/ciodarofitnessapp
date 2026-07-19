@@ -44,6 +44,8 @@
         </div>
         <div class="space-y-4">
             <input type="text" id="ex-nom" placeholder="Nombre del Alumno" class="input-dark">
+            <!-- Nuevo campo de teléfono integrado en el expediente -->
+            <input type="text" id="ex-tel" placeholder="WhatsApp / Teléfono" class="input-dark">
             <div class="grid grid-cols-3 gap-2">
                 <input type="number" id="ex-edad" placeholder="E" class="input-dark">
                 <input type="number" id="ex-peso" placeholder="P" class="input-dark">
@@ -95,6 +97,7 @@
 
         function toggleVisibility() { mostrar = !mostrar; render(); }
 
+        // Muestra el teléfono en la lista principal si existe
         function render() {
             let busqueda = document.getElementById('busc').value.toLowerCase();
             
@@ -122,10 +125,12 @@
                 let saldo = parseFloat(c.plan||0) - yaPagado;
                 let textoSaldo = saldo <= 0 ? "Pagado (0)" : `Resta: $${saldo}`;
                 let idxOriginal = db.indexOf(c);
+                let tlfTexto = c.tel ? `<p class="text-[11px] text-zinc-400">📱 ${c.tel}</p>` : '';
                 return `
                 <div class="box flex justify-between items-center ${saldo > 0 ? 'border-red-900/50' : ''}">
                     <div>
                         <h3 class="font-bold text-sm">${c.nom}</h3>
+                        ${tlfTexto}
                         <span class="text-[10px] ${saldo <= 0 ? 'text-emerald-500' : 'text-red-500'} font-bold ${mostrar ? '' : 'hidden-monto'}">${textoSaldo}</span>
                     </div>
                     <button onclick="abrirModal(${idxOriginal})" class="bg-zinc-900 px-3 py-2 rounded-lg font-bold text-[10px] border border-zinc-700">EXPEDIENTE</button>
@@ -133,17 +138,19 @@
             `}).join('');
         }
         
+        // Carga el teléfono en el input al abrir el modal
         function abrirModal(i) {
             cur = i;
             if(i !== null) {
                 document.getElementById('ex-nom').value = db[i].nom;
+                document.getElementById('ex-tel').value = db[i].tel || '';
                 document.getElementById('ex-edad').value = db[i].edad || '';
                 document.getElementById('ex-plan').value = db[i].plan;
                 document.getElementById('ex-peso').value = db[i].peso || '';
                 document.getElementById('ex-est').value = db[i].est || '';
                 renderPagos(); renderMetricas();
             } else { 
-                document.getElementById('ex-nom').value = ''; document.getElementById('ex-edad').value = ''; document.getElementById('ex-peso').value = ''; document.getElementById('ex-est').value = ''; document.getElementById('ex-plan').value = ''; document.getElementById('hist-pagos').innerHTML = ''; document.getElementById('hist-met').innerHTML = '';
+                document.getElementById('ex-nom').value = ''; document.getElementById('ex-tel').value = ''; document.getElementById('ex-edad').value = ''; document.getElementById('ex-peso').value = ''; document.getElementById('ex-est').value = ''; document.getElementById('ex-plan').value = ''; document.getElementById('hist-pagos').innerHTML = ''; document.getElementById('hist-met').innerHTML = '';
             }
             document.getElementById('modal').classList.remove('hidden');
         }
@@ -237,8 +244,16 @@
 
         function borrarCliente() { if(confirm('¿Borrar?')) { db.splice(cur, 1); localStorage.setItem('ciodaro_db', JSON.stringify(db)); document.getElementById('modal').classList.add('hidden'); render(); } }
 
+        // Procesa y guarda el nuevo campo de teléfono en el localStorage
         function guardarCliente() {
-            let datos = { nom: document.getElementById('ex-nom').value, edad: document.getElementById('ex-edad').value, plan: document.getElementById('ex-plan').value, peso: document.getElementById('ex-peso').value, est: document.getElementById('ex-est').value };
+            let datos = { 
+                nom: document.getElementById('ex-nom').value, 
+                tel: document.getElementById('ex-tel').value,
+                edad: document.getElementById('ex-edad').value, 
+                plan: document.getElementById('ex-plan').value, 
+                peso: document.getElementById('ex-peso').value, 
+                est: document.getElementById('ex-est').value 
+            };
             if(cur === null) { db.push({...datos, pagos: [], met: []}); cur = db.length - 1; } 
             else { db[cur] = {...db[cur], ...datos}; }
             localStorage.setItem('ciodaro_db', JSON.stringify(db)); render();
