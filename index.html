@@ -102,7 +102,7 @@
                     <h3 class="text-[10px] uppercase text-zinc-400 font-bold tracking-wider mt-6 mb-2">Historial Comparativo</h3>
                     <div id="hist-met" class="mt-2 text-[11px] space-y-2"></div>
                 </div>
-                <button onclick="guardarCliente()" class="btn bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700">GUARDAR TODO</button>
+                <button onclick="guardarCliente(true)" class="btn bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700">GUARDAR TODO</button>
             </div>
         </div>
     </div>
@@ -111,6 +111,11 @@
         let db = JSON.parse(localStorage.getItem('ciodaro_db')) || [];
         let cur = null;
         let mostrar = false;
+
+        // Renderizado inicial al cargar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            render();
+        });
 
         function toggleVisibility() { mostrar = !mostrar; render(); }
 
@@ -190,7 +195,7 @@
         
         function abrirModal(i) {
             cur = i;
-            if(i !== null) {
+            if(i !== null && db[i]) {
                 document.getElementById('ex-nom').value = db[i].nom || '';
                 document.getElementById('ex-tel').value = db[i].tel || '';
                 document.getElementById('ex-ingreso').value = db[i].ingreso || '';
@@ -202,7 +207,7 @@
             } else { 
                 document.getElementById('ex-nom').value = ''; 
                 document.getElementById('ex-tel').value = ''; 
-                document.getElementById('ex-ingreso').value = ''; 
+                document.getElementById('ex-ingreso').value = new Date().toISOString().split('T')[0]; 
                 document.getElementById('ex-edad').value = ''; 
                 document.getElementById('ex-peso').value = ''; 
                 document.getElementById('ex-est').value = ''; 
@@ -213,8 +218,45 @@
             document.getElementById('modal').classList.remove('hidden');
         }
 
+        function guardarCliente(cerrarModal = false) {
+            let nom = document.getElementById('ex-nom').value;
+            if(!nom) { 
+                alert("Ingresa al menos el nombre del alumno."); 
+                return false; 
+            }
+
+            let datosCliente = {
+                nom: nom,
+                tel: document.getElementById('ex-tel').value,
+                ingreso: document.getElementById('ex-ingreso').value,
+                edad: document.getElementById('ex-edad').value,
+                peso: document.getElementById('ex-peso').value,
+                est: document.getElementById('ex-est').value,
+                plan: document.getElementById('ex-plan').value,
+                pagos: (cur !== null && db[cur] && db[cur].pagos) ? db[cur].pagos : [],
+                met: (cur !== null && db[cur] && db[cur].met) ? db[cur].met : []
+            };
+
+            if (cur === null) {
+                db.push(datosCliente);
+                cur = db.length - 1; // Actualiza el índice al recién creado
+            } else {
+                db[cur] = datosCliente;
+            }
+
+            localStorage.setItem('ciodaro_db', JSON.stringify(db));
+            render();
+
+            if (cerrarModal) {
+                document.getElementById('modal').classList.add('hidden');
+            }
+            return true;
+        }
+
         function pagoTotal() {
-            if(cur === null) { guardarCliente(); }
+            if(cur === null) { 
+                if(!guardarCliente(false)) return; 
+            }
             let plan = parseFloat(document.getElementById('ex-plan').value || 0);
             let mesActualClave = getMesClave(new Date());
             let yaPagadoMes = (db[cur].pagos||[]).filter(p => p.fecha && p.fecha.startsWith(mesActualClave)).reduce((x, y) => x + parseFloat(y.monto||0), 0);
@@ -228,17 +270,21 @@
         }
 
         function agregarPago() {
-            if(cur === null) { guardarCliente(); }
+            if(cur === null) { 
+                if(!guardarCliente(false)) return; 
+            }
             let monto = parseFloat(document.getElementById('pago-monto').value);
-            let fecha = document.getElementById('pago-fecha').value;
+            let fecha = document.getElementById('pago-fecha').value || new Date().toISOString().split('T')[0];
             if(isNaN(monto) || !fecha) return;
             if(!db[cur].pagos) db[cur].pagos = [];
             db[cur].pagos.push({fecha, monto});
             localStorage.setItem('ciodaro_db', JSON.stringify(db));
+            document.getElementById('pago-monto').value = '';
             renderPagos(); render();
         }
 
         function borrarPago(idx) { 
+            if (cur === null || !db[cur]) return;
             db[cur].pagos.splice(idx, 1); 
             localStorage.setItem('ciodaro_db', JSON.stringify(db)); 
             renderPagos(); render(); 
@@ -250,76 +296,47 @@
         }
 
         function guardarMetrica() {
-            if(cur === null) { guardarCliente(); }
+            if(cur === null) { 
+                if(!guardarCliente(false)) return; 
+            }
             let p = parseFloat(document.getElementById('m-p').value) || parseFloat(document.getElementById('ex-peso').value);
             let h = parseFloat(document.getElementById('ex-est').value) / 100;
             let fecha = document.getElementById('m-fecha').value || new Date().toISOString().split('T')[0];
             let met = {
                 fecha: fecha,
                 p: document.getElementById('m-p').value,
-                c: document.getElementById('m-c').value, t: document.getElementById('m-t').value,
-                b: document.getElementById('m-b').value, cin: document.getElementById('m-cin').value,
-                g: document.getElementById('m-g').value, cuad: document.getElementById('m-cuad').value,
+                c: document.getElementById('m-c').value, 
+                t: document.getElementById('m-t').value,
+                b: document.getElementById('m-b').value, 
+                cin: document.getElementById('m-cin').value,
+                g: document.getElementById('m-g').value, 
+                cuad: document.getElementById('m-cuad').value,
                 pan: document.getElementById('m-pan').value,
                 imc: (p && h) ? (p / (h * h)).toFixed(1) : 0
             };
             if(!db[cur].met) db[cur].met = [];
             db[cur].met.push(met);
             localStorage.setItem('ciodaro_db', JSON.stringify(db));
+            
+            // Limpiar campos de antropometría
+            document.getElementById('m-p').value = '';
+            document.getElementById('m-c').value = '';
+            document.getElementById('m-t').value = '';
+            document.getElementById('m-b').value = '';
+            document.getElementById('m-cin').value = '';
+            document.getElementById('m-g').value = '';
+            document.getElementById('m-cuad').value = '';
+            document.getElementById('m-pan').value = '';
+
             renderMetricas();
         }
 
         function borrarMetrica(idx) { 
+            if (cur === null || !db[cur]) return;
             db[cur].met.splice(idx, 1); 
             localStorage.setItem('ciodaro_db', JSON.stringify(db)); 
             renderMetricas(); 
         }
 
         function editarMetrica(idx) {
-            let m = db[cur].met[idx];
-            document.getElementById('m-fecha').value = m.fecha;
-            document.getElementById('m-p').value = m.p;
-            document.getElementById('m-c').value = m.c;
-            document.getElementById('m-t').value = m.t;
-            document.getElementById('m-b').value = m.b;
-            document.getElementById('m-cin').value = m.cin;
-            document.getElementById('m-g').value = m.g;
-            document.getElementById('m-cuad').value = m.cuad;
-            document.getElementById('m-pan').value = m.pan;
-            db[cur].met.splice(idx, 1);
-            localStorage.setItem('ciodaro_db', JSON.stringify(db));
-            renderMetricas();
-        }
-
-        function renderMetricas() {
-            if (cur === null || !db[cur]) return;
-            document.getElementById('hist-met').innerHTML = (db[cur].met||[]).map((m, i) => `<div class="comp-card">
-                <div class="flex justify-between font-bold text-amber-400 mb-1">
-                    <span>FECHA: ${m.fecha}</span>
-                    <div class="flex gap-2 items-center">
-                        <button onclick="editarMetrica(${i})" class="text-sky-400 text-[10px] font-bold">EDITAR</button>
-                        <button onclick="borrarMetrica(${i})" class="text-rose-400 text-[10px] font-bold">ELIMINAR</button>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-1 text-[11px] text-zinc-300">
-                    <span>PESO: <b>${m.p || '-'}</b></span> <span>IMC: <b>${m.imc}</b></span>
-                    <span>C: <b>${m.c}</b></span> <span>T: <b>${m.t}</b></span>
-                    <span>B: <b>${m.b}</b></span> <span>CI: <b>${m.cin}</b></span>
-                    <span>G: <b>${m.g}</b></span> <span>CU: <b>${m.cuad}</b></span>
-                    <span>PAN: <b>${m.pan}</b></span> <span></span>
-                </div>
-            </div>`).join('');
-        }
-
-        function borrarCliente() { 
-            if(cur !== null && confirm('¿Borrar alumno?')) { 
-                db.splice(cur, 1); 
-                localStorage.setItem('ciodaro_db', JSON.stringify(db)); 
-                document.getElementById('modal').classList.add('hidden'); 
-                render(); 
-            } 
-        }
-
-        function guardarCliente() {
-            let nom = document.getElementById('ex-nom').value;
-            if(!nom) { alert("Ingresa al menos el nombre del alumno."); retu
+         
