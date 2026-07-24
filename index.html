@@ -1,343 +1,294 @@
-
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CiodaroFitness</title>
+    <title>CiodaroFitness - Gestión de Alumnos</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background: #09090b; color: #f4f4f5; font-family: system-ui, -apple-system, sans-serif; font-size: 14px; }
-        .box { background: #121215; border: 1px solid #27272a; border-radius: 14px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
-        .box-gold { border: 1px solid rgba(245, 158, 11, 0.25); }
-        .input-dark { background: #18181b; border: 1px solid #3f3f46; padding: 11px; width: 100%; border-radius: 10px; color: #fff !important; font-size: 14px; margin-bottom: 8px; transition: all 0.2s; }
-        .input-dark:focus { border-color: #f59e0b; outline: none; box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2); }
-        ::placeholder { color: #71717a; }
-        .btn { padding: 12px; border-radius: 10px; font-weight: 800; font-size: 13px; text-transform: uppercase; width: 100%; letter-spacing: 0.5px; transition: all 0.2s; cursor: pointer; display: block; text-align: center; }
-        .btn-gold { background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #000; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3); }
-        .btn-gold:active { transform: scale(0.98); }
-        .comp-card { background: #18181b; padding: 12px; border-radius: 10px; margin-bottom: 8px; border-left: 4px solid #f59e0b; }
-        .hidden-monto { filter: blur(5px); pointer-events: none; user-select: none; }
-        #modal { display: none; }
-    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fdf4f4',
+                            500: '#ef4444',
+                            600: '#dc2626',
+                            700: '#b91c1c',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="p-4 max-w-md mx-auto">
+<body class="bg-zinc-950 text-zinc-100 min-h-screen font-sans antialiased">
 
-    <header class="box box-gold">
-        <div class="flex justify-between items-center">
-            <div>
-                <h1 class="font-black text-amber-500 text-2xl tracking-tight">CIODAROFITNESS</h1>
-                <p id="total-alumnos" class="text-[10px] text-zinc-400 uppercase font-extrabold tracking-wider mt-1">Alumnos: 0</p>
+    <!-- Header -->
+    <header class="bg-zinc-900 border-b border-zinc-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <span class="text-2xl font-black tracking-wider text-brand-500">CIODAROFITNESS</span>
+                <span class="text-xs bg-zinc-800 text-zinc-400 px-2 py-1 rounded-md font-medium">Entrenamiento Inteligente</span>
             </div>
-            <button type="button" onclick="toggleVisibility()" class="text-xs bg-zinc-800/80 hover:bg-zinc-700 text-amber-400 px-3 py-1.5 rounded-lg border border-zinc-700 transition">👁️</button>
-        </div>
-        <div class="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-zinc-800/80">
-            <div><p class="text-[9px] text-zinc-400 uppercase font-bold tracking-wider">Planes (Mes)</p><span id="val-planes" class="text-md font-black text-amber-100 hidden-monto">$0</span></div>
-            <div>
-                <p class="text-[9px] text-zinc-400 uppercase font-bold tracking-wider">Recaudado</p>
-                <span id="val-recaudado" class="text-md font-black text-emerald-400 hidden-monto">$0</span>
+            <div id="stats-header" class="text-sm text-zinc-400">
+                Alumnos activos: <strong id="total-students" class="text-white">0</strong>
             </div>
-            <div><p class="text-[9px] text-zinc-400 uppercase font-bold tracking-wider">Faltante</p><span id="val-faltante" class="text-md font-black text-rose-500 hidden-monto">$0</span></div>
-        </div>
-        <div class="mt-3 pt-2.5 border-t border-zinc-800/80 text-[10px] text-zinc-400 flex justify-between items-center">
-            <span class="font-bold tracking-wider">VS. MES ANTERIOR:</span>
-            <span id="val-comparativa" class="font-bold hidden-monto">$0 (0%)</span>
         </div>
     </header>
 
-    <input type="text" id="busc" onkeyup="render()" placeholder="🔍 Buscar alumno..." class="input-dark">
-    <button type="button" onclick="abrirModal(null)" class="btn btn-gold mb-4">➕ NUEVO ALUMNO</button>
-
-    <div id="lista" class="space-y-3"></div>
-
-    <div id="modal" class="fixed inset-0 bg-black/90 backdrop-blur-sm p-4 overflow-y-auto z-50 flex items-center justify-center">
-        <div class="max-w-md w-full my-auto">
-            <div class="flex justify-between mb-4 items-center border-b border-zinc-800 pb-3">
-                <button type="button" onclick="cerrarModal()" class="text-xs font-bold bg-zinc-800 text-zinc-300 px-3 py-1.5 rounded-lg">✕ Cerrar</button>
-                <button type="button" onclick="borrarCliente()" class="text-xs font-bold text-rose-500 bg-rose-950/30 px-3 py-1.5 rounded-lg border border-rose-900/50">🗑️ BORRAR</button>
-            </div>
-            <div class="space-y-4">
-                <input type="text" id="ex-nom" placeholder="Nombre del Alumno" class="input-dark">
-                <input type="text" id="ex-tel" placeholder="WhatsApp / Teléfono" class="input-dark">
-                <div>
-                    <label class="text-[10px] text-amber-500/90 uppercase font-extrabold tracking-wider block mb-1">Fecha de Ingreso</label>
-                    <input type="date" id="ex-ingreso" class="input-dark">
-                </div>
-                <div class="grid grid-cols-3 gap-2">
-                    <input type="number" id="ex-edad" placeholder="Edad" class="input-dark">
-                    <input type="number" id="ex-peso" placeholder="Peso (kg)" class="input-dark">
-                    <input type="number" id="ex-est" placeholder="Estatura (cm)" class="input-dark">
-                </div>
-                <div class="flex gap-2">
-                    <div class="relative w-full">
-                        <input type="number" id="ex-plan" placeholder="Valor del Plan ($)" class="input-dark">
-                        <button type="button" onclick="document.getElementById('ex-plan').value=''" class="absolute right-3 top-3 text-zinc-500 font-bold">✕</button>
-                    </div>
-                    <button type="button" onclick="pagoTotal()" class="btn bg-zinc-800 hover:bg-zinc-700 text-amber-400 border border-amber-500/30 w-auto text-[10px] px-4">PAGO TOTAL</button>
-                </div>
-                
-                <div class="box box-gold">
-                    <h3 class="text-[10px] uppercase font-bold text-amber-500 tracking-wider mb-2">Historial de Pagos</h3>
-                    <div class="flex gap-2 mb-2">
-                        <input type="date" id="pago-fecha" class="input-dark text-[10px]">
-                        <input type="number" id="pago-monto" placeholder="$" class="input-dark">
-                        <button type="button" onclick="agregarPago()" class="btn bg-emerald-600 hover:bg-emerald-500 text-white w-auto px-4">ADD</button>
-                    </div>
-                    <div id="hist-pagos" class="text-xs space-y-1"></div>
-                </div>
-                
-                <div class="box box-gold">
-                    <h3 class="text-[10px] uppercase text-amber-500 font-bold tracking-wider mb-3 border-b border-zinc-800 pb-2">ANTROPOMETRÍA</h3>
-                    <input type="date" id="m-fecha" class="input-dark text-[10px]">
-                    <input type="number" id="m-p" placeholder="Peso (kg)" class="input-dark">
-                    <div class="grid grid-cols-2 gap-2">
-                        <input type="number" id="m-c" placeholder="Cuello" class="input-dark">
-                        <input type="number" id="m-t" placeholder="Tórax" class="input-dark">
-                        <input type="number" id="m-b" placeholder="Bíceps" class="input-dark">
-                        <input type="number" id="m-cin" placeholder="Cintura" class="input-dark">
-                        <input type="number" id="m-g" placeholder="Glúteos" class="input-dark">
-                        <input type="number" id="m-cuad" placeholder="Cuád." class="input-dark">
-                        <input type="number" id="m-pan" placeholder="Pantorrilla" class="input-dark">
-                    </div>
-                    <button type="button" onclick="guardarMetrica()" class="btn btn-gold mt-2 text-[10px]">Guardar y Calcular</button>
-                    <h3 class="text-[10px] uppercase text-zinc-400 font-bold tracking-wider mt-6 mb-2">Historial Comparativo</h3>
-                    <div id="hist-met" class="mt-2 text-[11px] space-y-2"></div>
-                </div>
-                <button type="button" onclick="guardarCliente(true)" class="btn bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700">GUARDAR TODO</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        let db = [];
-        try {
-            let raw = localStorage.getItem('ciodaro_db');
-            if (raw) db = JSON.parse(raw);
-            if (!Array.isArray(db)) db = [];
-        } catch (e) {
-            db = [];
-        }
-
-        let cur = null;
-        let mostrar = false;
-
-        function toggleVisibility() { 
-            mostrar = !mostrar; 
-            render(); 
-        }
-
-        function getMesClave(fechaObj) {
-            try {
-                let a = fechaObj.getFullYear();
-                let m = String(fechaObj.getMonth() + 1).padStart(2, '0');
-                return `${a}-${m}`;
-            } catch(e) {
-                return "2026-01";
-            }
-        }
-
-        function render() {
-            try {
-                let busqEl = document.getElementById('busc');
-                let busqueda = busqEl ? busqEl.value.toLowerCase() : '';
-                
-                let hoy = new Date();
-                let mesActualClave = getMesClave(hoy);
-                let fechaMesPasado = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
-                let mesPasadoClave = getMesClave(fechaMesPasado);
-
-                let totalPlanes = db.reduce((a, b) => a + parseFloat(b.plan||0), 0);
-                
-                let totalRecaudadoMes = db.reduce((accClient, client) => {
-                    let pagosMes = (client.pagos || []).filter(p => p && p.fecha && p.fecha.startsWith(mesActualClave));
-                    return accClient + pagosMes.reduce((accPago, p) => accPago + parseFloat(p.monto || 0), 0);
-                }, 0);
-
-                let totalRecaudadoMesPasado = db.reduce((accClient, client) => {
-                    let pagosMesPasado = (client.pagos || []).filter(p => p && p.fecha && p.fecha.startsWith(mesPasadoClave));
-                    return accClient + pagosMesPasado.reduce((accPago, p) => accPago + parseFloat(p.monto || 0), 0);
-                }, 0);
-
-                let totalFaltanteMes = totalPlanes - totalRecaudadoMes;
-                
-                let dif = totalRecaudadoMes - totalRecaudadoMesPasado;
-                let pct = totalRecaudadoMesPasado > 0 
-                    ? ((dif / totalRecaudadoMesPasado) * 100).toFixed(0) 
-                    : (totalRecaudadoMes > 0 ? 100 : 0);
-                let simboloPct = pct >= 0 ? `+${pct}%` : `${pct}%`;
-                let colorComp = dif >= 0 ? 'text-emerald-400' : 'text-rose-400';
-
-                document.getElementById('val-planes').innerText = `$${totalPlanes}`;
-                document.getElementById('val-recaudado').innerText = `$${totalRecaudadoMes}`;
-                document.getElementById('val-faltante').innerText = `$${totalFaltanteMes}`;
-                document.getElementById('total-alumnos').innerText = `Alumnos: ${db.length}`;
-                
-                document.getElementById('val-comparativa').innerHTML = `$${totalRecaudadoMesPasado} <span class="${colorComp}">(${simboloPct})</span>`;
-
-                document.getElementById('val-planes').className = `text-md font-black text-amber-100 ${mostrar ? '' : 'hidden-monto'}`;
-                document.getElementById('val-recaudado').className = `text-md font-black text-emerald-400 ${mostrar ? '' : 'hidden-monto'}`;
-                document.getElementById('val-faltante').className = `text-md font-black text-rose-500 ${mostrar ? '' : 'hidden-monto'}`;
-                document.getElementById('val-comparativa').className = `font-bold ${mostrar ? '' : 'hidden-monto'}`;
-
-                let listaFiltrada = db.filter(c => c && c.nom && c.nom.toLowerCase().includes(busqueda)).sort((a, b) => {
-                    let pagadoA = (a.pagos||[]).filter(p => p && p.fecha && p.fecha.startsWith(mesActualClave)).reduce((x, y) => x + parseFloat(y.monto||0), 0);
-                    let pagadoB = (b.pagos||[]).filter(p => p && p.fecha && p.fecha.startsWith(mesActualClave)).reduce((x, y) => x + parseFloat(y.monto||0), 0);
-                    let sA = parseFloat(a.plan||0) - pagadoA;
-                    let sB = parseFloat(b.plan||0) - pagadoB;
-                    return (sB > 0) - (sA > 0);
-                });
-                
-                document.getElementById('lista').innerHTML = listaFiltrada.map((c) => {
-                    let yaPagadoMes = (c.pagos||[]).filter(p => p && p.fecha && p.fecha.startsWith(mesActualClave)).reduce((x, y) => x + parseFloat(y.monto||0), 0);
-                    let saldo = parseFloat(c.plan||0) - yaPagadoMes;
-                    let textoSaldo = saldo <= 0 ? "Pagado (0)" : `Resta: $${saldo}`;
-                    let idxOriginal = db.indexOf(c);
-                    let tlfLink = c.tel ? `<a href="https://wa.me/${c.tel}" target="_blank" class="text-[11px] text-emerald-400 hover:underline font-bold block mt-0.5">💬 ${c.tel}</a>` : '';
-                    return `
-                    <div class="box flex justify-between items-center ${saldo > 0 ? 'border-rose-900/40 bg-rose-950/10' : 'border-zinc-800'}">
-                        <div>
-                            <h3 class="font-bold text-sm text-zinc-100">${c.nom}</h3>
-                            ${tlfLink}
-                            <span class="text-[10px] ${saldo <= 0 ? 'text-emerald-400' : 'text-rose-400'} font-bold ${mostrar ? '' : 'hidden-monto'}">${textoSaldo}</span>
-                        </div>
-                        <button type="button" onclick="abrirModal(${idxOriginal})" class="bg-zinc-800/80 hover:bg-zinc-700 px-3.5 py-2 rounded-lg font-bold text-[10px] border border-zinc-700 text-amber-400 transition">EXPEDIENTE</button>
-                    </div>
-                `}).join('');
-            } catch(e) {
-                console.error("Error en render:", e);
-            }
-        }
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        function abrirModal(i) {
-            cur = i;
-            let hoyStr = new Date().toISOString().split('T')[0];
-            document.getElementById('pago-fecha').value = hoyStr;
-            document.getElementById('m-fecha').value = hoyStr;
-            document.getElementById('pago-monto').value = '';
+        <!-- Formulario de Registro / Edición -->
+        <section class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 h-fit shadow-xl">
+            <h2 class="text-lg font-bold mb-4 text-white flex items-center gap-2">
+                <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                Nuevo Alumno / Antropometría
+            </h2>
+            
+            <form id="student-form" class="space-y-4">
+                <input type="hidden" id="student-id">
+                
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-zinc-400 mb-1">Nombre Completo</label>
+                    <input type="text" id="name" required class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-brand-500 text-sm">
+                </div>
 
-            if(i !== null && db[i]) {
-                document.getElementById('ex-nom').value = db[i].nom || '';
-                document.getElementById('ex-tel').value = db[i].tel || '';
-                document.getElementById('ex-ingreso').value = db[i].ingreso || '';
-                document.getElementById('ex-edad').value = db[i].edad || '';
-                document.getElementById('ex-plan').value = db[i].plan || '';
-                document.getElementById('ex-peso').value = db[i].peso || '';
-                document.getElementById('ex-est').value = db[i].est || '';
-                renderPagos(); renderMetricas();
-            } else { 
-                cur = null;
-                document.getElementById('ex-nom').value = ''; 
-                document.getElementById('ex-tel').value = ''; 
-                document.getElementById('ex-ingreso').value = hoyStr; 
-                document.getElementById('ex-edad').value = ''; 
-                document.getElementById('ex-peso').value = ''; 
-                document.getElementById('ex-est').value = ''; 
-                document.getElementById('ex-plan').value = ''; 
-                document.getElementById('m-p').value = '';
-                document.getElementById('m-c').value = '';
-                document.getElementById('m-t').value = '';
-                document.getElementById('m-b').value = '';
-                document.getElementById('m-cin').value = '';
-                document.getElementById('m-g').value = '';
-                document.getElementById('m-cuad').value = '';
-                document.getElementById('m-pan').value = '';
-                document.getElementById('hist-pagos').innerHTML = ''; 
-                document.getElementById('hist-met').innerHTML = '';
-            }
-            let m = document.getElementById('modal');
-            if(m) m.style.display = 'flex';
-        }
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-zinc-400 mb-1">Teléfono (WhatsApp)</label>
+                        <input type="text" id="phone" placeholder="58412..." required class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-brand-500 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-zinc-400 mb-1">Estado Pago</label>
+                        <select id="payment-status" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-brand-500 text-sm">
+                            <option value="Al Día">Al Día</option>
+                            <option value="Pendiente">Pendiente</option>
+                        </select>
+                    </div>
+                </div>
 
-        function cerrarModal() {
-            let m = document.getElementById('modal');
-            if(m) m.style.display = 'none';
-        }
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-zinc-400 mb-1">Peso (kg)</label>
+                        <input type="number" step="0.1" id="weight" required class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-brand-500 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-zinc-400 mb-1">Altura (cm)</label>
+                        <input type="number" id="height" required class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-brand-500 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-zinc-400 mb-1">IMC</label>
+                        <input type="text" id="imc-display" readonly class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-zinc-400 text-sm font-bold" placeholder="0.0">
+                    </div>
+                </div>
 
-        function guardarCliente(debeCerrar = false) {
-            let nom = document.getElementById('ex-nom').value;
-            if(!nom) { 
-                alert("Ingresa al menos el nombre del alumno."); 
-                return false; 
-            }
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-zinc-400 mb-1">Observaciones / Objetivos</label>
+                    <textarea id="notes" rows="2" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-brand-500 text-sm"></textarea>
+                </div>
 
-            let datosCliente = {
-                nom: nom,
-                tel: document.getElementById('ex-tel').value,
-                ingreso: document.getElementById('ex-ingreso').value,
-                edad: document.getElementById('ex-edad').value,
-                peso: document.getElementById('ex-peso').value,
-                est: document.getElementById('ex-est').value,
-                plan: document.getElementById('ex-plan').value,
-                pagos: (cur !== null && db[cur] && db[cur].pagos) ? db[cur].pagos : [],
-                met: (cur !== null && db[cur] && db[cur].met) ? db[cur].met : []
-            };
+                <div class="flex gap-2 pt-2">
+                    <button type="submit" class="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-medium py-2 px-4 rounded-lg text-sm transition-colors shadow-lg shadow-brand-600/20">Guardar Alumno</button>
+                    <button type="button" id="reset-form" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-medium py-2 px-3 rounded-lg text-sm transition-colors">Limpiar</button>
+                </div>
+            </form>
+        </section>
 
-            if (cur === null) {
-                db.push(datosCliente);
-                cur = db.length - 1;
-            } else {
-                db[cur] = datosCliente;
-            }
+        <!-- Listado de Alumnos -->
+        <section class="lg:col-span-2 bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                    <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    Listado de Alumnos Asesorados
+                </h2>
+                <input type="text" id="search-student" placeholder="Buscar alumno..." class="bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand-500">
+            </div>
 
-            localStorage.setItem('ciodaro_db', JSON.stringify(db));
-            render();
+            <div class="overflow-x-auto flex-1">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-zinc-800 text-xs font-semibold uppercase text-zinc-400">
+                            <th class="py-3 px-3">Alumno</th>
+                            <th class="py-3 px-3">Antropometría</th>
+                            <th class="py-3 px-3">Pago</th>
+                            <th class="py-3 px-3 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="students-table-body" class="divide-y divide-zinc-800/50 text-sm">
+                        <!-- Los alumnos se cargan dinámicamente vía JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
-            if (debeCerrar) {
-                cerrarModal();
-            }
-            return true;
-        }
+    </main>
 
-        function borrarCliente() {
-            if (cur !== null && db[cur]) {
-                if (confirm(`¿Estás seguro de eliminar a ${db[cur].nom}?`)) {
-                    db.splice(cur, 1);
-                    localStorage.setItem('ciodaro_db', JSON.stringify(db));
-                    render();
-                    cerrarModal();
+    <!-- JavaScript Lógica -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let students = JSON.parse(localStorage.getItem('ciodarofitness_students')) || [];
+
+            const form = document.getElementById('student-form');
+            const tableBody = document.getElementById('students-table-body');
+            const totalStudentsEl = document.getElementById('total-students');
+            const weightInput = document.getElementById('weight');
+            const heightInput = document.getElementById('height');
+            const imcDisplay = document.getElementById('imc-display');
+            const searchInput = document.getElementById('search-student');
+
+            // Calcular IMC en tiempo real
+            function calculateIMC() {
+                const w = parseFloat(weightInput.value);
+                const h = parseFloat(heightInput.value);
+                if (w > 0 && h > 0) {
+                    const heightM = h / 100;
+                    const imc = (w / (heightM * heightM)).toFixed(1);
+                    imcDisplay.value = imc;
+                } else {
+                    imcDisplay.value = '';
                 }
-            } else {
-                cerrarModal();
             }
-        }
 
-        function pagoTotal() {
-            if(cur === null) { 
-                if(!guardarCliente(false)) return; 
+            weightInput.addEventListener('input', calculateIMC);
+            heightInput.addEventListener('input', calculateIMC);
+
+            // Renderizar tabla
+            function renderStudents(filter = '') {
+                tableBody.innerHTML = '';
+                const filtered = students.filter(s => s.name.toLowerCase().includes(filter.toLowerCase()));
+
+                if (filtered.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-zinc-500">No hay alumnos registrados.</td></tr>`;
+                    totalStudentsEl.textContent = students.length;
+                    return;
+                }
+
+                filtered.forEach((student, index) => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-zinc-800/30 transition-colors";
+                    
+                    const paymentBadge = student.paymentStatus === 'Al Día' 
+                        ? '<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded text-xs font-medium">Al Día</span>'
+                        : '<span class='bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded text-xs font-medium'>Pendiente</span>';
+
+                    tr.innerHTML = `
+                        <td class="py-3 px-3">
+                            <div class="font-bold text-white">${student.name}</div>
+                            <div class="text-xs text-zinc-400">${student.phone}</div>
+                        </td>
+                        <td class="py-3 px-3">
+                            <div class="text-xs text-zinc-300">Peso: <strong class="text-white">${student.weight} kg</strong></div>
+                            <div class="text-xs text-zinc-400">IMC: ${student.imc || 'N/A'}</div>
+                        </td>
+                        <td class="py-3 px-3">
+                            ${paymentBadge}
+                        </td>
+                        <td class="py-3 px-3 text-right space-x-2">
+                            <button onclick="sendWhatsApp('${student.phone}', '${student.name}')" class="bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 p-1.5 rounded-lg transition-colors" title="Enviar WhatsApp">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"></path></svg>
+                            </button>
+                            <button onclick="editStudent(${student.id})" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 p-1.5 rounded-lg transition-colors" title="Editar">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                            </button>
+                            <button onclick="deleteStudent(${student.id})" class="bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 p-1.5 rounded-lg transition-colors" title="Eliminar">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+
+                totalStudentsEl.textContent = students.length;
             }
-            let plan = parseFloat(document.getElementById('ex-plan').value || 0);
-            let mesActualClave = getMesClave(new Date());
-            let yaPagadoMes = (db[cur].pagos||[]).filter(p => p && p.fecha && p.fecha.startsWith(mesActualClave)).reduce((x, y) => x + parseFloat(y.monto||0), 0);
-            let restante = plan - yaPagadoMes;
-            if(restante > 0) {
-                if(!db[cur].pagos) db[cur].pagos = [];
-                db[cur].pagos.push({fecha: new Date().toISOString().split('T')[0], monto: restante});
-                localStorage.setItem('ciodaro_db', JSON.stringify(db));
-                renderPagos(); render();
+
+            // Guardar o Actualizar Alumno
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const id = document.getElementById('student-id').value;
+                const name = document.getElementById('name').value;
+                const phone = document.getElementById('phone').value;
+                const paymentStatus = document.getElementById('payment-status').value;
+                const weight = document.getElementById('weight').value;
+                const height = document.getElementById('height').value;
+                const imc = document.getElementById('imc-display').value;
+                const notes = document.getElementById('notes').value;
+
+                if (id) {
+                    // Editar
+                    students = students.map(s => s.id == id ? { id: Number(id), name, phone, paymentStatus, weight, height, imc, notes } : s);
+                } else {
+                    // Nuevo
+                    const newStudent = {
+                        id: Date.now(),
+                        name,
+                        phone,
+                        paymentStatus,
+                        weight,
+                        height,
+                        imc,
+                        notes
+                    };
+                    students.push(newStudent);
+                }
+
+                localStorage.setItem('ciodarofitness_students', JSON.stringify(students));
+                form.reset();
+                document.getElementById('student-id').value = '';
+                imcDisplay.value = '';
+                renderStudents();
+            });
+
+            // Editar alumno (cargar en formulario)
+            window.editStudent = function(id) {
+                const student = students.find(s => s.id === id);
+                if (student) {
+                    document.getElementById('student-id').value = student.id;
+                    document.getElementById('name').value = student.name;
+                    document.getElementById('phone').value = student.phone;
+                    document.getElementById('payment-status').value = student.paymentStatus;
+                    document.getElementById('weight').value = student.weight;
+                    document.getElementById('height').value = student.height;
+                    document.getElementById('imc-display').value = student.imc || '';
+                    document.getElementById('notes').value = student.notes || '';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
             }
-        }
 
-        function agregarPago() {
-            if(cur === null) { 
-                if(!guardarCliente(false)) return; 
+            // Eliminar alumno
+            window.deleteStudent = function(id) {
+                if (confirm('¿Estás seguro de eliminar este alumno?')) {
+                    students = students.filter(s => s.id !== id);
+                    localStorage.setItem('ciodarofitness_students', JSON.stringify(students));
+                    renderStudents();
+                }
             }
-            let monto = parseFloat(document.getElementById('pago-monto').value);
-            let fecha = document.getElementById('pago-fecha').value || new Date().toISOString().split('T')[0];
-            if(isNaN(monto) || !fecha) return;
-            if(!db[cur].pagos) db[cur].pagos = [];
-            db[cur].pagos.push({fecha, monto});
-            localStorage.setItem('ciodaro_db', JSON.stringify(db));
-            document.getElementById('pago-monto').value = '';
-            renderPagos(); render();
-        }
 
-        function borrarPago(idx) { 
-            if (cur === null || !db[cur]) return;
-            db[cur].pagos.splice(idx, 1); 
-            localStorage.setItem('ciodaro_db', JSON.stringify(db)); 
-            renderPagos(); render(); 
-        }
+            // Enviar WhatsApp
+            window.sendWhatsApp = function(phone, name) {
+                const cleanPhone = phone.replace(/\D/g, '');
+                const message = encodeURIComponent(`¡Hola ${name}! Te escribo de CiodaroFitness para revisar tus avances y programar tu rutina inteligente.`);
+                window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
+            }
 
-        function renderPagos() {
-            if (cur === null || !db[cur]) return;
-            document.getElementById('hist-pagos').innerHTML = (db[cur].pagos||[]).map((p, i) => `<div class="flex justify-between border-b border-zinc-800/60 py-1.5 text-zinc-300"><span>${p.fecha}: <b class="text-emerald-400">$${p.monto}</b></span><button type="button" onclick="borrarPago(${i})" class="text-rose-400 hover:text-rose-300">🗑️</button></div
+            // Búsqueda en vivo
+            searchInput.addEventListener('input', (e) => {
+                renderStudents(e.target.value);
+            });
+
+            // Botón Limpiar
+            document.getElementById('reset-form').addEventListener('click', () => {
+                form.reset();
+                document.getElementById('student-id').value = '';
+                imcDisplay.value = '';
+            });
+
+            // Render inicial
+            renderStudents();
+        });
+    </script>
+</body>
+</html>
