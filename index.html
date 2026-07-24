@@ -113,7 +113,6 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             render();
-            // EventListener explícito para abrir el modal correctamente
             const btnNuevo = document.getElementById('btn-nuevo-alumno');
             if (btnNuevo) {
                 btnNuevo.addEventListener('click', () => abrirModal(null));
@@ -344,49 +343,4 @@
         }
 
         function borrarMetrica(idx) { 
-            if (cur === null || !db[cur]) return;
-            db[cur].met.splice(idx, 1); 
-            localStorage.setItem('ciodaro_db', JSON.stringify(db)); 
-            renderMetricas(); 
-        }
-
-        function editarMetrica(idx) {
-            if (cur === null || !db[cur]) return;
-            let m = db[cur].met[idx];
-            document.getElementById('m-fecha').value = m.fecha;
-            document.getElementById('m-p').value = m.p;
-            document.getElementById('m-c').value = m.c;
-            document.getElementById('m-t').value = m.t;
-            document.getElementById('m-b').value = m.b;
-            document.getElementById('m-cin').value = m.cin;
-            document.getElementById('m-g').value = m.g;
-            document.getElementById('m-cuad').value = m.cuad;
-            document.getElementById('m-pan').value = m.pan;
-            db[cur].met.splice(idx, 1);
-            localStorage.setItem('ciodaro_db', JSON.stringify(db));
-            renderMetricas();
-        }
-
-        function renderMetricas() {
-            if (cur === null || !db[cur]) return;
-            document.getElementById('hist-met').innerHTML = (db[cur].met||[]).map((m, i) => `<div class="comp-card">
-                <div class="flex justify-between font-bold text-amber-400 mb-1">
-                    <span>FECHA: ${m.fecha}</span>
-                    <div class="flex gap-2 items-center">
-                        <button onclick="editarMetrica(${i})" class="text-sky-400 text-[10px] font-bold">EDITAR</button>
-                        <button onclick="borrarMetrica(${i})" class="text-rose-400 text-[10px] font-bold">ELIMINAR</button>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-1 text-[11px] text-zinc-300">
-                    <span>PESO: <b>${m.p || '-'}</b></span> <span>IMC: <b>${m.imc}</b></span>
-                    <span>C: <b>${m.c}</b></span> <span>T: <b>${m.t}</b></span>
-                    <span>B: <b>${m.b}</b></span> <span>CI: <b>${m.cin}</b></span>
-                    <span>G: <b>${m.g}</b></span> <span>CU: <b>${m.cuad}</b></span>
-                    <span>PAN: <b>${m.pan}</b></span> <span></span>
-                </div>
-            </div>`).join('');
-        }
-
-        function borrarCliente() { 
-            if(cur !== null && confirm('¿Borrar alumno?')) { 
-                db.splice
+            if (cur === null || !db[cur
