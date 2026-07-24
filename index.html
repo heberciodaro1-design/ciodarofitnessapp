@@ -64,7 +64,6 @@
     </header>
 
     <main class="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
         <aside class="lg:col-span-4 xl:col-span-4 space-y-6">
             <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 shadow-xl sticky top-24">
                 <h2 class="text-lg font-bold mb-5 text-white flex items-center gap-2.5">
@@ -145,12 +144,10 @@
                             <th class="py-3 px-3 text-right">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody id="students-table-body" class="divide-y divide-zinc-800/40 text-sm">
-                        </tbody>
+                    <tbody id="students-table-body" class="divide-y divide-zinc-800/40 text-sm"></tbody>
                 </table>
             </div>
         </section>
-
     </main>
 
     <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
@@ -195,12 +192,10 @@
             const notesInput = document.getElementById('notes');
             const btnSave = document.getElementById('btn-save');
 
-            // Modal de ajustes
             const settingsModal = document.getElementById('settings-modal');
             document.getElementById('btn-settings').addEventListener('click', () => settingsModal.classList.remove('hidden'));
             document.getElementById('close-modal').addEventListener('click', () => settingsModal.classList.add('hidden'));
 
-            // Cálculo de IMC
             function calculateIMC() {
                 const w = parseFloat(weightInput.value);
                 const h = parseFloat(heightInput.value);
@@ -214,7 +209,6 @@
             weightInput.addEventListener('input', calculateIMC);
             heightInput.addEventListener('input', calculateIMC);
 
-            // Renderizar tabla
             function renderStudents(filter = '') {
                 tableBody.innerHTML = '';
                 const filtered = students.filter(s => s.name.toLowerCase().includes(filter.toLowerCase()));
@@ -262,4 +256,37 @@
                 });
                 totalStudentsEl.textContent = students.length;
             }
-            
+
+            btnSave.addEventListener('click', () => {
+                const name = nameInput.value.trim();
+                const phone = phoneInput.value.trim();
+                const weight = weightInput.value.trim();
+                const height = heightInput.value.trim();
+
+                if (!name || !phone || !weight || !height) {
+                    alert('Por favor completa los campos principales (Nombre, Teléfono, Peso y Altura).');
+                    return;
+                }
+
+                const id = idInput.value;
+                const paymentStatus = paymentInput.value;
+                const imc = imcDisplay.value;
+                const notes = notesInput.value.trim();
+
+                if (id) {
+                    students = students.map(s => s.id == id ? { id: Number(id), name, phone, paymentStatus, weight, height, imc, notes } : s);
+                } else {
+                    students.push({ id: Date.now(), name, phone, paymentStatus, weight, height, imc, notes });
+                }
+
+                localStorage.setItem('ciodarofitness_students', JSON.stringify(students));
+                
+                idInput.value = '';
+                nameInput.value = '';
+                phoneInput.value = '';
+                weightInput.value = '';
+                heightInput.value = '';
+                notesInput.value = '';
+                imcDisplay.value = '0.0';
+                
+                renderStud
