@@ -26,9 +26,17 @@
             <button onclick="toggleVisibility()" class="text-xs bg-zinc-800 px-3 py-1 rounded">👁️</button>
         </div>
         <div class="grid grid-cols-3 gap-2 mt-4">
-            <div><p class="text-[9px] text-zinc-500 uppercase">Planes</p><span id="val-planes" class="text-md font-black ${mostrar ? '' : 'hidden-monto'}">$0</span></div>
-            <div><p class="text-[9px] text-zinc-500 uppercase">Recaudado</p><span id="val-recaudado" class="text-md font-black text-emerald-500 ${mostrar ? '' : 'hidden-monto'}">$0</span></div>
-            <div><p class="text-[9px] text-zinc-500 uppercase">Faltante</p><span id="val-faltante" class="text-md font-black text-red-500 ${mostrar ? '' : 'hidden-monto'}">$0</span></div>
+            <div><p class="text-[9px] text-zinc-500 uppercase">Planes (Mes)</p><span id="val-planes" class="text-md font-black ${mostrar ? '' : 'hidden-monto'}">$0</span></div>
+            <div>
+                <p class="text-[9px] text-zinc-500 uppercase">Recaudado (Mes)</p>
+                <span id="val-recaudado" class="text-md font-black text-emerald-500 ${mostrar ? '' : 'hidden-monto'}">$0</span>
+            </div>
+            <div><p class="text-[9px] text-zinc-500 uppercase">Faltante (Mes)</p><span id="val-faltante" class="text-md font-black text-red-500 ${mostrar ? '' : 'hidden-monto'}">$0</span></div>
+        </div>
+        <!-- Indicador comparativo vs. Mes anterior -->
+        <div class="mt-3 pt-2 border-t border-zinc-800 text-[10px] text-zinc-400 flex justify-between items-center">
+            <span>VS. MES ANTERIOR:</span>
+            <span id="val-comparativa" class="font-bold ${mostrar ? '' : 'hidden-monto'}">$0 (0%)</span>
         </div>
     </header>
 
@@ -100,34 +108,74 @@
 
         function toggleVisibility() { mostrar = !mostrar; render(); }
 
+        // Utilidad para obtener clave YYYY-MM
+        function getMesClave(fechaObj) {
+            let a = fechaObj.getFullYear();
+            let m = String(fechaObj.getMonth() + 1).padStart(2, '0');
+            return `${a}-${m}`;
+        }
+
         function render() {
             let busqueda = document.getElementById('busc').value.toLowerCase();
             
-            let totalPlanes = db.reduce((a, b) => a + parseFloat(b.plan||0), 0);
-            let totalRecaudado = db.reduce((a, b) => a + (b.pagos||[]).reduce((x, y) => x + parseFloat(y.monto||0), 0), 0);
-            let totalFaltante = totalPlanes - totalRecaudado;
+            // Calculo de Fechas para Mes Actual y Mes Anterior
+            let hoy = new Date();
+            let mesActualClave = getMesClave(hoy);
             
+            let fechaMesPasado = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+            let mesPasadoClave = getMesClave(fechaMesPasado);
+
+            // Totales del Mes Actual
+            let totalPlanes = db.reduce((a, b) => a + parseFloat(b.plan||0), 0);
+            
+            let totalRecaudadoMes = db.reduce((accClient, client) => {
+                let pagosMes = (client.pagos || []).filter(p => p.fecha && p.fecha.startsWith(mesActualClave));
+                return accClient + pagosMes.reduce((accPago, p) => accPago + parseFloat(p.monto || 0), 0);
+            }, 0);
+
+            // Totales del Mes Anterior para Comparativa
+            let totalRecaudadoMesPasado = db.reduce((accClient, client) => {
+                let pagosMesPasado = (client.pagos || []).filter(p => p.fecha && p.fecha.startsWith(mesPasadoClave));
+                return accClient + pagosMesPasado.reduce((accPago, p) => accPago + parseFloat(p.monto || 0), 0);
+            }, 0);
+
+            let totalFaltanteMes = totalPlanes - totalRecaudadoMes;
+            
+            // Cálculo del porcentaje comparativo
+            let dif = totalRecaudadoMes - totalRecaudadoMesPasado;
+            let pct = totalRecaudadoMesPasado > 0 
+                ? ((dif / totalRecaudadoMesPasado) * 100).toFixed(0) 
+                : (totalRecaudadoMes > 0 ? 100 : 0);
+            let simboloPct = pct >= 0 ? `+${pct}%` : `${pct}%`;
+            let colorComp = dif >= 0 ? 'text-emerald-400' : 'text-red-400';
+
+            // Actualizar UI Cabecera
             document.getElementById('val-planes').innerText = `$${totalPlanes}`;
-            document.getElementById('val-recaudado').innerText = `$${totalRecaudado}`;
-            document.getElementById('val-faltante').innerText = `$${totalFaltante}`;
+            document.getElementById('val-recaudado').innerText = `$${totalRecaudadoMes}`;
+            document.getElementById('val-faltante').innerText = `$${totalFaltanteMes}`;
             document.getElementById('total-alumnos').innerText = `Alumnos: ${db.length}`;
             
+            document.getElementById('val-comparativa').innerHTML = `$${totalRecaudadoMesPasado} <span class="${colorComp}">(${simboloPct})</span>`;
+
             document.getElementById('val-planes').className = `text-md font-black ${mostrar ? '' : 'hidden-monto'}`;
             document.getElementById('val-recaudado').className = `text-md font-black text-emerald-500 ${mostrar ? '' : 'hidden-monto'}`;
             document.getElementById('val-faltante').className = `text-md font-black text-red-500 ${mostrar ? '' : 'hidden-monto'}`;
-            
+            document.getElementById('val-comparativa').className = `font-bold ${mostrar ? '' : 'hidden-monto'}`;
+
+            // Lista de Clientes (Saldos evaluados en el mes actual)
             let listaFiltrada = db.filter(c => c.nom.toLowerCase().includes(busqueda)).sort((a, b) => {
-                let sA = parseFloat(a.plan||0) - (a.pagos||[]).reduce((x, y) => x + parseFloat(y.monto||0), 0);
-                let sB = parseFloat(b.plan||0) - (b.pagos||[]).reduce((x, y) => x + parseFloat(y.monto||0), 0);
+                let pagadoA = (a.pagos||[]).filter(p => p.fecha && p.fecha.startsWith(mesActualClave)).reduce((x, y) => x + parseFloat(y.monto||0), 0);
+                let pagadoB = (b.pagos||[]).filter(p => p.fecha && p.fecha.startsWith(mesActualClave)).reduce((x, y) => x + parseFloat(y.monto||0), 0);
+                let sA = parseFloat(a.plan||0) - pagadoA;
+                let sB = parseFloat(b.plan||0) - pagadoB;
                 return (sB > 0) - (sA > 0);
             });
             
-            document.getElementById('lista').innerHTML = listaFiltrada.map((c, i) => {
-                let yaPagado = (c.pagos||[]).reduce((x, y) => x + parseFloat(y.monto||0), 0);
-                let saldo = parseFloat(c.plan||0) - yaPagado;
+            document.getElementById('lista').innerHTML = listaFiltrada.map((c) => {
+                let yaPagadoMes = (c.pagos||[]).filter(p => p.fecha && p.fecha.startsWith(mesActualClave)).reduce((x, y) => x + parseFloat(y.monto||0), 0);
+                let saldo = parseFloat(c.plan||0) - yaPagadoMes;
                 let textoSaldo = saldo <= 0 ? "Pagado (0)" : `Resta: $${saldo}`;
                 let idxOriginal = db.indexOf(c);
-                // El link de WhatsApp aquí:
                 let tlfLink = c.tel ? `<a href="https://wa.me/${c.tel}" target="_blank" class="text-[11px] text-emerald-400 font-bold block">💬 ${c.tel}</a>` : '';
                 return `
                 <div class="box flex justify-between items-center ${saldo > 0 ? 'border-red-900/50' : ''}">
@@ -161,8 +209,9 @@
         function pagoTotal() {
             if(cur === null) { guardarCliente(); }
             let plan = parseFloat(document.getElementById('ex-plan').value || 0);
-            let yaPagado = (db[cur].pagos||[]).reduce((x, y) => x + parseFloat(y.monto||0), 0);
-            let restante = plan - yaPagado;
+            let mesActualClave = getMesClave(new Date());
+            let yaPagadoMes = (db[cur].pagos||[]).filter(p => p.fecha && p.fecha.startsWith(mesActualClave)).reduce((x, y) => x + parseFloat(y.monto||0), 0);
+            let restante = plan - yaPagadoMes;
             if(restante > 0) {
                 if(!db[cur].pagos) db[cur].pagos = [];
                 db[cur].pagos.push({fecha: new Date().toISOString().split('T')[0], monto: restante});
