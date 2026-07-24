@@ -8,11 +8,11 @@
     <style>
         body { background: #09090b; color: #f4f4f5; font-family: system-ui, -apple-system, sans-serif; font-size: 14px; }
         .box { background: #121215; border: 1px solid #27272a; border-radius: 14px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
-        .box-gold { border: 1px solid rgba(245, 158, 11, 0.2); }
+        .box-gold { border: 1px solid rgba(245, 158, 11, 0.25); }
         .input-dark { background: #18181b; border: 1px solid #3f3f46; padding: 11px; width: 100%; border-radius: 10px; color: #fff !important; font-size: 14px; margin-bottom: 8px; transition: all 0.2s; }
         .input-dark:focus { border-color: #f59e0b; outline: none; box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2); }
         ::placeholder { color: #71717a; }
-        .btn { padding: 12px; border-radius: 10px; font-weight: 800; font-size: 13px; text-transform: uppercase; width: 100%; letter-spacing: 0.5px; transition: all 0.2s; cursor: pointer; }
+        .btn { padding: 12px; border-radius: 10px; font-weight: 800; font-size: 13px; text-transform: uppercase; width: 100%; letter-spacing: 0.5px; transition: all 0.2s; }
         .btn-gold { background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #000; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3); }
         .btn-gold:active { transform: scale(0.98); }
         .comp-card { background: #18181b; padding: 12px; border-radius: 10px; margin-bottom: 8px; border-left: 4px solid #f59e0b; }
@@ -37,6 +37,7 @@
             </div>
             <div><p class="text-[9px] text-zinc-400 uppercase font-bold tracking-wider">Faltante</p><span id="val-faltante" class="text-md font-black text-rose-500">$0</span></div>
         </div>
+        <!-- Indicador comparativo vs. Mes anterior -->
         <div class="mt-3 pt-2.5 border-t border-zinc-800/80 text-[10px] text-zinc-400 flex justify-between items-center">
             <span class="font-bold tracking-wider">VS. MES ANTERIOR:</span>
             <span id="val-comparativa" class="font-bold">$0 (0%)</span>
@@ -44,14 +45,14 @@
     </header>
 
     <input type="text" id="busc" onkeyup="render()" placeholder="🔍 Buscar alumno..." class="input-dark">
-    <button id="btn-nuevo-alumno" class="btn btn-gold mb-4">➕ NUEVO ALUMNO</button>
+    <button onclick="abrirModal(null)" class="btn btn-gold mb-4">➕ Nuevo Alumno</button>
 
     <div id="lista" class="space-y-3"></div>
 
     <div id="modal" class="fixed inset-0 bg-black/90 backdrop-blur-sm hidden p-4 overflow-y-auto z-50">
         <div class="max-w-md mx-auto">
             <div class="flex justify-between mb-4 items-center border-b border-zinc-800 pb-3">
-                <button onclick="cerrarModal()" class="text-xs font-bold bg-zinc-800 text-zinc-300 px-3 py-1.5 rounded-lg">✕ Cerrar</button>
+                <button onclick="document.getElementById('modal').classList.add('hidden')" class="text-xs font-bold bg-zinc-800 text-zinc-300 px-3 py-1.5 rounded-lg">✕ Cerrar</button>
                 <button onclick="borrarCliente()" class="text-xs font-bold text-rose-500 bg-rose-950/30 px-3 py-1.5 rounded-lg border border-rose-900/50">🗑️ BORRAR</button>
             </div>
             <div class="space-y-4">
@@ -113,10 +114,6 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             render();
-            const btnNuevo = document.getElementById('btn-nuevo-alumno');
-            if (btnNuevo) {
-                btnNuevo.addEventListener('click', () => abrirModal(null));
-            }
         });
 
         function toggleVisibility() { mostrar = !mostrar; render(); }
@@ -206,7 +203,6 @@
                 document.getElementById('ex-est').value = db[i].est || '';
                 renderPagos(); renderMetricas();
             } else { 
-                cur = null;
                 document.getElementById('ex-nom').value = ''; 
                 document.getElementById('ex-tel').value = ''; 
                 document.getElementById('ex-ingreso').value = new Date().toISOString().split('T')[0]; 
@@ -217,20 +213,10 @@
                 document.getElementById('hist-pagos').innerHTML = ''; 
                 document.getElementById('hist-met').innerHTML = '';
             }
-            let modal = document.getElementById('modal');
-            if (modal) {
-                modal.classList.remove('hidden');
-            }
+            document.getElementById('modal').classList.remove('hidden');
         }
 
-        function cerrarModal() {
-            let modal = document.getElementById('modal');
-            if (modal) {
-                modal.classList.add('hidden');
-            }
-        }
-
-        function guardarCliente(cerrarModalFlag = false) {
+        function guardarCliente(cerrarModal = false) {
             let nom = document.getElementById('ex-nom').value;
             if(!nom) { 
                 alert("Ingresa al menos el nombre del alumno."); 
@@ -251,7 +237,7 @@
 
             if (cur === null) {
                 db.push(datosCliente);
-                cur = db.length - 1; 
+                cur = db.length - 1;
             } else {
                 db[cur] = datosCliente;
             }
@@ -259,8 +245,8 @@
             localStorage.setItem('ciodaro_db', JSON.stringify(db));
             render();
 
-            if (cerrarModalFlag) {
-                cerrarModal();
+            if (cerrarModal) {
+                document.getElementById('modal').classList.add('hidden');
             }
             return true;
         }
@@ -343,4 +329,14 @@
         }
 
         function borrarMetrica(idx) { 
-            if (cur === null || !db[cur
+            if (cur === null || !db[cur]) return;
+            db[cur].met.splice(idx, 1); 
+            localStorage.setItem('ciodaro_db', JSON.stringify(db)); 
+            renderMetricas(); 
+        }
+
+        function editarMetrica(idx) {
+            if (cur === null || !db[cur]) return;
+            let m = db[cur].met[idx];
+            document.getElementById('m-fecha').value = m.fecha;
+       
