@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -209,6 +210,11 @@
         
         function abrirModal(i) {
             cur = i;
+            let hoyStr = new Date().toISOString().split('T')[0];
+            document.getElementById('pago-fecha').value = hoyStr;
+            document.getElementById('m-fecha').value = hoyStr;
+            document.getElementById('pago-monto').value = '';
+
             if(i !== null && db[i]) {
                 document.getElementById('ex-nom').value = db[i].nom || '';
                 document.getElementById('ex-tel').value = db[i].tel || '';
@@ -222,11 +228,19 @@
                 cur = null;
                 document.getElementById('ex-nom').value = ''; 
                 document.getElementById('ex-tel').value = ''; 
-                document.getElementById('ex-ingreso').value = new Date().toISOString().split('T')[0]; 
+                document.getElementById('ex-ingreso').value = hoyStr; 
                 document.getElementById('ex-edad').value = ''; 
                 document.getElementById('ex-peso').value = ''; 
                 document.getElementById('ex-est').value = ''; 
                 document.getElementById('ex-plan').value = ''; 
+                document.getElementById('m-p').value = '';
+                document.getElementById('m-c').value = '';
+                document.getElementById('m-t').value = '';
+                document.getElementById('m-b').value = '';
+                document.getElementById('m-cin').value = '';
+                document.getElementById('m-g').value = '';
+                document.getElementById('m-cuad').value = '';
+                document.getElementById('m-pan').value = '';
                 document.getElementById('hist-pagos').innerHTML = ''; 
                 document.getElementById('hist-met').innerHTML = '';
             }
@@ -274,6 +288,19 @@
             return true;
         }
 
+        function borrarCliente() {
+            if (cur !== null && db[cur]) {
+                if (confirm(`¿Estás seguro de eliminar a ${db[cur].nom}?`)) {
+                    db.splice(cur, 1);
+                    localStorage.setItem('ciodaro_db', JSON.stringify(db));
+                    render();
+                    cerrarModal();
+                }
+            } else {
+                cerrarModal();
+            }
+        }
+
         function pagoTotal() {
             if(cur === null) { 
                 if(!guardarCliente(false)) return; 
@@ -313,27 +340,4 @@
 
         function renderPagos() {
             if (cur === null || !db[cur]) return;
-            document.getElementById('hist-pagos').innerHTML = (db[cur].pagos||[]).map((p, i) => `<div class="flex justify-between border-b border-zinc-800/60 py-1.5 text-zinc-300"><span>${p.fecha}: <b class="text-emerald-400">$${p.monto}</b></span><button type="button" onclick="borrarPago(${i})" class="text-rose-400 hover:text-rose-300">🗑️</button></div>`).join('');
-        }
-
-        function guardarMetrica() {
-            if(cur === null) { 
-                if(!guardarCliente(false)) return; 
-            }
-            let p = parseFloat(document.getElementById('m-p').value) || parseFloat(document.getElementById('ex-peso').value);
-            let h = parseFloat(document.getElementById('ex-est').value) / 100;
-            let fecha = document.getElementById('m-fecha').value || new Date().toISOString().split('T')[0];
-            let met = {
-                fecha: fecha,
-                p: document.getElementById('m-p').value,
-                c: document.getElementById('m-c').value, 
-                t: document.getElementById('m-t').value,
-                b: document.getElementById('m-b').value, 
-                cin: document.getElementById('m-cin').value,
-                g: document.getElementById('m-g').value, 
-                cuad: document.getElementById('m-cuad').value,
-                pan: document.getElementById('m-pan').value,
-                imc: (p && h) ? (p / (h * h)).toFixed(1) : 0
-            };
-            if(!db[cur].met) db[cur].met = [];
-            d
+            document.getElementById('hist-pagos').innerHTML = (db[cur].pagos||[]).map((p, i) => `<div class="flex justify-between border-b border-zinc-800/60 py-1.5 text-zinc-300"><span>${p.fecha}: <b class="text-emerald-400">$${p.monto}</b></span><button type="button" onclick="borrarPago(${i})" class="text-rose-400 hover:text-rose-300">🗑️</button></div
