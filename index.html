@@ -45,6 +45,10 @@
         <div class="space-y-4">
             <input type="text" id="ex-nom" placeholder="Nombre del Alumno" class="input-dark">
             <input type="text" id="ex-tel" placeholder="WhatsApp / Teléfono" class="input-dark">
+            <div>
+                <label class="text-[10px] text-zinc-500 uppercase font-bold block mb-1">Fecha de Ingreso</label>
+                <input type="date" id="ex-ingreso" class="input-dark">
+            </div>
             <div class="grid grid-cols-3 gap-2">
                 <input type="number" id="ex-edad" placeholder="E" class="input-dark">
                 <input type="number" id="ex-peso" placeholder="P" class="input-dark">
@@ -142,13 +146,14 @@
             if(i !== null) {
                 document.getElementById('ex-nom').value = db[i].nom;
                 document.getElementById('ex-tel').value = db[i].tel || '';
+                document.getElementById('ex-ingreso').value = db[i].ingreso || '';
                 document.getElementById('ex-edad').value = db[i].edad || '';
                 document.getElementById('ex-plan').value = db[i].plan;
                 document.getElementById('ex-peso').value = db[i].peso || '';
                 document.getElementById('ex-est').value = db[i].est || '';
                 renderPagos(); renderMetricas();
             } else { 
-                document.getElementById('ex-nom').value = ''; document.getElementById('ex-tel').value = ''; document.getElementById('ex-edad').value = ''; document.getElementById('ex-peso').value = ''; document.getElementById('ex-est').value = ''; document.getElementById('ex-plan').value = ''; document.getElementById('hist-pagos').innerHTML = ''; document.getElementById('hist-met').innerHTML = '';
+                document.getElementById('ex-nom').value = ''; document.getElementById('ex-tel').value = ''; document.getElementById('ex-ingreso').value = ''; document.getElementById('ex-edad').value = ''; document.getElementById('ex-peso').value = ''; document.getElementById('ex-est').value = ''; document.getElementById('ex-plan').value = ''; document.getElementById('hist-pagos').innerHTML = ''; document.getElementById('hist-met').innerHTML = '';
             }
             document.getElementById('modal').classList.remove('hidden');
         }
@@ -246,6 +251,7 @@
             let datos = { 
                 nom: document.getElementById('ex-nom').value, 
                 tel: document.getElementById('ex-tel').value,
+                ingreso: document.getElementById('ex-ingreso').value,
                 edad: document.getElementById('ex-edad').value, 
                 plan: document.getElementById('ex-plan').value, 
                 peso: document.getElementById('ex-peso').value, 
