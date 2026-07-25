@@ -17,9 +17,7 @@
 <body class="bg-[#0b0f19] text-gray-100 min-h-screen p-4 pb-20">
 
     <div class="max-w-md mx-auto space-y-6" id="app-container">
-        <!-- VISTA PRINCIPAL -->
         <div id="vista-principal" class="space-y-6">
-            <!-- Header -->
             <header class="flex justify-between items-center bg-[#131b2e] p-4 rounded-2xl border border-gray-800">
                 <div>
                     <h1 class="text-xl font-black tracking-wider text-orange-500">CIODAROFITNESS <span class="text-xs text-gray-400 font-normal">page</span></h1>
@@ -30,7 +28,6 @@
                 </div>
             </header>
 
-            <!-- Métricas Financieras -->
             <div class="grid grid-cols-2 gap-4">
                 <div class="bg-[#131b2e] p-4 rounded-2xl border border-gray-800">
                     <div class="text-xs text-gray-400 uppercase font-semibold">Clientes Activos</div>
@@ -50,7 +47,6 @@
                 </div>
             </div>
 
-            <!-- Formulario Registro -->
             <div class="bg-[#131b2e] p-5 rounded-2xl border border-gray-800 space-y-4 no-print">
                 <h2 class="text-sm font-bold text-orange-500 uppercase tracking-wide flex items-center gap-2">
                     👤 Registrar Nuevo Cliente
@@ -87,7 +83,6 @@
                 </form>
             </div>
 
-            <!-- Control de Clientes -->
             <div class="space-y-3 no-print">
                 <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wide flex items-center gap-2">
                     📋 Control de Clientes y Vencimientos
@@ -96,7 +91,6 @@
             </div>
         </div>
 
-        <!-- VISTA EXPEDIENTE / PERFIL DE ATLETA -->
         <div id="vista-expediente" class="hidden space-y-4">
             <div class="flex justify-between items-center no-print">
                 <button onclick="volverAlInicio()" class="bg-gray-800 hover:bg-gray-700 text-white text-xs font-semibold px-4 py-2 rounded-xl border border-gray-700">
@@ -111,7 +105,12 @@
     </div>
 
     <script>
-        document.getElementById('fecha').valueAsDate = new Date();
+        // Establecer fecha actual por defecto de forma segura
+        const inputFecha = document.getElementById('fecha');
+        if (inputFecha) {
+            inputFecha.valueAsDate = new Date();
+        }
+
         let clientes = JSON.parse(localStorage.getItem('ciodaro_clientes')) || [];
         let montosOcultos = false;
 
@@ -128,18 +127,28 @@
 
         document.getElementById('form-cliente').addEventListener('submit', function(e) {
             e.preventDefault();
+            
+            const nombreVal = document.getElementById('nombre').value;
+            const edadVal = document.getElementById('edad').value || 'N/A';
+            const whatsappVal = document.getElementById('whatsapp').value;
+            const costoVal = parseFloat(document.getElementById('costo').value) || 0;
+            const fechaVal = document.getElementById('fecha').value;
+
             const nuevoCliente = {
                 id: Date.now(),
-                nombre: document.getElementById('nombre').value,
-                edad: document.getElementById('edad').value || 'N/A',
-                whatsapp: document.getElementById('whatsapp').value,
-                costo: parseFloat(document.getElementById('costo').value),
-                fecha: document.getElementById('fecha').value,
+                nombre: nombreVal,
+                edad: edadVal,
+                whatsapp: whatsappVal,
+                costo: costoVal,
+                fecha: fechaVal,
                 pagado: true,
                 metricas: []
             };
+
             clientes.push(nuevoCliente);
             guardarStorage();
+            
+            // Limpiar formulario y restaurar fecha actual de forma segura
             this.reset();
             document.getElementById('fecha').valueAsDate = new Date();
         });
@@ -153,6 +162,7 @@
 
         function renderizarClientes() {
             const contenedor = document.getElementById('lista-clientes');
+            if (!contenedor) return;
             contenedor.innerHTML = '';
             
             let totalCli = clientes.length;
@@ -316,7 +326,8 @@
                     ${htmlMetricas}
                 </div>
             `;
-            document.getElementById('m-fecha').valueAsDate = new Date();
+            const mFechaInput = document.getElementById('m-fecha');
+            if (mFechaInput) mFechaInput.valueAsDate = new Date();
         }
 
         function generarPDFExpediente() {
@@ -324,14 +335,4 @@
         }
 
         function toggleEstadoPago(id) {
-            const c = clientes.find(item => item.id === id);
-            if (c) {
-                c.pagado = !c.pagado;
-                guardarStorage();
-                renderizarExpediente();
-            }
-        }
-
-        function guardarMetrica(e) {
-            e.preventDefault();
-            const c = clientes.find(item => item.id ==
+            const c = cliente
