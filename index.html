@@ -7,11 +7,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @media print {
-            body { background: #0b0f19 !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            body { background: #ffffff !important; color: #111827 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .no-print { display: none !important; }
             .print-only { display: block !important; }
-            .bg-\[\#131b2e\] { background-color: #131b2e !important; border-color: #f97316 !important; }
-            .bg-\[\#0b0f19\] { background-color: #0b0f19 !important; }
+            .bg-\[\#131b2e\] { background-color: #f8fafc !important; border-color: #e2e8f0 !important; color: #111827 !important; }
+            .bg-\[\#0b0f19\] { background-color: #ffffff !important; }
+            .text-white { color: #111827 !important; }
+            .text-gray-300, .text-gray-400 { color: #4b5563 !important; }
+            input, select { background-color: #ffffff !important; color: #111827 !important; border-color: #cbd5e1 !important; }
         }
     </style>
 </head>
@@ -120,7 +123,9 @@
                 <p class="text-[11px] font-semibold text-gray-300">Entrenamiento Inteligente</p>
             </div>
         </div>
-    </div>    <script>
+    </div>
+
+    <script>
         const inputFecha = document.getElementById('fecha');
         if (inputFecha) {
             inputFecha.valueAsDate = new Date();
@@ -174,8 +179,7 @@
                 guardarStorage();
             }
         }
-
-        function renderizarClientes() {
+                function renderizarClientes() {
             const contenedor = document.getElementById('lista-clientes');
             if (!contenedor) return;
             contenedor.innerHTML = '';
@@ -358,6 +362,7 @@
                     </div>
                 </div>
 
+                <!-- Sección de Abonos con Calendario -->
                 <div class="bg-[#131b2e] p-5 rounded-3xl border border-gray-800 space-y-3">
                     <h3 class="text-sm font-bold text-orange-500 uppercase">💵 Registrar Abono Parcial</h3>
                     <form onsubmit="agregarAbono(event)" class="space-y-3 text-xs no-print">
@@ -466,70 +471,6 @@
             const c = clientes.find(item => item.id === clienteActualId);
             if (!c) return;
 
-            const peso = parseFl                            <div><label class="text-gray-400">Cuádriceps</label><input type="number" step="0.1" id="m-cuadriceps" class="w-full bg-[#0b0f19] border border-gray-800 rounded-lg p-2 text-white"></div>
-                            <div><label class="text-gray-400">Pantorrilla</label><input type="number" step="0.1" id="m-pantorrilla" class="w-full bg-[#0b0f19] border border-gray-800 rounded-lg p-2 text-white"></div>
-                        </div>
-                        <button type="submit" class="w-full bg-orange-600 text-white font-bold py-2 rounded-xl">Registrar y Calcular IMC</button>
-                    </form>
-                </div>
-
-                <div class="space-y-3">
-                    <h3 class="text-sm font-bold text-orange-400 uppercase tracking-wide">📈 Historial y Comparativa Mensual</h3>
-                    ${htmlMetricas}
-                </div>
-            `;
-            const mFechaInput = document.getElementById('m-fecha');
-            if (mFechaInput) mFechaInput.valueAsDate = new Date();
-            const fechaAbonoInput = document.getElementById('fecha-abono');
-            if (fechaAbonoInput) fechaAbonoInput.valueAsDate = new Date();
-            
-            const lblFecha = document.getElementById('fecha-impresion');
-            if (lblFecha) {
-                lblFecha.textContent = "Fecha de emisión: " + new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
-            }
-        }
-
-        function generarPDFExpediente() {
-            window.print();
-        }
-
-        function toggleEstadoPago(id) {
-            const c = clientes.find(item => item.id === id);
-            if (c) {
-                c.pagado = !c.pagado;
-                guardarStorage();
-                renderizarExpediente();
-            }
-        }
-
-        function agregarAbono(e) {
-            e.preventDefault();
-            const c = clientes.find(item => item.id === clienteActualId);
-            if (!c) return;
-
-            const monto = parseFloat(document.getElementById('monto-abono').value) || 0;
-            const fecha = document.getElementById('fecha-abono').value;
-
-            if (!c.abonos) c.abonos = [];
-            c.abonos.push({ monto, fecha });
-
-            guardarStorage();
-            renderizarExpediente();
-        }
-
-        function eliminarAbono(idx) {
-            const c = clientes.find(item => item.id === clienteActualId);
-            if (!c) return;
-            c.abonos.splice(idx, 1);
-            guardarStorage();
-            renderizarExpediente();
-        }
-
-        function guardarMetrica(e) {
-            e.preventDefault();
-            const c = clientes.find(item => item.id === clienteActualId);
-            if (!c) return;
-
             const peso = parseFloat(document.getElementById('m-peso').value) || 0;
             const estatura = parseFloat(document.getElementById('m-estatura').value) || 0;
             
@@ -571,4 +512,3 @@
     </script>
 </body>
 </html>
-
