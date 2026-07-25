@@ -198,15 +198,15 @@
             let porCobrarTotal = 0;
 
             clientes.forEach(c => {
-                metaTotal += c.costo;
-                let totalAbonado = (c.abonos || []).reduce((sum, a) => sum + a.monto, 0);
+                metaTotal += Number(c.costo) || 0;
+                let totalAbonado = (c.abonos || []).reduce((sum, a) => sum + (Number(a.monto) || 0), 0);
                 let pagadoReal = c.pagado || (totalAbonado >= c.costo);
                 
                 if (pagadoReal) {
-                    recaudadoTotal += c.costo;
+                    recaudadoTotal += Number(c.costo) || 0;
                 } else {
                     recaudadoTotal += totalAbonado;
-                    porCobrarTotal += (c.costo - totalAbonado);
+                    porCobrarTotal += ((Number(c.costo) || 0) - totalAbonado);
                 }
             });
 
@@ -226,7 +226,7 @@
                 fechaVenc.setDate(fechaVenc.getDate() + 30);
                 let opt = { day: '2-digit', month: 'short' };
 
-                let totalAbonado = (c.abonos || []).reduce((sum, a) => sum + a.monto, 0);
+                let totalAbonado = (c.abonos || []).reduce((sum, a) => sum + (Number(a.monto) || 0), 0);
                 let pagadoReal = c.pagado || (totalAbonado >= c.costo);
 
                 const card = document.createElement('div');
@@ -237,7 +237,7 @@
                             <h4 class="font-bold text-white text-base">${c.nombre}</h4>
                             <p class="text-xs text-gray-400 mt-0.5">📅 Ciclo: ${fechaInicio.toLocaleDateString('es-ES', opt)} al ${fechaVenc.toLocaleDateString('es-ES', opt)}</p>
                         </div>
-                        <span class="text-emerald-400 font-bold text-sm">${montosOcultos ? '••••' : '$' + c.costo.toFixed(2)}</span>
+                        <span class="text-emerald-400 font-bold text-sm">${montosOcultos ? '••••' : '$' + (Number(c.costo) || 0).toFixed(2)}</span>
                     </div>
                     <div class="flex justify-between items-center pt-2 border-t border-gray-800/60">
                         <span class="bg-${pagadoReal ? 'emerald' : 'amber'}-500/10 text-${pagadoReal ? 'emerald' : 'amber'}-400 border border-${pagadoReal ? 'emerald' : 'amber'}-500/20 text-[10px] font-semibold px-2.5 py-1 rounded-full">
@@ -254,9 +254,7 @@
                 contenedor.appendChild(card);
             });
         }
-                let clienteActualId = null;
-
-        function abrirExpediente(id) {
+                function abrirExpediente(id) {
             clienteActualId = id;
             metricaEditandoIdx = null;
             document.getElementById('vista-principal').classList.add('hidden');
@@ -278,8 +276,8 @@
 
             const contenedor = document.getElementById('detalle-expediente');
             
-            let totalAbonado = (c.abonos || []).reduce((sum, a) => sum + a.monto, 0);
-            let saldoPendiente = c.costo - totalAbonado;
+            let totalAbonado = (c.abonos || []).reduce((sum, a) => sum + (Number(a.monto) || 0), 0);
+            let saldoPendiente = (Number(c.costo) || 0) - totalAbonado;
             if (saldoPendiente < 0) saldoPendiente = 0;
 
             let htmlAbonos = '';
@@ -288,7 +286,7 @@
                     htmlAbonos += `
                         <div class="flex justify-between items-center bg-[#0b0f19] p-2.5 rounded-xl border border-gray-800 text-xs">
                             <div>
-                                <span class="text-emerald-400 font-bold">$${abono.monto.toFixed(2)}</span>
+                                <span class="text-emerald-400 font-bold">$${(Number(abono.monto) || 0).toFixed(2)}</span>
                                 <span class="text-gray-400 ml-2">📅 ${abono.fecha}</span>
                             </div>
                             <button onclick="eliminarAbono(${idx})" class="text-red-400 hover:text-red-300 text-[10px] bg-red-950/40 px-2 py-1 rounded no-print">Eliminar</button>
@@ -330,7 +328,7 @@
                 htmlMetricas = `<p class="text-gray-500 text-xs text-center py-4">No hay registros antropométricos aún.</p>`;
             }
 
-            const numeroLimpio = c.whatsapp.replace(/\D/g, '');
+            const numeroLimpio = c.whatsapp ? c.whatsapp.replace(/\D/g, '') : '';
             const mensajeWp = encodeURIComponent(`¡Hola ${c.nombre}! Te escribo de Ciodarofitness para recordarte tu fecha de vencimiento y estatus de pago de tu plan. 💪🔥`);
             const linkWhatsApp = `https://wa.me/${numeroLimpio}?text=${mensajeWp}`;
 
@@ -344,7 +342,7 @@
                         <div><b>Edad:</b> ${c.edad} años</div>
                         <div><b>WhatsApp:</b> ${c.whatsapp}</div>
                         <div><b>Inicio:</b> ${c.fecha}</div>
-                        <div><b>Paquete:</b> $${c.costo.toFixed(2)}</div>
+                        <div><b>Paquete:</b> $${(Number(c.costo) || 0).toFixed(2)}</div>
                         <div class="col-span-2 pt-1 border-t border-gray-800 flex justify-between items-center">
                             <span><b>Estatus:</b> <span class="${c.pagado ? 'text-emerald-400 font-bold' : 'text-amber-400'}">${c.pagado ? 'Pagado Total (Al día)' : `Restante: $${saldoPendiente.toFixed(2)}`}</span></span>
                         </div>
