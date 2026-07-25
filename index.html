@@ -84,9 +84,14 @@
             </div>
 
             <div class="space-y-3 no-print">
-                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wide flex items-center gap-2">
-                    📋 Control de Clientes y Vencimientos
-                </h3>
+                <div class="flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wide flex items-center gap-2">
+                        📋 Control de Clientes
+                    </h3>
+                </div>
+                <div>
+                    <input type="text" id="buscador-clientes" oninput="renderizarClientes()" placeholder="🔍 Buscar atleta por nombre..." class="w-full bg-[#131b2e] border border-gray-800 rounded-xl p-3 text-sm focus:outline-none focus:border-orange-500 text-white">
+                </div>
                 <div id="lista-clientes" class="space-y-3"></div>
             </div>
         </div>
@@ -101,17 +106,33 @@
                 </button>
             </div>
             
-            <!-- Marca visible únicamente al imprimir el PDF -->
-            <div class="print-only hidden text-center pb-2 border-b border-gray-700">
-                <h1 class="text-xl font-black tracking-wider text-orange-600">CIODAROFITNESS</h1>
-                <p class="text-xs text-gray-500">Expediente Antropométrico y Control de Atleta</p>
+            <div class="print-only hidden text-center pb-4 border-b-2 border-orange-500 mb-4">
+                <h1 class="text-2xl font-black tracking-wider text-orange-600">CIODAROFITNESS</h1>
+                <p class="text-xs font-semibold text-gray-600 uppercase tracking-widest mt-1">Expediente Antropométrico y Control de Rendimiento</p>
             </div>
 
             <div id="detalle-expediente" class="space-y-4"></div>
-        </div>
-    </div>
 
-    <script>
+            <div class="print-only hidden pt-12 mt-8 border-t border-gray-300">
+                <div class="grid grid-cols-2 gap-8 items-end">
+                    <div class="text-center">
+                        <div class="border-b border-gray-400 pb-1 mb-2 w-48 mx-auto"></div>
+                        <p class="text-xs font-bold text-gray-800">Firma del Entrenador / Especialista</p>
+                        <p class="text-[10px] text-gray-500">Ciodarofitness System</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="inline-block border-2 border-orange-600 px-4 py-2 rounded-lg rotate-[-5deg]">
+                            <p class="text-xs font-black text-orange-600 uppercase tracking-wider">APROBADO & VALIDADO</p>
+                            <p class="text-[9px] text-gray-500" id="fecha-impresion"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-8 text-[9px] text-gray-400">
+                    Documento oficial generado digitalmente por Ciodarofitness - Todos los derechos reservados.
+                </div>
+            </div>
+        </div>
+    </div>    <script>
         const inputFecha = document.getElementById('fecha');
         if (inputFecha) {
             inputFecha.valueAsDate = new Date();
@@ -170,29 +191,21 @@
             if (!contenedor) return;
             contenedor.innerHTML = '';
             
-            // Filtro de cierre de mes automático
             const hoy = new Date();
             const mesActual = hoy.getMonth();
             const anioActual = hoy.getFullYear();
+
+            const inputBusqueda = document.getElementById('buscador-clientes');
+            const textoFiltro = inputBusqueda ? inputBusqueda.value.toLowerCase() : '';
+            const clientesFiltrados = clientes.filter(c => c.nombre.toLowerCase().includes(textoFiltro));
 
             let totalCli = clientes.length;
             let metaTotal = 0;
             let recaudadoTotal = 0;
             let porCobrarTotal = 0;
 
-            if (totalCli === 0) {
-                contenedor.innerHTML = `<div class="text-center text-gray-500 text-sm py-6 bg-[#131b2e] rounded-2xl border border-gray-800">No hay atletas registrados.</div>`;
-                document.getElementById('total-clientes').textContent = '0';
-                document.getElementById('total-meta').textContent = montosOcultos ? '••••' : '$0.00';
-                document.getElementById('total-recaudado').textContent = montosOcultos ? '••••' : '$0.00';
-                document.getElementById('total-por-cobrar').textContent = montosOcultos ? '••••' : '$0.00';
-                return;
-            }
-
             clientes.forEach(c => {
                 let fechaInicio = new Date(c.fecha + 'T00:00:00');
-                
-                // Sumar los montos financieros solo si el ciclo pertenece al mes actual
                 if (fechaInicio.getMonth() === mesActual && fechaInicio.getFullYear() === anioActual) {
                     metaTotal += c.costo;
                     if (c.pagado) {
@@ -201,7 +214,19 @@
                         porCobrarTotal += c.costo;
                     }
                 }
+            });
 
+            if (clientesFiltrados.length === 0) {
+                contenedor.innerHTML = `<div class="text-center text-gray-500 text-sm py-6 bg-[#131b2e] rounded-2xl border border-gray-800">No se encontraron atletas.</div>`;
+                document.getElementById('total-clientes').textContent = totalCli;
+                document.getElementById('total-meta').textContent = montosOcultos ? '••••' : '$' + metaTotal.toFixed(2);
+                document.getElementById('total-recaudado').textContent = montosOcultos ? '••••' : '$' + recaudadoTotal.toFixed(2);
+                document.getElementById('total-por-cobrar').textContent = montosOcultos ? '••••' : '$' + porCobrarTotal.toFixed(2);
+                return;
+            }
+
+            clientesFiltrados.forEach(c => {
+                let fechaInicio = new Date(c.fecha + 'T00:00:00');
                 let fechaVenc = new Date(fechaInicio);
                 fechaVenc.setDate(fechaVenc.getDate() + 30);
                 let opt = { day: '2-digit', month: 'short' };
@@ -290,6 +315,10 @@
                 htmlMetricas = `<p class="text-gray-500 text-xs text-center py-4">No hay registros antropométricos aún.</p>`;
             }
 
+            const numeroLimpio = c.whatsapp.replace(/\D/g, '');
+            const mensajeWp = encodeURIComponent(`¡Hola ${c.nombre}! Te escribo de Ciodarofitness para recordarte tu fecha de vencimiento y estatus de pago de tu plan. 💪🔥`);
+            const linkWhatsApp = `https://wa.me/${numeroLimpio}?text=${mensajeWp}`;
+
             contenedor.innerHTML = `
                 <div class="bg-[#131b2e] p-5 rounded-2xl border border-gray-800 space-y-3">
                     <h2 class="text-lg font-bold text-white">🏋️‍♂️ Expediente de ${c.nombre}</h2>
@@ -299,9 +328,14 @@
                         <div><b>Inicio:</b> ${c.fecha}</div>
                         <div><b>Pago Paquete:</b> $${c.costo.toFixed(2)} (${c.pagado ? 'Al día' : 'Pendiente'})</div>
                     </div>
-                    <button onclick="toggleEstadoPago(${c.id})" class="w-full bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 font-semibold py-2 rounded-xl text-xs no-print">
-                        🔄 Cambiar Estatus de Pago (${c.pagado ? 'Marcar Pendiente' : 'Marcar Pagado'})
-                    </button>
+                    <div class="grid grid-cols-2 gap-2 no-print">
+                        <button onclick="toggleEstadoPago(${c.id})" class="bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 font-semibold py-2.5 rounded-xl text-xs">
+                            🔄 (${c.pagado ? 'Marcar Pendiente' : 'Marcar Pagado'})
+                        </button>
+                        <a href="${linkWhatsApp}" target="_blank" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs text-center flex items-center justify-center gap-1.5 shadow-lg">
+                            💬 Enviar WhatsApp
+                        </a>
+                    </div>
                 </div>
 
                 <div class="bg-[#131b2e] p-5 rounded-2xl border border-gray-800 space-y-3 no-print">
@@ -341,6 +375,11 @@
             `;
             const mFechaInput = document.getElementById('m-fecha');
             if (mFechaInput) mFechaInput.valueAsDate = new Date();
+            
+            const lblFecha = document.getElementById('fecha-impresion');
+            if (lblFecha) {
+                lblFecha.textContent = "Emisión: " + new Date().toLocaleDateString('es-ES');
+            }
         }
 
         function generarPDFExpediente() {
@@ -402,3 +441,5 @@
     </script>
 </body>
 </html>
+
+    
