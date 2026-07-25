@@ -127,10 +127,11 @@
     </div>
 
     <script>
-        const inputFecha = document.getElementById('fecha');
-        if (inputFecha) {
-            inputFecha.valueAsDate = new Date();
-        }
+        document.addEventListener("DOMContentLoaded", () => {
+            const inputFecha = document.getElementById('fecha');
+            if (inputFecha) inputFecha.valueAsDate = new Date();
+            renderizarClientes();
+        });
 
         let clientes = JSON.parse(localStorage.getItem('ciodaro_clientes')) || [];
         let montosOcultos = false;
@@ -148,33 +149,27 @@
             renderizarClientes();
         }
 
-        document.getElementById('form-cliente').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const nombreVal = document.getElementById('nombre').value;
-            const edadVal = document.getElementById('edad').value || 'N/A';
-            const whatsappVal = document.getElementById('whatsapp').value;
-            const costoVal = parseFloat(document.getElementById('costo').value) || 0;
-            const fechaVal = document.getElementById('fecha').value;
-
-            const nuevoCliente = {
-                id: Date.now(),
-                nombre: nombreVal,
-                edad: edadVal,
-                whatsapp: whatsappVal,
-                costo: costoVal,
-                fecha: fechaVal,
-                pagado: true,
-                abonos: [],
-                metricas: []
-            };
-
-            clientes.push(nuevoCliente);
-            guardarStorage();
-            
-            this.reset();
-            document.getElementById('fecha').valueAsDate = new Date();
-        });
+        const formCliente = document.getElementById('form-cliente');
+        if (formCliente) {
+            formCliente.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const nuevoCliente = {
+                    id: Date.now(),
+                    nombre: document.getElementById('nombre').value,
+                    edad: document.getElementById('edad').value || 'N/A',
+                    whatsapp: document.getElementById('whatsapp').value,
+                    costo: parseFloat(document.getElementById('costo').value) || 0,
+                    fecha: document.getElementById('fecha').value,
+                    pagado: true,
+                    abonos: [],
+                    metricas: []
+                };
+                clientes.push(nuevoCliente);
+                guardarStorage();
+                this.reset();
+                document.getElementById('fecha').valueAsDate = new Date();
+            });
+        }
 
         function eliminarCliente(id) {
             if(confirm('¿Eliminar este atleta por completo?')) {
@@ -190,7 +185,7 @@
 
             const inputBusqueda = document.getElementById('buscador-clientes');
             const textoFiltro = inputBusqueda ? inputBusqueda.value.toLowerCase() : '';
-            const clientesFiltrados = clientes.filter(c => c.nombre.toLowerCase().includes(textoFiltro));
+            const clientesFiltrados = clientes.filter(c => c.nombre && c.nombre.toLowerCase().includes(textoFiltro));
 
             let totalCli = clientes.length;
             let metaTotal = 0;
@@ -198,15 +193,16 @@
             let porCobrarTotal = 0;
 
             clientes.forEach(c => {
-                metaTotal += Number(c.costo) || 0;
+                let costoC = Number(c.costo) || 0;
+                metaTotal += costoC;
                 let totalAbonado = (c.abonos || []).reduce((sum, a) => sum + (Number(a.monto) || 0), 0);
-                let pagadoReal = c.pagado || (totalAbonado >= c.costo);
+                let pagadoReal = c.pagado || (totalAbonado >= costoC);
                 
                 if (pagadoReal) {
-                    recaudadoTotal += Number(c.costo) || 0;
+                    recaudadoTotal += costoC;
                 } else {
                     recaudadoTotal += totalAbonado;
-                    porCobrarTotal += ((Number(c.costo) || 0) - totalAbonado);
+                    porCobrarTotal += (costoC - totalAbonado);
                 }
             });
 
@@ -225,9 +221,9 @@
                 let fechaVenc = new Date(fechaInicio);
                 fechaVenc.setDate(fechaVenc.getDate() + 30);
                 let opt = { day: '2-digit', month: 'short' };
-
+                let costoC = Number(c.costo) || 0;
                 let totalAbonado = (c.abonos || []).reduce((sum, a) => sum + (Number(a.monto) || 0), 0);
-                let pagadoReal = c.pagado || (totalAbonado >= c.costo);
+                let pagadoReal = c.pagado || (totalAbonado >= costoC);
 
                 const card = document.createElement('div');
                 card.className = "bg-[#131b2e] p-4 rounded-2xl border border-gray-800 space-y-3";
@@ -237,7 +233,7 @@
                             <h4 class="font-bold text-white text-base">${c.nombre}</h4>
                             <p class="text-xs text-gray-400 mt-0.5">📅 Ciclo: ${fechaInicio.toLocaleDateString('es-ES', opt)} al ${fechaVenc.toLocaleDateString('es-ES', opt)}</p>
                         </div>
-                        <span class="text-emerald-400 font-bold text-sm">${montosOcultos ? '••••' : '$' + (Number(c.costo) || 0).toFixed(2)}</span>
+                        <span class="text-emerald-400 font-bold text-sm">${montosOcultos ? '••••' : '$' + costoC.toFixed(2)}</span>
                     </div>
                     <div class="flex justify-between items-center pt-2 border-t border-gray-800/60">
                         <span class="bg-${pagadoReal ? 'emerald' : 'amber'}-500/10 text-${pagadoReal ? 'emerald' : 'amber'}-400 border border-${pagadoReal ? 'emerald' : 'amber'}-500/20 text-[10px] font-semibold px-2.5 py-1 rounded-full">
@@ -273,11 +269,12 @@
         function renderizarExpediente() {
             const c = clientes.find(item => item.id === clienteActualId);
             if (!c) return;
-
             const contenedor = document.getElementById('detalle-expediente');
+            if (!contenedor) return;
             
+            let costoC = Number(c.costo) || 0;
             let totalAbonado = (c.abonos || []).reduce((sum, a) => sum + (Number(a.monto) || 0), 0);
-            let saldoPendiente = (Number(c.costo) || 0) - totalAbonado;
+            let saldoPendiente = costoC - totalAbonado;
             if (saldoPendiente < 0) saldoPendiente = 0;
 
             let htmlAbonos = '';
@@ -342,7 +339,7 @@
                         <div><b>Edad:</b> ${c.edad} años</div>
                         <div><b>WhatsApp:</b> ${c.whatsapp}</div>
                         <div><b>Inicio:</b> ${c.fecha}</div>
-                        <div><b>Paquete:</b> $${(Number(c.costo) || 0).toFixed(2)}</div>
+                        <div><b>Paquete:</b> $${costoC.toFixed(2)}</div>
                         <div class="col-span-2 pt-1 border-t border-gray-800 flex justify-between items-center">
                             <span><b>Estatus:</b> <span class="${c.pagado ? 'text-emerald-400 font-bold' : 'text-amber-400'}">${c.pagado ? 'Pagado Total (Al día)' : `Restante: $${saldoPendiente.toFixed(2)}`}</span></span>
                         </div>
@@ -538,8 +535,6 @@
             guardarStorage();
             renderizarExpediente();
         }
-
-        renderizarClientes();
     </script>
 </body>
 </html>
