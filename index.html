@@ -105,7 +105,6 @@
     </div>
 
     <script>
-        // Establecer fecha actual por defecto de forma segura
         const inputFecha = document.getElementById('fecha');
         if (inputFecha) {
             inputFecha.valueAsDate = new Date();
@@ -148,7 +147,6 @@
             clientes.push(nuevoCliente);
             guardarStorage();
             
-            // Limpiar formulario y restaurar fecha actual de forma segura
             this.reset();
             document.getElementById('fecha').valueAsDate = new Date();
         });
@@ -223,7 +221,6 @@
             document.getElementById('total-por-cobrar').textContent = montosOcultos ? '••••' : '$' + porCobrarTotal.toFixed(2);
         }
 
-        // GESTIÓN DE EXPEDIENTES Y MÉTRICAS
         let clienteActualId = null;
 
         function abrirExpediente(id) {
@@ -335,4 +332,57 @@
         }
 
         function toggleEstadoPago(id) {
-            const c = cliente
+            const c = clientes.find(item => item.id === id);
+            if (c) {
+                c.pagado = !c.pagado;
+                guardarStorage();
+                renderizarExpediente();
+            }
+        }
+
+        function guardarMetrica(e) {
+            e.preventDefault();
+            const c = clientes.find(item => item.id === clienteActualId);
+            if (!c) return;
+
+            const peso = parseFloat(document.getElementById('m-peso').value) || 0;
+            const estatura = parseFloat(document.getElementById('m-estatura').value) || 0;
+            
+            let imcVal = "0.0";
+            if (estatura > 0) {
+                const estMetros = estatura / 100;
+                imcVal = (peso / (estMetros * estMetros)).toFixed(1);
+            }
+
+            const nuevaMetrica = {
+                fecha: document.getElementById('m-fecha').value,
+                peso: peso,
+                estatura: estatura,
+                imc: imcVal,
+                cuello: document.getElementById('m-cuello').value || '-',
+                torax: document.getElementById('m-torax').value || '-',
+                biceps: document.getElementById('m-biceps').value || '-',
+                abdomen: document.getElementById('m-abdomen').value || '-',
+                gluteos: document.getElementById('m-gluteos').value || '-',
+                cuadriceps: document.getElementById('m-cuadriceps').value || '-',
+                pantorrilla: document.getElementById('m-pantorrilla').value || '-'
+            };
+
+            if (!c.metricas) c.metricas = [];
+            c.metricas.push(nuevaMetrica);
+            guardarStorage();
+            renderizarExpediente();
+        }
+
+        function eliminarMetrica(idx) {
+            const c = clientes.find(item => item.id === clienteActualId);
+            if (!c) return;
+            c.metricas.splice(idx, 1);
+            guardarStorage();
+            renderizarExpediente();
+        }
+
+        renderizarClientes();
+    </script>
+</body>
+</html>
