@@ -10,10 +10,8 @@
             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .no-print { display: none !important; }
             .print-only { display: block !important; }
-            /* Mantiene los colores originales de las tarjetas y contenedores en el PDF */
             .bg-\[\#131b2e\] { background-color: #131b2e !important; border: 1px solid rgba(249, 115, 22, 0.4) !important; }
             .bg-\[\#0b0f19\] { background-color: #0b0f19 !important; }
-            /* Letras y acentos nítidos y claros en el PDF */
             .text-white { color: #ffffff !important; font-weight: 800 !important; }
             .text-gray-200, .text-gray-300, .text-gray-400 { color: #e2e8f0 !important; font-weight: 700 !important; }
             .text-orange-400, .text-orange-500 { color: #f97316 !important; font-weight: 900 !important; }
@@ -136,6 +134,8 @@
 
         let clientes = JSON.parse(localStorage.getItem('ciodaro_clientes')) || [];
         let montosOcultos = false;
+        let metricaEditandoIdx = null;
+        let clienteActualId = null;
 
         function guardarStorage() {
             localStorage.setItem('ciodaro_clientes', JSON.stringify(clientes));
@@ -182,14 +182,11 @@
                 guardarStorage();
             }
         }
-                function renderizarClientes() {
+
+        function renderizarClientes() {
             const contenedor = document.getElementById('lista-clientes');
             if (!contenedor) return;
             contenedor.innerHTML = '';
-            
-            const hoy = new Date();
-            const mesActual = hoy.getMonth();
-            const anioActual = hoy.getFullYear();
 
             const inputBusqueda = document.getElementById('buscador-clientes');
             const textoFiltro = inputBusqueda ? inputBusqueda.value.toLowerCase() : '';
@@ -201,27 +198,25 @@
             let porCobrarTotal = 0;
 
             clientes.forEach(c => {
-                let fechaInicio = new Date(c.fecha + 'T00:00:00');
-                if (fechaInicio.getMonth() === mesActual && fechaInicio.getFullYear() === anioActual) {
-                    metaTotal += c.costo;
-                    let totalAbonado = (c.abonos || []).reduce((sum, a) => sum + a.monto, 0);
-                    let pagadoReal = c.pagado || (totalAbonado >= c.costo);
-                    
-                    if (pagadoReal) {
-                        recaudadoTotal += c.costo;
-                    } else {
-                        recaudadoTotal += totalAbonado;
-                        porCobrarTotal += (c.costo - totalAbonado);
-                    }
+                metaTotal += c.costo;
+                let totalAbonado = (c.abonos || []).reduce((sum, a) => sum + a.monto, 0);
+                let pagadoReal = c.pagado || (totalAbonado >= c.costo);
+                
+                if (pagadoReal) {
+                    recaudadoTotal += c.costo;
+                } else {
+                    recaudadoTotal += totalAbonado;
+                    porCobrarTotal += (c.costo - totalAbonado);
                 }
             });
 
+            document.getElementById('total-clientes').textContent = totalCli;
+            document.getElementById('total-meta').textContent = montosOcultos ? '••••' : '$' + metaTotal.toFixed(2);
+            document.getElementById('total-recaudado').textContent = montosOcultos ? '••••' : '$' + recaudadoTotal.toFixed(2);
+            document.getElementById('total-por-cobrar').textContent = montosOcultos ? '••••' : '$' + porCobrarTotal.toFixed(2);
+
             if (clientesFiltrados.length === 0) {
                 contenedor.innerHTML = `<div class="text-center text-gray-500 text-sm py-6 bg-[#131b2e] rounded-2xl border border-gray-800">No se encontraron atletas.</div>`;
-                document.getElementById('total-clientes').textContent = totalCli;
-                document.getElementById('total-meta').textContent = montosOcultos ? '••••' : '$' + metaTotal.toFixed(2);
-                document.getElementById('total-recaudado').textContent = montosOcultos ? '••••' : '$' + recaudadoTotal.toFixed(2);
-                document.getElementById('total-por-cobrar').textContent = montosOcultos ? '••••' : '$' + porCobrarTotal.toFixed(2);
                 return;
             }
 
@@ -258,17 +253,12 @@
                 `;
                 contenedor.appendChild(card);
             });
-
-            document.getElementById('total-clientes').textContent = totalCli;
-            document.getElementById('total-meta').textContent = montosOcultos ? '••••' : '$' + metaTotal.toFixed(2);
-            document.getElementById('total-recaudado').textContent = montosOcultos ? '••••' : '$' + recaudadoTotal.toFixed(2);
-            document.getElementById('total-por-cobrar').textContent = montosOcultos ? '••••' : '$' + porCobrarTotal.toFixed(2);
         }
-
         let clienteActualId = null;
 
         function abrirExpediente(id) {
             clienteActualId = id;
+            metricaEditandoIdx = null;
             document.getElementById('vista-principal').classList.add('hidden');
             document.getElementById('vista-expediente').classList.remove('hidden');
             renderizarExpediente();
@@ -276,6 +266,7 @@
 
         function volverAlInicio() {
             clienteActualId = null;
+            metricaEditandoIdx = null;
             document.getElementById('vista-expediente').classList.add('hidden');
             document.getElementById('vista-principal').classList.remove('hidden');
             renderizarClientes();
@@ -343,6 +334,9 @@
             const mensajeWp = encodeURIComponent(`¡Hola ${c.nombre}! Te escribo de Ciodarofitness para recordarte tu fecha de vencimiento y estatus de pago de tu plan. 💪🔥`);
             const linkWhatsApp = `https://wa.me/${numeroLimpio}?text=${mensajeWp}`;
 
+            const tituloFormMetrica = metricaEditandoIdx !== null ? '✏️ Actualizar Medición Antropométrica' : '📊 Nueva Medición Antropométrica';
+            const textoBotonMetrica = metricaEditandoIdx !== null ? 'Actualizar Medición' : 'Registrar y Calcular IMC';
+
             contenedor.innerHTML = `
                 <div class="bg-[#131b2e] p-5 rounded-3xl border border-orange-500/40 space-y-3 shadow-xl">
                     <h2 class="text-lg font-black text-white flex items-center gap-2">🏋️‍♂️ Atleta: <span class="text-orange-400">${c.nombre}</span></h2>
@@ -387,7 +381,7 @@
                 </div>
 
                 <div class="bg-[#131b2e] p-5 rounded-3xl border border-gray-800 space-y-3 no-print">
-                    <h3 class="text-sm font-bold text-orange-500 uppercase">📊 Nueva Medición Antropométrica</h3>
+                    <h3 class="text-sm font-bold text-orange-500 uppercase">${tituloFormMetrica}</h3>
                     <form id="form-metrica" onsubmit="guardarMetrica(event)" class="space-y-3 text-xs">
                         <div class="grid grid-cols-3 gap-2">
                             <div>
@@ -412,7 +406,10 @@
                             <div><label class="text-gray-400">Cuádriceps</label><input type="number" step="0.1" id="m-cuadriceps" class="w-full bg-[#0b0f19] border border-gray-800 rounded-lg p-2 text-white"></div>
                             <div><label class="text-gray-400">Pantorrilla</label><input type="number" step="0.1" id="m-pantorrilla" class="w-full bg-[#0b0f19] border border-gray-800 rounded-lg p-2 text-white"></div>
                         </div>
-                        <button type="submit" class="w-full bg-orange-600 text-white font-bold py-2 rounded-xl">Registrar y Calcular IMC</button>
+                        <div class="flex gap-2">
+                            <button type="submit" class="w-full bg-orange-600 text-white font-bold py-2 rounded-xl">${textoBotonMetrica}</button>
+                            ${metricaEditandoIdx !== null ? `<button type="button" onclick="cancelarEdicionMetrica()" class="bg-gray-700 text-white font-bold px-3 py-2 rounded-xl">Cancelar</button>` : ''}
+                        </div>
                     </form>
                 </div>
 
@@ -421,8 +418,24 @@
                     ${htmlMetricas}
                 </div>
             `;
-            const mFechaInput = document.getElementById('m-fecha');
-            if (mFechaInput) mFechaInput.valueAsDate = new Date();
+
+            if (metricaEditandoIdx !== null && c.metricas && c.metricas[metricaEditandoIdx]) {
+                const m = c.metricas[metricaEditandoIdx];
+                document.getElementById('m-peso').value = m.peso;
+                document.getElementById('m-estatura').value = m.estatura;
+                document.getElementById('m-fecha').value = m.fecha;
+                document.getElementById('m-cuello').value = m.cuello !== '-' ? m.cuello : '';
+                document.getElementById('m-torax').value = m.torax !== '-' ? m.torax : '';
+                document.getElementById('m-biceps').value = m.biceps !== '-' ? m.biceps : '';
+                document.getElementById('m-abdomen').value = m.abdomen !== '-' ? m.abdomen : '';
+                document.getElementById('m-gluteos').value = m.gluteos !== '-' ? m.gluteos : '';
+                document.getElementById('m-cuadriceps').value = m.cuadriceps !== '-' ? m.cuadriceps : '';
+                document.getElementById('m-pantorrilla').value = m.pantorrilla !== '-' ? m.pantorrilla : '';
+            } else {
+                const mFechaInput = document.getElementById('m-fecha');
+                if (mFechaInput) mFechaInput.valueAsDate = new Date();
+            }
+
             const fechaAbonoInput = document.getElementById('fecha-abono');
             if (fechaAbonoInput) fechaAbonoInput.valueAsDate = new Date();
             
@@ -497,8 +510,26 @@
             };
 
             if (!c.metricas) c.metricas = [];
-            c.metricas.push(nuevaMetrica);
+
+            if (metricaEditandoIdx !== null) {
+                c.metricas[metricaEditandoIdx] = nuevaMetrica;
+                metricaEditandoIdx = null;
+            } else {
+                c.metricas.push(nuevaMetrica);
+            }
+
             guardarStorage();
+            renderizarExpediente();
+        }
+
+        function editarMetrica(idx) {
+            metricaEditandoIdx = idx;
+            renderizarExpediente();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function cancelarEdicionMetrica() {
+            metricaEditandoIdx = null;
             renderizarExpediente();
         }
 
