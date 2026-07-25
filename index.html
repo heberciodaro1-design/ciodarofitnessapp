@@ -7,10 +7,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @media print {
-            body { background: white !important; color: black !important; }
+            body { background: #0b0f19 !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .no-print { display: none !important; }
             .print-only { display: block !important; }
-            div { border-color: #ccc !important; }
+            .bg-\[\#131b2e\] { background-color: #131b2e !important; border-color: #f97316 !important; }
+            .bg-\[\#0b0f19\] { background-color: #0b0f19 !important; }
         }
     </style>
 </head>
@@ -101,35 +102,22 @@
                 <button onclick="volverAlInicio()" class="bg-gray-800 hover:bg-gray-700 text-white text-xs font-semibold px-4 py-2 rounded-xl border border-gray-700">
                     ← Volver al Panel
                 </button>
-                <button onclick="generarPDFExpediente()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-lg flex items-center gap-1.5">
-                    📄 Descargar Expediente PDF
+                <button onclick="generarPDFExpediente()" class="bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-xl flex items-center gap-2">
+                    ⚡ Descargar Expediente Full Color
                 </button>
             </div>
             
-            <div class="print-only hidden text-center pb-4 border-b-2 border-orange-500 mb-4">
-                <h1 class="text-2xl font-black tracking-wider text-orange-600">CIODAROFITNESS</h1>
-                <p class="text-xs font-semibold text-gray-600 uppercase tracking-widest mt-1">Expediente Antropométrico y Control de Rendimiento</p>
+            <div class="bg-gradient-to-r from-orange-600 via-amber-600 to-orange-500 p-6 rounded-3xl shadow-xl text-white text-center space-y-1 border border-orange-400/30">
+                <h1 class="text-2xl font-black tracking-widest drop-shadow">CIODAROFITNESS</h1>
+                <p class="text-xs font-bold uppercase tracking-widest text-orange-100">Expediente Antropométrico & Rendimiento Pro</p>
+                <div class="text-[10px] text-orange-200 pt-1" id="fecha-impresion"></div>
             </div>
 
             <div id="detalle-expediente" class="space-y-4"></div>
 
-            <div class="print-only hidden pt-12 mt-8 border-t border-gray-300">
-                <div class="grid grid-cols-2 gap-8 items-end">
-                    <div class="text-center">
-                        <div class="border-b border-gray-400 pb-1 mb-2 w-48 mx-auto"></div>
-                        <p class="text-xs font-bold text-gray-800">Firma del Entrenador / Especialista</p>
-                        <p class="text-[10px] text-gray-500">Ciodarofitness System</p>
-                    </div>
-                    <div class="text-center">
-                        <div class="inline-block border-2 border-orange-600 px-4 py-2 rounded-lg rotate-[-5deg]">
-                            <p class="text-xs font-black text-orange-600 uppercase tracking-wider">APROBADO & VALIDADO</p>
-                            <p class="text-[9px] text-gray-500" id="fecha-impresion"></p>
-                        </div>
-                    </div>
-                </div>
-                <div class="text-center mt-8 text-[9px] text-gray-400">
-                    Documento oficial generado digitalmente por Ciodarofitness - Todos los derechos reservados.
-                </div>
+            <div class="bg-[#131b2e] p-4 rounded-2xl border border-orange-500/40 text-center space-y-1 shadow-lg mt-6">
+                <p class="text-xs font-black text-orange-500 tracking-wider">CIODAROFITNESS</p>
+                <p class="text-[11px] font-semibold text-gray-300">Entrenamiento Inteligente</p>
             </div>
         </div>
     </div>    <script>
@@ -169,6 +157,7 @@
                 costo: costoVal,
                 fecha: fechaVal,
                 pagado: true,
+                abonos: [],
                 metricas: []
             };
 
@@ -208,10 +197,14 @@
                 let fechaInicio = new Date(c.fecha + 'T00:00:00');
                 if (fechaInicio.getMonth() === mesActual && fechaInicio.getFullYear() === anioActual) {
                     metaTotal += c.costo;
-                    if (c.pagado) {
+                    let totalAbonado = (c.abonos || []).reduce((sum, a) => sum + a.monto, 0);
+                    let pagadoReal = c.pagado || (totalAbonado >= c.costo);
+                    
+                    if (pagadoReal) {
                         recaudadoTotal += c.costo;
                     } else {
-                        porCobrarTotal += c.costo;
+                        recaudadoTotal += totalAbonado;
+                        porCobrarTotal += (c.costo - totalAbonado);
                     }
                 }
             });
@@ -231,6 +224,9 @@
                 fechaVenc.setDate(fechaVenc.getDate() + 30);
                 let opt = { day: '2-digit', month: 'short' };
 
+                let totalAbonado = (c.abonos || []).reduce((sum, a) => sum + a.monto, 0);
+                let pagadoReal = c.pagado || (totalAbonado >= c.costo);
+
                 const card = document.createElement('div');
                 card.className = "bg-[#131b2e] p-4 rounded-2xl border border-gray-800 space-y-3";
                 card.innerHTML = `
@@ -242,8 +238,8 @@
                         <span class="text-emerald-400 font-bold text-sm">${montosOcultos ? '••••' : '$' + c.costo.toFixed(2)}</span>
                     </div>
                     <div class="flex justify-between items-center pt-2 border-t border-gray-800/60">
-                        <span class="bg-${c.pagado ? 'emerald' : 'red'}-500/10 text-${c.pagado ? 'emerald' : 'red'}-400 border border-${c.pagado ? 'emerald' : 'red'}-500/20 text-[10px] font-semibold px-2.5 py-1 rounded-full">
-                            ${c.pagado ? 'Al Día (30d)' : 'Pendiente Pago'}
+                        <span class="bg-${pagadoReal ? 'emerald' : 'amber'}-500/10 text-${pagadoReal ? 'emerald' : 'amber'}-400 border border-${pagadoReal ? 'emerald' : 'amber'}-500/20 text-[10px] font-semibold px-2.5 py-1 rounded-full">
+                            ${pagadoReal ? 'Al Día (30d)' : `Abonado: $${totalAbonado.toFixed(2)}`}
                         </span>
                         <div class="flex gap-2">
                             <button onclick="abrirExpediente(${c.id})" class="bg-orange-600 hover:bg-orange-500 text-white text-xs font-semibold px-3 py-2 rounded-xl transition">
@@ -284,22 +280,43 @@
 
             const contenedor = document.getElementById('detalle-expediente');
             
+            let totalAbonado = (c.abonos || []).reduce((sum, a) => sum + a.monto, 0);
+            let saldoPendiente = c.costo - totalAbonado;
+            if (saldoPendiente < 0) saldoPendiente = 0;
+
+            let htmlAbonos = '';
+            if (c.abonos && c.abonos.length > 0) {
+                c.abonos.forEach((abono, idx) => {
+                    htmlAbonos += `
+                        <div class="flex justify-between items-center bg-[#0b0f19] p-2.5 rounded-xl border border-gray-800 text-xs">
+                            <div>
+                                <span class="text-emerald-400 font-bold">$${abono.monto.toFixed(2)}</span>
+                                <span class="text-gray-400 ml-2">📅 ${abono.fecha}</span>
+                            </div>
+                            <button onclick="eliminarAbono(${idx})" class="text-red-400 hover:text-red-300 text-[10px] bg-red-950/40 px-2 py-1 rounded no-print">Eliminar</button>
+                        </div>
+                    `;
+                });
+            } else {
+                htmlAbonos = `<p class="text-gray-500 text-xs text-center py-2">No hay abonos registrados aún.</p>`;
+            }
+
             let htmlMetricas = '';
             if (c.metricas && c.metricas.length > 0) {
                 c.metricas.forEach((m, idx) => {
                     htmlMetricas += `
-                        <div class="bg-[#131b2e] p-4 rounded-xl border border-gray-800 space-y-2 text-xs">
+                        <div class="bg-[#131b2e] p-4 rounded-2xl border border-orange-500/30 space-y-2 text-xs shadow-md">
                             <div class="flex justify-between items-center border-b border-gray-800 pb-2">
-                                <span class="font-bold text-orange-400">📅 Registro: ${m.fecha}</span>
+                                <span class="font-bold text-orange-400 text-sm">📅 Registro: ${m.fecha}</span>
                                 <div class="flex gap-1 no-print">
                                     <button onclick="editarMetrica(${idx})" class="bg-gray-800 px-2 py-1 rounded text-gray-300">Editar</button>
                                     <button onclick="eliminarMetrica(${idx})" class="bg-red-900/40 text-red-400 px-2 py-1 rounded">Eliminar</button>
                                 </div>
                             </div>
-                            <div class="grid grid-cols-3 gap-2 pt-1 text-gray-300">
-                                <div><b>Peso:</b> ${m.peso} kg</div>
+                            <div class="grid grid-cols-3 gap-2 pt-1 text-gray-200">
+                                <div><b>Peso:</b> <span class="text-orange-300">${m.peso} kg</span></div>
                                 <div><b>Estatura:</b> ${m.estatura} cm</div>
-                                <div><b>IMC:</b> <span class="text-emerald-400 font-bold">${m.imc}</span></div>
+                                <div><b>IMC:</b> <span class="text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded">${m.imc}</span></div>
                                 <div><b>Cuello:</b> ${m.cuello} cm</div>
                                 <div><b>Tórax:</b> ${m.torax} cm</div>
                                 <div><b>Bíceps:</b> ${m.biceps} cm</div>
@@ -320,17 +337,20 @@
             const linkWhatsApp = `https://wa.me/${numeroLimpio}?text=${mensajeWp}`;
 
             contenedor.innerHTML = `
-                <div class="bg-[#131b2e] p-5 rounded-2xl border border-gray-800 space-y-3">
-                    <h2 class="text-lg font-bold text-white">🏋️‍♂️ Expediente de ${c.nombre}</h2>
-                    <div class="grid grid-cols-2 gap-2 text-xs text-gray-300 bg-[#0b0f19] p-3 rounded-xl border border-gray-800">
+                <div class="bg-[#131b2e] p-5 rounded-3xl border border-orange-500/40 space-y-3 shadow-xl">
+                    <h2 class="text-lg font-black text-white flex items-center gap-2">🏋️‍♂️ Atleta: <span class="text-orange-400">${c.nombre}</span></h2>
+                    <div class="grid grid-cols-2 gap-2 text-xs text-gray-200 bg-[#0b0f19] p-3.5 rounded-2xl border border-gray-800">
                         <div><b>Edad:</b> ${c.edad} años</div>
                         <div><b>WhatsApp:</b> ${c.whatsapp}</div>
                         <div><b>Inicio:</b> ${c.fecha}</div>
-                        <div><b>Pago Paquete:</b> $${c.costo.toFixed(2)} (${c.pagado ? 'Al día' : 'Pendiente'})</div>
+                        <div><b>Paquete:</b> $${c.costo.toFixed(2)}</div>
+                        <div class="col-span-2 pt-1 border-t border-gray-800 flex justify-between items-center">
+                            <span><b>Estatus:</b> <span class="${c.pagado ? 'text-emerald-400 font-bold' : 'text-amber-400'}">${c.pagado ? 'Pagado Total (Al día)' : `Restante: $${saldoPendiente.toFixed(2)}`}</span></span>
+                        </div>
                     </div>
                     <div class="grid grid-cols-2 gap-2 no-print">
                         <button onclick="toggleEstadoPago(${c.id})" class="bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 font-semibold py-2.5 rounded-xl text-xs">
-                            🔄 (${c.pagado ? 'Marcar Pendiente' : 'Marcar Pagado'})
+                            🔄 (${c.pagado ? 'Marcar Pendiente' : 'Marcar Pago Total'})
                         </button>
                         <a href="${linkWhatsApp}" target="_blank" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs text-center flex items-center justify-center gap-1.5 shadow-lg">
                             💬 Enviar WhatsApp
@@ -338,7 +358,28 @@
                     </div>
                 </div>
 
-                <div class="bg-[#131b2e] p-5 rounded-2xl border border-gray-800 space-y-3 no-print">
+                <div class="bg-[#131b2e] p-5 rounded-3xl border border-gray-800 space-y-3">
+                    <h3 class="text-sm font-bold text-orange-500 uppercase">💵 Registrar Abono Parcial</h3>
+                    <form onsubmit="agregarAbono(event)" class="space-y-3 text-xs no-print">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-gray-400 block mb-1">Monto Abono ($)</label>
+                                <input type="number" step="0.1" id="monto-abono" required placeholder="Ej. 20" class="w-full bg-[#0b0f19] border border-gray-800 rounded-lg p-2.5 text-white">
+                            </div>
+                            <div>
+                                <label class="text-gray-400 block mb-1">📅 Fecha del Abono</label>
+                                <input type="date" id="fecha-abono" required class="w-full bg-[#0b0f19] border border-gray-800 rounded-lg p-2.5 text-white">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-2.5 rounded-xl transition">Agregar Abono</button>
+                    </form>
+                    <div class="space-y-2 pt-2 border-t border-gray-800">
+                        <h4 class="text-xs font-semibold text-gray-400 uppercase">Historial de Abonos:</h4>
+                        ${htmlAbonos}
+                    </div>
+                </div>
+
+                <div class="bg-[#131b2e] p-5 rounded-3xl border border-gray-800 space-y-3 no-print">
                     <h3 class="text-sm font-bold text-orange-500 uppercase">📊 Nueva Medición Antropométrica</h3>
                     <form id="form-metrica" onsubmit="guardarMetrica(event)" class="space-y-3 text-xs">
                         <div class="grid grid-cols-3 gap-2">
@@ -368,17 +409,19 @@
                     </form>
                 </div>
 
-                <div class="space-y-2">
-                    <h3 class="text-sm font-bold text-gray-400 uppercase">📈 Historial y Comparativa Mensual</h3>
+                <div class="space-y-3">
+                    <h3 class="text-sm font-bold text-orange-400 uppercase tracking-wide">📈 Historial y Comparativa Mensual</h3>
                     ${htmlMetricas}
                 </div>
             `;
             const mFechaInput = document.getElementById('m-fecha');
             if (mFechaInput) mFechaInput.valueAsDate = new Date();
+            const fechaAbonoInput = document.getElementById('fecha-abono');
+            if (fechaAbonoInput) fechaAbonoInput.valueAsDate = new Date();
             
             const lblFecha = document.getElementById('fecha-impresion');
             if (lblFecha) {
-                lblFecha.textContent = "Emisión: " + new Date().toLocaleDateString('es-ES');
+                lblFecha.textContent = "Fecha de emisión: " + new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
             }
         }
 
@@ -393,6 +436,93 @@
                 guardarStorage();
                 renderizarExpediente();
             }
+        }
+
+        function agregarAbono(e) {
+            e.preventDefault();
+            const c = clientes.find(item => item.id === clienteActualId);
+            if (!c) return;
+
+            const monto = parseFloat(document.getElementById('monto-abono').value) || 0;
+            const fecha = document.getElementById('fecha-abono').value;
+
+            if (!c.abonos) c.abonos = [];
+            c.abonos.push({ monto, fecha });
+
+            guardarStorage();
+            renderizarExpediente();
+        }
+
+        function eliminarAbono(idx) {
+            const c = clientes.find(item => item.id === clienteActualId);
+            if (!c) return;
+            c.abonos.splice(idx, 1);
+            guardarStorage();
+            renderizarExpediente();
+        }
+
+        function guardarMetrica(e) {
+            e.preventDefault();
+            const c = clientes.find(item => item.id === clienteActualId);
+            if (!c) return;
+
+            const peso = parseFl                            <div><label class="text-gray-400">Cuádriceps</label><input type="number" step="0.1" id="m-cuadriceps" class="w-full bg-[#0b0f19] border border-gray-800 rounded-lg p-2 text-white"></div>
+                            <div><label class="text-gray-400">Pantorrilla</label><input type="number" step="0.1" id="m-pantorrilla" class="w-full bg-[#0b0f19] border border-gray-800 rounded-lg p-2 text-white"></div>
+                        </div>
+                        <button type="submit" class="w-full bg-orange-600 text-white font-bold py-2 rounded-xl">Registrar y Calcular IMC</button>
+                    </form>
+                </div>
+
+                <div class="space-y-3">
+                    <h3 class="text-sm font-bold text-orange-400 uppercase tracking-wide">📈 Historial y Comparativa Mensual</h3>
+                    ${htmlMetricas}
+                </div>
+            `;
+            const mFechaInput = document.getElementById('m-fecha');
+            if (mFechaInput) mFechaInput.valueAsDate = new Date();
+            const fechaAbonoInput = document.getElementById('fecha-abono');
+            if (fechaAbonoInput) fechaAbonoInput.valueAsDate = new Date();
+            
+            const lblFecha = document.getElementById('fecha-impresion');
+            if (lblFecha) {
+                lblFecha.textContent = "Fecha de emisión: " + new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+            }
+        }
+
+        function generarPDFExpediente() {
+            window.print();
+        }
+
+        function toggleEstadoPago(id) {
+            const c = clientes.find(item => item.id === id);
+            if (c) {
+                c.pagado = !c.pagado;
+                guardarStorage();
+                renderizarExpediente();
+            }
+        }
+
+        function agregarAbono(e) {
+            e.preventDefault();
+            const c = clientes.find(item => item.id === clienteActualId);
+            if (!c) return;
+
+            const monto = parseFloat(document.getElementById('monto-abono').value) || 0;
+            const fecha = document.getElementById('fecha-abono').value;
+
+            if (!c.abonos) c.abonos = [];
+            c.abonos.push({ monto, fecha });
+
+            guardarStorage();
+            renderizarExpediente();
+        }
+
+        function eliminarAbono(idx) {
+            const c = clientes.find(item => item.id === clienteActualId);
+            if (!c) return;
+            c.abonos.splice(idx, 1);
+            guardarStorage();
+            renderizarExpediente();
         }
 
         function guardarMetrica(e) {
@@ -442,4 +572,3 @@
 </body>
 </html>
 
-    
