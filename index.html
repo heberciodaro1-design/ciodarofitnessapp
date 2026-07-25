@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ciodarofitness - Panel de Control</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            body { background: white !important; color: black !important; }
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            div { border-color: #ccc !important; }
+        }
+    </style>
 </head>
 <body class="bg-[#0b0f19] text-gray-100 min-h-screen p-4 pb-20">
 
@@ -43,7 +51,7 @@
             </div>
 
             <!-- Formulario Registro -->
-            <div class="bg-[#131b2e] p-5 rounded-2xl border border-gray-800 space-y-4">
+            <div class="bg-[#131b2e] p-5 rounded-2xl border border-gray-800 space-y-4 no-print">
                 <h2 class="text-sm font-bold text-orange-500 uppercase tracking-wide flex items-center gap-2">
                     👤 Registrar Nuevo Cliente
                 </h2>
@@ -80,7 +88,7 @@
             </div>
 
             <!-- Control de Clientes -->
-            <div class="space-y-3">
+            <div class="space-y-3 no-print">
                 <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wide flex items-center gap-2">
                     📋 Control de Clientes y Vencimientos
                 </h3>
@@ -90,9 +98,14 @@
 
         <!-- VISTA EXPEDIENTE / PERFIL DE ATLETA -->
         <div id="vista-expediente" class="hidden space-y-4">
-            <button onclick="volverAlInicio()" class="bg-gray-800 hover:bg-gray-700 text-white text-xs font-semibold px-4 py-2 rounded-xl border border-gray-700">
-                ← Volver al Panel
-            </button>
+            <div class="flex justify-between items-center no-print">
+                <button onclick="volverAlInicio()" class="bg-gray-800 hover:bg-gray-700 text-white text-xs font-semibold px-4 py-2 rounded-xl border border-gray-700">
+                    ← Volver al Panel
+                </button>
+                <button onclick="generarPDFExpediente()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-lg flex items-center gap-1.5">
+                    📄 Descargar Expediente PDF
+                </button>
+            </div>
             <div id="detalle-expediente" class="space-y-4"></div>
         </div>
     </div>
@@ -122,7 +135,7 @@
                 whatsapp: document.getElementById('whatsapp').value,
                 costo: parseFloat(document.getElementById('costo').value),
                 fecha: document.getElementById('fecha').value,
-                pagado: true, // Por defecto al día al crear
+                pagado: true,
                 metricas: []
             };
             clientes.push(nuevoCliente);
@@ -230,7 +243,7 @@
                         <div class="bg-[#131b2e] p-4 rounded-xl border border-gray-800 space-y-2 text-xs">
                             <div class="flex justify-between items-center border-b border-gray-800 pb-2">
                                 <span class="font-bold text-orange-400">📅 Registro: ${m.fecha}</span>
-                                <div class="flex gap-1">
+                                <div class="flex gap-1 no-print">
                                     <button onclick="editarMetrica(${idx})" class="bg-gray-800 px-2 py-1 rounded text-gray-300">Editar</button>
                                     <button onclick="eliminarMetrica(${idx})" class="bg-red-900/40 text-red-400 px-2 py-1 rounded">Eliminar</button>
                                 </div>
@@ -263,12 +276,12 @@
                         <div><b>Inicio:</b> ${c.fecha}</div>
                         <div><b>Pago Paquete:</b> $${c.costo.toFixed(2)} (${c.pagado ? 'Al día' : 'Pendiente'})</div>
                     </div>
-                    <button onclick="toggleEstadoPago(${c.id})" class="w-full bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 font-semibold py-2 rounded-xl text-xs">
+                    <button onclick="toggleEstadoPago(${c.id})" class="w-full bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 font-semibold py-2 rounded-xl text-xs no-print">
                         🔄 Cambiar Estatus de Pago (${c.pagado ? 'Marcar Pendiente' : 'Marcar Pagado'})
                     </button>
                 </div>
 
-                <div class="bg-[#131b2e] p-5 rounded-2xl border border-gray-800 space-y-3">
+                <div class="bg-[#131b2e] p-5 rounded-2xl border border-gray-800 space-y-3 no-print">
                     <h3 class="text-sm font-bold text-orange-500 uppercase">📊 Nueva Medición Antropométrica</h3>
                     <form id="form-metrica" onsubmit="guardarMetrica(event)" class="space-y-3 text-xs">
                         <div class="grid grid-cols-3 gap-2">
@@ -306,6 +319,10 @@
             document.getElementById('m-fecha').valueAsDate = new Date();
         }
 
+        function generarPDFExpediente() {
+            window.print();
+        }
+
         function toggleEstadoPago(id) {
             const c = clientes.find(item => item.id === id);
             if (c) {
@@ -317,65 +334,4 @@
 
         function guardarMetrica(e) {
             e.preventDefault();
-            const c = clientes.find(item => item.id === clienteActualId);
-            if (!c) return;
-
-            const peso = parseFloat(document.getElementById('m-peso').value);
-            const estaturaCm = parseFloat(document.getElementById('m-estatura').value);
-            const estaturaM = estaturaCm / 100;
-            const imc = (peso / (estaturaM * estaturaM)).toFixed(1);
-
-            const nuevaMedicion = {
-                fecha: document.getElementById('m-fecha').value,
-                peso: peso,
-                estatura: estaturaCm,
-                imc: imc,
-                cuello: document.getElementById('m-cuello').value || '-',
-                torax: document.getElementById('m-torax').value || '-',
-                biceps: document.getElementById('m-biceps').value || '-',
-                abdomen: document.getElementById('m-abdomen').value || '-',
-                gluteos: document.getElementById('m-gluteos').value || '-',
-                cuadriceps: document.getElementById('m-cuadriceps').value || '-',
-                pantorrilla: document.getElementById('m-pantorrilla').value || '-'
-            };
-
-            if(!c.metricas) c.metricas = [];
-            c.metricas.push(nuevaMedicion);
-            guardarStorage();
-            renderizarExpediente();
-        }
-
-        function eliminarMetrica(idx) {
-            const c = clientes.find(item => item.id === clienteActualId);
-            if (c && c.metricas) {
-                c.metricas.splice(idx, 1);
-                guardarStorage();
-                renderizarExpediente();
-            }
-        }
-
-        function editarMetrica(idx) {
-            const c = clientes.find(item => item.id === clienteActualId);
-            if (c && c.metricas && c.metricas[idx]) {
-                const m = c.metricas[idx];
-                document.getElementById('m-peso').value = m.peso;
-                document.getElementById('m-estatura').value = m.estatura;
-                document.getElementById('m-fecha').value = m.fecha;
-                document.getElementById('m-cuello').value = m.cuello !== '-' ? m.cuello : '';
-                document.getElementById('m-torax').value = m.torax !== '-' ? m.torax : '';
-                document.getElementById('m-biceps').value = m.biceps !== '-' ? m.biceps : '';
-                document.getElementById('m-abdomen').value = m.abdomen !== '-' ? m.abdomen : '';
-                document.getElementById('m-gluteos').value = m.gluteos !== '-' ? m.gluteos : '';
-                document.getElementById('m-cuadriceps').value = m.cuadriceps !== '-' ? m.cuadriceps : '';
-                document.getElementById('m-pantorrilla').value = m.pantorrilla !== '-' ? m.pantorrilla : '';
-                
-                c.metricas.splice(idx, 1);
-                guardarStorage();
-                renderizarExpediente();
-            }
-        }
-
-        renderizarClientes();
-    </script>
-</body>
-</html>
+            const c = clientes.find(item => item.id ==
