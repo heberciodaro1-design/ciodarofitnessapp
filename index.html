@@ -100,6 +100,13 @@
                     📄 Descargar Expediente PDF
                 </button>
             </div>
+            
+            <!-- Marca visible únicamente al imprimir el PDF -->
+            <div class="print-only hidden text-center pb-2 border-b border-gray-700">
+                <h1 class="text-xl font-black tracking-wider text-orange-600">CIODAROFITNESS</h1>
+                <p class="text-xs text-gray-500">Expediente Antropométrico y Control de Atleta</p>
+            </div>
+
             <div id="detalle-expediente" class="space-y-4"></div>
         </div>
     </div>
@@ -163,6 +170,11 @@
             if (!contenedor) return;
             contenedor.innerHTML = '';
             
+            // Filtro de cierre de mes automático
+            const hoy = new Date();
+            const mesActual = hoy.getMonth();
+            const anioActual = hoy.getFullYear();
+
             let totalCli = clientes.length;
             let metaTotal = 0;
             let recaudadoTotal = 0;
@@ -178,14 +190,18 @@
             }
 
             clientes.forEach(c => {
-                metaTotal += c.costo;
-                if (c.pagado) {
-                    recaudadoTotal += c.costo;
-                } else {
-                    porCobrarTotal += c.costo;
+                let fechaInicio = new Date(c.fecha + 'T00:00:00');
+                
+                // Sumar los montos financieros solo si el ciclo pertenece al mes actual
+                if (fechaInicio.getMonth() === mesActual && fechaInicio.getFullYear() === anioActual) {
+                    metaTotal += c.costo;
+                    if (c.pagado) {
+                        recaudadoTotal += c.costo;
+                    } else {
+                        porCobrarTotal += c.costo;
+                    }
                 }
 
-                let fechaInicio = new Date(c.fecha + 'T00:00:00');
                 let fechaVenc = new Date(fechaInicio);
                 fechaVenc.setDate(fechaVenc.getDate() + 30);
                 let opt = { day: '2-digit', month: 'short' };
