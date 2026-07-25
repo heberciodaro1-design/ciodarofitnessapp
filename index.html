@@ -20,7 +20,6 @@
     </style>
 </head>
 <body class="bg-[#0b0f19] text-gray-100 min-h-screen p-4 pb-20">
-
     <div class="max-w-md mx-auto space-y-5" id="app-container">
         <div id="vista-principal" class="space-y-5">
             <header class="flex justify-between items-center bg-[#131b2e] p-4 rounded-2xl border border-gray-800 shadow-lg">
@@ -53,10 +52,7 @@
             </div>
 
             <div class="bg-[#131b2e] p-5 rounded-3xl border border-gray-800 space-y-3 shadow-xl no-print">
-                <h2 class="text-xs font-bold text-orange-500 uppercase tracking-wider flex items-center gap-1.5">
-                    ⚡ Registrar Nuevo Atleta
-                </h2>
-                
+                <h2 class="text-xs font-bold text-orange-500 uppercase tracking-wider flex items-center gap-1.5">⚡ Registrar Nuevo Atleta</h2>
                 <form id="form-cliente" class="space-y-3">
                     <div>
                         <label class="text-xs text-gray-400 block mb-1">Nombre Completo</label>
@@ -82,51 +78,35 @@
                             <input type="date" id="fecha" required class="w-full bg-[#0b0f19] border border-gray-800 rounded-xl p-3 text-sm focus:outline-none focus:border-orange-500 text-white">
                         </div>
                     </div>
-                    <button type="submit" class="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-3 px-4 rounded-xl transition duration-200 flex items-center justify-center gap-2 shadow-lg shadow-orange-600/20">
-                        📂 Agregar a la Base de Datos
-                    </button>
+                    <button type="submit" class="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-3 px-4 rounded-xl transition duration-200 flex items-center justify-center gap-2 shadow-lg shadow-orange-600/20">📂 Agregar a la Base de Datos</button>
                 </form>
             </div>
 
             <div class="space-y-3 no-print">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                        📋 Control de Atletas
-                    </h3>
-                </div>
-                <div>
-                    <input type="text" id="buscador-clientes" oninput="renderizarClientes()" placeholder="🔍 Buscar atleta por nombre..." class="w-full bg-[#131b2e] border border-gray-800 rounded-xl p-3 text-sm focus:outline-none focus:border-orange-500 text-white placeholder-gray-600 shadow-md">
-                </div>
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">📋 Control de Atletas</h3>
+                <input type="text" id="buscador-clientes" oninput="renderizarClientes()" placeholder="🔍 Buscar atleta por nombre..." class="w-full bg-[#131b2e] border border-gray-800 rounded-xl p-3 text-sm focus:outline-none focus:border-orange-500 text-white placeholder-gray-600 shadow-md">
                 <div id="lista-clientes" class="space-y-3"></div>
             </div>
         </div>
 
         <div id="vista-expediente" class="hidden space-y-4">
             <div class="flex justify-between items-center no-print">
-                <button onclick="volverAlInicio()" class="bg-gray-800 hover:bg-gray-700 text-white text-xs font-semibold px-3.5 py-2 rounded-xl border border-gray-700 transition">
-                    ← Volver al Panel
-                </button>
-                <button onclick="generarPDFExpediente()" class="bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-lg flex items-center gap-1.5 transition">
-                    ⚡ Descargar Expediente PDF
-                </button>
+                <button onclick="volverAlInicio()" class="bg-gray-800 hover:bg-gray-700 text-white text-xs font-semibold px-3.5 py-2 rounded-xl border border-gray-700 transition">← Volver al Panel</button>
+                <button onclick="generarPDFExpediente()" class="bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-lg flex items-center gap-1.5 transition">⚡ Descargar Expediente PDF</button>
             </div>
-            
             <div class="bg-gradient-to-r from-orange-600 to-amber-600 p-5 rounded-2xl shadow-xl text-white text-center space-y-1">
                 <h1 class="text-xl font-black tracking-wider">CIODAROFITNESS</h1>
                 <p class="text-xs font-semibold uppercase tracking-widest text-orange-100">Expediente Antropométrico & Rendimiento</p>
                 <div class="text-[10px] text-orange-200 pt-1" id="fecha-impresion"></div>
             </div>
-
             <div id="detalle-expediente" class="space-y-4"></div>
-
             <div class="bg-[#131b2e] p-4 rounded-2xl border border-gray-800 text-center space-y-1 mt-6">
                 <p class="text-xs font-bold text-orange-500">CIODAROFITNESS</p>
                 <p class="text-[10px] text-gray-400">Entrenamiento Inteligente</p>
             </div>
         </div>
     </div>
-
-    <script>
+        <script>
         document.addEventListener("DOMContentLoaded", () => {
             const inputFecha = document.getElementById('fecha');
             if (inputFecha) inputFecha.valueAsDate = new Date();
@@ -240,9 +220,7 @@
                             ${pagadoReal ? 'Al Día (30d)' : `Abonado: $${totalAbonado.toFixed(2)}`}
                         </span>
                         <div class="flex gap-2">
-                            <button onclick="abrirExpediente(${c.id})" class="bg-orange-600 hover:bg-orange-500 text-white text-xs font-semibold px-3 py-2 rounded-xl transition">
-                                📂 Expediente
-                            </button>
+                            <button onclick="abrirExpediente(${c.id})" class="bg-orange-600 hover:bg-orange-500 text-white text-xs font-semibold px-3 py-2 rounded-xl transition">📂 Expediente</button>
                             <button onclick="eliminarCliente(${c.id})" class="bg-gray-800 hover:bg-red-600/20 text-gray-400 hover:text-red-400 p-2 rounded-xl border border-gray-700">🗑️</button>
                         </div>
                     </div>
@@ -250,7 +228,8 @@
                 contenedor.appendChild(card);
             });
         }
-                function abrirExpediente(id) {
+
+        function abrirExpediente(id) {
             clienteActualId = id;
             metricaEditandoIdx = null;
             document.getElementById('vista-principal').classList.add('hidden');
@@ -265,8 +244,7 @@
             document.getElementById('vista-principal').classList.remove('hidden');
             renderizarClientes();
         }
-
-        function renderizarExpediente() {
+                    function renderizarExpediente() {
             const c = clientes.find(item => item.id === clienteActualId);
             if (!c) return;
             const contenedor = document.getElementById('detalle-expediente');
@@ -345,12 +323,8 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-2 no-print">
-                        <button onclick="toggleEstadoPago(${c.id})" class="bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 font-semibold py-2.5 rounded-xl text-xs">
-                            🔄 (${c.pagado ? 'Marcar Pendiente' : 'Marcar Pago Total'})
-                        </button>
-                        <a href="${linkWhatsApp}" target="_blank" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs text-center flex items-center justify-center gap-1.5 shadow-lg">
-                            💬 Enviar WhatsApp
-                        </a>
+                        <button onclick="toggleEstadoPago(${c.id})" class="bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 font-semibold py-2.5 rounded-xl text-xs">🔄 (${c.pagado ? 'Marcar Pendiente' : 'Marcar Pago Total'})</button>
+                        <a href="${linkWhatsApp}" target="_blank" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs text-center flex items-center justify-center gap-1.5 shadow-lg">💬 Enviar WhatsApp</a>
                     </div>
                 </div>
 
@@ -379,18 +353,9 @@
                     <h3 class="text-sm font-bold text-orange-500 uppercase">${tituloFormMetrica}</h3>
                     <form id="form-metrica" onsubmit="guardarMetrica(event)" class="space-y-3 text-xs">
                         <div class="grid grid-cols-3 gap-2">
-                            <div>
-                                <label class="text-gray-400">Peso (kg)</label>
-                                <input type="number" step="0.1" id="m-peso" required class="w-full bg-[#0b0f19] border border-gray-800 rounded-lg p-2 text-white">
-                            </div>
-                            <div>
-                                <label class="text-gray-400">Estatura (cm)</label>
-                                <input type="number" step="1" id="m-estatura" required class="w-full bg-[#0b0f19] border border-gray-800 rounded-lg p-2 text-white">
-                            </div>
-                            <div>
-                                <label class="text-gray-400">Fecha</label>
-                                <input type="date" id="m-fecha" required class="w-full bg-[#0b0f19] border border-gray-800 rounded-lg p-2 text-white">
-                            </div>
+                            <div><label class="text-gray-400">Peso (kg)</label><input type="number" step="0.1" id="m-peso" required class="w-full bg-[#0b0f19] border border-gray-800 rounded-lg p-2 text-white"></div>
+                            <div><label class="text-gray-400">Estatura (cm)</label><input type="number" step="1" id="m-estatura" required class="w-full bg-[#0b0f19] border border-gray-800 rounded-lg p-2 text-white"></div>
+                            <div><label class="text-gray-400">Fecha</label><input type="date" id="m-fecha" required class="w-full bg-[#0b0f19] border border-gray-800 rounded-lg p-2 text-white"></div>
                         </div>
                         <div class="grid grid-cols-4 gap-2">
                             <div><label class="text-gray-400">Cuello</label><input type="number" step="0.1" id="m-cuello" class="w-full bg-[#0b0f19] border border-gray-800 rounded-lg p-2 text-white"></div>
@@ -440,9 +405,7 @@
             }
         }
 
-        function generarPDFExpediente() {
-            window.print();
-        }
+        function generarPDFExpediente() { window.print(); }
 
         function toggleEstadoPago(id) {
             const c = clientes.find(item => item.id === id);
@@ -457,13 +420,10 @@
             e.preventDefault();
             const c = clientes.find(item => item.id === clienteActualId);
             if (!c) return;
-
             const monto = parseFloat(document.getElementById('monto-abono').value) || 0;
             const fecha = document.getElementById('fecha-abono').value;
-
             if (!c.abonos) c.abonos = [];
             c.abonos.push({ monto, fecha });
-
             guardarStorage();
             renderizarExpediente();
         }
@@ -480,16 +440,13 @@
             e.preventDefault();
             const c = clientes.find(item => item.id === clienteActualId);
             if (!c) return;
-
             const peso = parseFloat(document.getElementById('m-peso').value) || 0;
             const estatura = parseFloat(document.getElementById('m-estatura').value) || 0;
-            
             let imcVal = "0.0";
             if (estatura > 0) {
                 const estMetros = estatura / 100;
                 imcVal = (peso / (estMetros * estMetros)).toFixed(1);
             }
-
             const nuevaMetrica = {
                 fecha: document.getElementById('m-fecha').value,
                 peso: peso,
@@ -503,16 +460,13 @@
                 cuadriceps: document.getElementById('m-cuadriceps').value || '-',
                 pantorrilla: document.getElementById('m-pantorrilla').value || '-'
             };
-
             if (!c.metricas) c.metricas = [];
-
             if (metricaEditandoIdx !== null) {
                 c.metricas[metricaEditandoIdx] = nuevaMetrica;
                 metricaEditandoIdx = null;
             } else {
                 c.metricas.push(nuevaMetrica);
             }
-
             guardarStorage();
             renderizarExpediente();
         }
