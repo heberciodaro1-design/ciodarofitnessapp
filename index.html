@@ -7,14 +7,16 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @media print {
-            body { background: #ffffff !important; color: #111827 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            body { background: #ffffff !important; color: #000000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-weight: 700 !important; }
             .no-print { display: none !important; }
             .print-only { display: block !important; }
-            .bg-\[\#131b2e\] { background-color: #f8fafc !important; border-color: #e2e8f0 !important; color: #111827 !important; }
-            .bg-\[\#0b0f19\] { background-color: #ffffff !important; }
-            .text-white { color: #111827 !important; }
-            .text-gray-300, .text-gray-400 { color: #4b5563 !important; }
-            input, select { background-color: #ffffff !important; color: #111827 !important; border-color: #cbd5e1 !important; }
+            .bg-\[\#131b2e\] { background-color: #ffffff !important; border: 2px solid #000000 !important; color: #000000 !important; }
+            .bg-\[\#0b0f19\] { background-color: #ffffff !important; color: #000000 !important; }
+            .text-white { color: #000000 !important; font-weight: 800 !important; }
+            .text-gray-200, .text-gray-300, .text-gray-400 { color: #000000 !important; font-weight: 700 !important; }
+            .text-orange-400, .text-orange-500 { color: #000000 !important; font-weight: 900 !important; }
+            .text-emerald-400 { color: #000000 !important; font-weight: 800 !important; }
+            div, span, p, h1, h2, h3, h4, b { color: #000000 !important; font-weight: 700 !important; }
         }
     </style>
 </head>
@@ -179,7 +181,7 @@
                 guardarStorage();
             }
         }
-                function renderizarClientes() {
+                      function renderizarClientes() {
             const contenedor = document.getElementById('lista-clientes');
             if (!contenedor) return;
             contenedor.innerHTML = '';
@@ -362,7 +364,6 @@
                     </div>
                 </div>
 
-                <!-- Sección de Abonos con Calendario -->
                 <div class="bg-[#131b2e] p-5 rounded-3xl border border-gray-800 space-y-3">
                     <h3 class="text-sm font-bold text-orange-500 uppercase">💵 Registrar Abono Parcial</h3>
                     <form onsubmit="agregarAbono(event)" class="space-y-3 text-xs no-print">
