@@ -16,7 +16,10 @@
             .text-gray-200, .text-gray-300, .text-gray-400 { color: #e2e8f0 !important; font-weight: 700 !important; }
             .text-orange-400, .text-orange-500 { color: #f97316 !important; font-weight: 900 !important; }
             .text-emerald-400 { color: #34d399 !important; font-weight: 800 !important; }
+            .ocultar-en-pdf { display: none !important; }
+            .mostrar-en-pdf { display: inline !important; }
         }
+        .mostrar-en-pdf { display: none; }
     </style>
 </head>
 <body class="bg-[#0b0f19] text-gray-100 min-h-screen p-4 pb-20">
@@ -52,7 +55,7 @@
             </div>
 
             <div class="bg-[#131b2e] p-5 rounded-3xl border border-gray-800 space-y-3 shadow-xl no-print">
-                <h2 class="text-xs font-bold text-orange-500 uppercase tracking-wider flex items-center gap-1.5">⚡ Registrar Nuevo Atleta</h2>
+                <h2 id="titulo-form-cliente" class="text-xs font-bold text-orange-500 uppercase tracking-wider flex items-center gap-1.5">⚡ Registrar Nuevo Atleta</h2>
                 <form id="form-cliente" class="space-y-3">
                     <div>
                         <label class="text-xs text-gray-400 block mb-1">Nombre Completo</label>
@@ -74,11 +77,14 @@
                             <input type="number" id="costo" required placeholder="Ej. 50" class="w-full bg-[#0b0f19] border border-gray-800 rounded-xl p-3 text-sm focus:outline-none focus:border-orange-500 text-white placeholder-gray-600">
                         </div>
                         <div>
-                            <label class="text-xs text-gray-400 block mb-1">Fecha de Inicio</label>
+                            <label class="text-xs text-gray-400 block mb-1">Fecha de Inicio / Contratación</label>
                             <input type="date" id="fecha" required class="w-full bg-[#0b0f19] border border-gray-800 rounded-xl p-3 text-sm focus:outline-none focus:border-orange-500 text-white">
                         </div>
                     </div>
-                    <button type="submit" class="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-3 px-4 rounded-xl transition duration-200 flex items-center justify-center gap-2 shadow-lg shadow-orange-600/20">📂 Agregar a la Base de Datos</button>
+                    <div class="flex gap-2">
+                        <button type="submit" id="btn-submit-cliente" class="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-3 px-4 rounded-xl transition duration-200 flex items-center justify-center gap-2 shadow-lg shadow-orange-600/20">📂 Agregar a la Base de Datos</button>
+                        <button type="button" id="btn-cancelar-edicion-cliente" onclick="cancelarEdicionCliente()" class="hidden bg-gray-700 hover:bg-gray-600 text-white font-bold px-4 py-3 rounded-xl transition">Cancelar</button>
+                    </div>
                 </form>
             </div>
 
@@ -117,6 +123,7 @@
         let montosOcultos = false;
         let metricaEditandoIdx = null;
         let clienteActualId = null;
+        let clienteEditandoId = null;
 
         function guardarStorage() {
             localStorage.setItem('ciodaro_clientes', JSON.stringify(clientes));
@@ -133,22 +140,68 @@
         if (formCliente) {
             formCliente.addEventListener('submit', function(e) {
                 e.preventDefault();
-                const nuevoCliente = {
-                    id: Date.now(),
-                    nombre: document.getElementById('nombre').value,
-                    edad: document.getElementById('edad').value || 'N/A',
-                    whatsapp: document.getElementById('whatsapp').value,
-                    costo: parseFloat(document.getElementById('costo').value) || 0,
-                    fecha: document.getElementById('fecha').value,
-                    pagado: true,
-                    abonos: [],
-                    metricas: []
-                };
-                clientes.push(nuevoCliente);
+                const nombreVal = document.getElementById('nombre').value;
+                const edadVal = document.getElementById('edad').value || 'N/A';
+                const whatsappVal = document.getElementById('whatsapp').value;
+                const costoVal = parseFloat(document.getElementById('costo').value) || 0;
+                const fechaVal = document.getElementById('fecha').value;
+
+                if (clienteEditandoId !== null) {
+                    const c = clientes.find(item => item.id === clienteEditandoId);
+                    if (c) {
+                        c.nombre = nombreVal;
+                        c.edad = edadVal;
+                        c.whatsapp = whatsappVal;
+                        c.costo = costoVal;
+                        c.fecha = fechaVal;
+                    }
+                    clienteEditandoId = null;
+                    document.getElementById('titulo-form-cliente').textContent = '⚡ Registrar Nuevo Atleta';
+                    document.getElementById('btn-submit-cliente').textContent = '📂 Agregar a la Base de Datos';
+                    document.getElementById('btn-cancelar-edicion-cliente').classList.add('hidden');
+                } else {
+                    const nuevoCliente = {
+                        id: Date.now(),
+                        nombre: nombreVal,
+                        edad: edadVal,
+                        whatsapp: whatsappVal,
+                        costo: costoVal,
+                        fecha: fechaVal,
+                        pagado: true,
+                        abonos: [],
+                        metricas: []
+                    };
+                    clientes.push(nuevoCliente);
+                }
                 guardarStorage();
                 this.reset();
                 document.getElementById('fecha').valueAsDate = new Date();
             });
+        }
+
+        function prepararEdicionCliente(id) {
+            const c = clientes.find(item => item.id === id);
+            if (!c) return;
+            clienteEditandoId = id;
+            document.getElementById('nombre').value = c.nombre;
+            document.getElementById('edad').value = c.edad !== 'N/A' ? c.edad : '';
+            document.getElementById('whatsapp').value = c.whatsapp;
+            document.getElementById('costo').value = c.costo;
+            document.getElementById('fecha').value = c.fecha;
+
+            document.getElementById('titulo-form-cliente').textContent = '✏️ Editar Atleta: ' + c.nombre;
+            document.getElementById('btn-submit-cliente').textContent = 'Guardar Cambios';
+            document.getElementById('btn-cancelar-edicion-cliente').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function cancelarEdicionCliente() {
+            clienteEditandoId = null;
+            document.getElementById('form-cliente').reset();
+            document.getElementById('fecha').valueAsDate = new Date();
+            document.getElementById('titulo-form-cliente').textContent = '⚡ Registrar Nuevo Atleta';
+            document.getElementById('btn-submit-cliente').textContent = '📂 Agregar a la Base de Datos';
+            document.getElementById('btn-cancelar-edicion-cliente').classList.add('hidden');
         }
 
         function eliminarCliente(id) {
@@ -200,7 +253,7 @@
                 let fechaInicio = new Date(c.fecha + 'T00:00:00');
                 let fechaVenc = new Date(fechaInicio);
                 fechaVenc.setDate(fechaVenc.getDate() + 30);
-                let opt = { day: '2-digit', month: 'short' };
+                let opt = { day: '2-digit', month: 'short', year: 'numeric' };
                 let costoC = Number(c.costo) || 0;
                 let totalAbonado = (c.abonos || []).reduce((sum, a) => sum + (Number(a.monto) || 0), 0);
                 let pagadoReal = c.pagado || (totalAbonado >= costoC);
@@ -211,7 +264,8 @@
                     <div class="flex justify-between items-start">
                         <div>
                             <h4 class="font-bold text-white text-base">${c.nombre}</h4>
-                            <p class="text-xs text-gray-400 mt-0.5">📅 Ciclo: ${fechaInicio.toLocaleDateString('es-ES', opt)} al ${fechaVenc.toLocaleDateString('es-ES', opt)}</p>
+                            <p class="text-xs text-gray-400 mt-0.5">🚀 Inicio: ${fechaInicio.toLocaleDateString('es-ES', opt)}</p>
+                            <p class="text-xs text-orange-400 font-semibold mt-0.5">⏳ Corte Mensual: ${fechaVenc.toLocaleDateString('es-ES', opt)}</p>
                         </div>
                         <span class="text-emerald-400 font-bold text-sm">${montosOcultos ? '••••' : '$' + costoC.toFixed(2)}</span>
                     </div>
@@ -220,6 +274,7 @@
                             ${pagadoReal ? 'Al Día (30d)' : `Abonado: $${totalAbonado.toFixed(2)}`}
                         </span>
                         <div class="flex gap-2">
+                            <button onclick="prepararEdicionCliente(${c.id})" class="bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-semibold px-2.5 py-2 rounded-xl border border-gray-700 transition">✏️ Editar</button>
                             <button onclick="abrirExpediente(${c.id})" class="bg-orange-600 hover:bg-orange-500 text-white text-xs font-semibold px-3 py-2 rounded-xl transition">📂 Expediente</button>
                             <button onclick="eliminarCliente(${c.id})" class="bg-gray-800 hover:bg-red-600/20 text-gray-400 hover:text-red-400 p-2 rounded-xl border border-gray-700">🗑️</button>
                         </div>
@@ -254,6 +309,11 @@
             let totalAbonado = (c.abonos || []).reduce((sum, a) => sum + (Number(a.monto) || 0), 0);
             let saldoPendiente = costoC - totalAbonado;
             if (saldoPendiente < 0) saldoPendiente = 0;
+
+            let fechaInicioObj = new Date(c.fecha + 'T00:00:00');
+            let fechaVencObj = new Date(fechaInicioObj);
+            fechaVencObj.setDate(fechaVencObj.getDate() + 30);
+            let opt = { day: '2-digit', month: 'long', year: 'numeric' };
 
             let htmlAbonos = '';
             if (c.abonos && c.abonos.length > 0) {
@@ -304,7 +364,7 @@
             }
 
             const numeroLimpio = c.whatsapp ? c.whatsapp.replace(/\D/g, '') : '';
-            const mensajeWp = encodeURIComponent(`¡Hola ${c.nombre}! Te escribo de Ciodarofitness para recordarte tu fecha de vencimiento y estatus de pago de tu plan. 💪🔥`);
+            const mensajeWp = encodeURIComponent(`¡Hola ${c.nombre}! Te escribo de Ciodarofitness para recordarte tu fecha de vencimiento (${fechaVencObj.toLocaleDateString('es-ES', opt)}) y estatus de pago de tu plan. 💪🔥`);
             const linkWhatsApp = `https://wa.me/${numeroLimpio}?text=${mensajeWp}`;
 
             const tituloFormMetrica = metricaEditandoIdx !== null ? '✏️ Actualizar Medición Antropométrica' : '📊 Nueva Medición Antropométrica';
@@ -316,9 +376,10 @@
                     <div class="grid grid-cols-2 gap-2 text-xs text-gray-200 bg-[#0b0f19] p-3.5 rounded-2xl border border-gray-800">
                         <div><b>Edad:</b> ${c.edad} años</div>
                         <div><b>WhatsApp:</b> ${c.whatsapp}</div>
-                        <div><b>Inicio:</b> ${c.fecha}</div>
-                        <div><b>Paquete:</b> $${costoC.toFixed(2)}</div>
-                        <div class="col-span-2 pt-1 border-t border-gray-800 flex justify-between items-center">
+                        <div><b>Contratación:</b> <span class="text-orange-300">${fechaInicioObj.toLocaleDateString('es-ES', opt)}</span></div>
+                        <div><b>Corte Mensual:</b> <span class="text-amber-400">${fechaVencObj.toLocaleDateString('es-ES', opt)}</span></div>
+                        <div class="col-span-2"><b>Paquete:</b> <span class="ocultar-en-pdf">$${costoC.toFixed(2)}</span><span class="mostrar-en-pdf">***</span></div>
+                        <div class="col-span-2 pt-1 border-t border-gray-800 flex justify-between items-center ocultar-en-pdf">
                             <span><b>Estatus:</b> <span class="${c.pagado ? 'text-emerald-400 font-bold' : 'text-amber-400'}">${c.pagado ? 'Pagado Total (Al día)' : `Restante: $${saldoPendiente.toFixed(2)}`}</span></span>
                         </div>
                     </div>
@@ -328,9 +389,9 @@
                     </div>
                 </div>
 
-                <div class="bg-[#131b2e] p-5 rounded-3xl border border-gray-800 space-y-3">
+                <div class="bg-[#131b2e] p-5 rounded-3xl border border-gray-800 space-y-3 no-print">
                     <h3 class="text-sm font-bold text-orange-500 uppercase">💵 Registrar Abono Parcial</h3>
-                    <form onsubmit="agregarAbono(event)" class="space-y-3 text-xs no-print">
+                    <form onsubmit="agregarAbono(event)" class="space-y-3 text-xs">
                         <div class="grid grid-cols-2 gap-2">
                             <div>
                                 <label class="text-gray-400 block mb-1">Monto Abono ($)</label>
@@ -355,7 +416,7 @@
                         <div class="grid grid-cols-3 gap-2">
                             <div><label class="text-gray-400">Peso (kg)</label><input type="number" step="0.1" id="m-peso" required class="w-full bg-[#0b0f19] border border-gray-800 rounded-lg p-2 text-white"></div>
                             <div><label class="text-gray-400">Estatura (cm)</label><input type="number" step="1" id="m-estatura" required class="w-full bg-[#0b0f19] border border-gray-800 rounded-lg p-2 text-white"></div>
-                            <div><label class="text-gray-400">Fecha</label><input type="date" id="m-fecha" required class="w-full bg-[#0b0f19] border border-gray-800 rounded-lg p-2 text-white"></div>
+                            <div><label class="text-gray-400">Fecha de Medición</label><input type="date" id="m-fecha" required class="w-full bg-[#0b0f19] border border-gray-800 rounded-lg p-2 text-white"></div>
                         </div>
                         <div class="grid grid-cols-4 gap-2">
                             <div><label class="text-gray-400">Cuello</label><input type="number" step="0.1" id="m-cuello" class="w-full bg-[#0b0f19] border border-gray-800 rounded-lg p-2 text-white"></div>
