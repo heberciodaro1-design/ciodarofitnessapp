@@ -30,10 +30,22 @@
                     <h1 class="text-lg font-black text-white tracking-wide">CIODAROFITNESS <span class="text-xs text-orange-500 font-normal">pro</span></h1>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button onclick="alternarVisibilidadMontos()" id="btn-ojo" class="bg-gray-800 hover:bg-gray-700 text-gray-300 p-2 rounded-xl border border-gray-700 text-xs transition">👁️</button>
+                    <button onclick="alternarVisibilidadMontos()" id="btn-ojo" class="bg-gray-800 hover:bg-gray-700 text-gray-300 p-2 rounded-xl border border-gray-700 text-xs transition" title="Ocultar/Mostrar montos">👁️</button>
                     <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold px-3 py-1 rounded-full">Activo</span>
                 </div>
             </header>
+
+            <!-- Botones de Respaldo JSON -->
+            <div class="bg-[#131b2e] p-3 rounded-2xl border border-gray-800 flex justify-between items-center gap-2 no-print">
+                <span class="text-[11px] text-gray-400 font-medium pl-1">💾 Respaldo de Base de Datos:</span>
+                <div class="flex gap-2">
+                    <button onclick="exportarDatosJSON()" class="bg-gray-800 hover:bg-gray-700 text-orange-400 text-xs font-semibold px-3 py-1.5 rounded-xl border border-gray-700 transition flex items-center gap-1">📤 Exportar</button>
+                    <label class="bg-gray-800 hover:bg-gray-700 text-emerald-400 text-xs font-semibold px-3 py-1.5 rounded-xl border border-gray-700 transition cursor-pointer flex items-center gap-1">
+                        📥 Importar
+                        <input type="file" id="input-json" accept=".json" onchange="importarDatosJSON(event)" class="hidden">
+                    </label>
+                </div>
+            </div>
 
             <div class="grid grid-cols-2 gap-3">
                 <div class="bg-[#131b2e] p-3.5 rounded-2xl border border-gray-800">
@@ -111,7 +123,8 @@
                 <p class="text-[10px] text-gray-400">Entrenamiento Inteligente</p>
             </div>
         </div>
-    </div>    <script>
+    </div>
+        <script>
         document.addEventListener("DOMContentLoaded", () => {
             const inputFecha = document.getElementById('fecha');
             if (inputFecha) inputFecha.valueAsDate = new Date();
@@ -129,13 +142,47 @@
             renderizarClientes();
         }
 
+        // Funciones para Exportar e Importar Respaldo JSON
+        function exportarDatosJSON() {
+            const datosStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(clientes, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", datosStr);
+            downloadAnchor.setAttribute("download", `respaldo_ciodarofitness_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importarDatosJSON(event) {
+            const archivo = event.target.files[0];
+            if (!archivo) return;
+            const lector = new FileReader();
+            lector.onload = function(e) {
+                try {
+                    const datosImportados = JSON.parse(e.target.result);
+                    if (Array.isArray(datosImportados)) {
+                        if (confirm(`¿Estás seguro de cargar este respaldo? Se reemplazarán los atletas actuales por los ${datosImportados.length} atletas del archivo.`)) {
+                            clientes = datosImportados;
+                            guardarStorage();
+                            alert('¡Base de datos importada exitosamente!');
+                        }
+                    } else {
+                        alert('El archivo no tiene el formato correcto.');
+                    }
+                } catch (error) {
+                    alert('Error al leer el archivo JSON.');
+                }
+                event.target.value = '';
+            };
+            lector.readAsText(archivo);
+        }
+
         function alternarVisibilidadMontos() {
             montosOcultos = !montosOcultos;
             document.getElementById('btn-ojo').textContent = montosOcultos ? '🙈' : '👁️';
             renderizarClientes();
         }
 
-        // Función para calcular el ciclo actual de pago basado en el día original de inicio
         function calcularCicloActual(fechaInicioStr) {
             if (!fechaInicioStr) return { inicioCiclo: new Date(), finCiclo: new Date() };
             
@@ -144,20 +191,17 @@
             
             const hoy = new Date();
             const anioActual = hoy.getFullYear();
-            const mesActual = hoy.getMonth(); // 0 al 11
+            const mesActual = hoy.getMonth();
 
-            // Intentar armar la fecha de inicio del ciclo en el mes actual
             let inicioCiclo = new Date(anioActual, mesActual, diaInicioOriginal);
             
-            // Si el día original aún no ha pasado este mes, el ciclo actual comenzó el mes pasado
             if (hoy < inicioCiclo) {
                 inicioCiclo = new Date(anioActual, mesActual - 1, diaInicioOriginal);
             }
 
-            // El fin del ciclo es exactamente un mes después del inicio del ciclo
             let finCiclo = new Date(inicioCiclo);
             finCiclo.setMonth(finCiclo.getMonth() + 1);
-            finCiclo.setDate(finCiclo.getDate() - 1); // El día anterior al cumplimiento del mes
+            finCiclo.setDate(finCiclo.getDate() - 1);
 
             return { inicioCiclo, finCiclo };
         }
@@ -324,7 +368,7 @@
             document.getElementById('vista-principal').classList.remove('hidden');
             renderizarClientes();
         }
-                function renderizarExpediente() {
+                    function renderizarExpediente() {
             const c = clientes.find(item => item.id === clienteActualId);
             if (!c) return;
             const contenedor = document.getElementById('detalle-expediente');
@@ -577,5 +621,3 @@
     </script>
 </body>
 </html>
-
-    
